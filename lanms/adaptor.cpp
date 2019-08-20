@@ -24,4 +24,12 @@ namespace lanms_adaptor {
 					});
 		}
 
-	
+		return ret;
+	}
+
+
+	/**
+	 *
+	 * \param quad_n9 an n-by-9 numpy array, where first 8 numbers denote the
+	 *		quadrangle, and the last one is the score
+	 * \param iou_threshold two quadrangles wit
