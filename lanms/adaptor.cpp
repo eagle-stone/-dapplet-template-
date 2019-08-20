@@ -5,4 +5,10 @@
 
 #include "lanms.h"
 
-namespace py = pyb
+namespace py = pybind11;
+
+
+namespace lanms_adaptor {
+
+	std::vector<std::vector<float>> polys2floats(const std::vector<lanms::Polygon> &polys) {
+		std::vector<std::vector<f
