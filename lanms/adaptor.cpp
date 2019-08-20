@@ -38,4 +38,8 @@ namespace lanms_adaptor {
 	 * \return an n-by-9 numpy array, the merged quadrangles
 	 */
 	std::vector<std::vector<float>> merge_quadrangle_n9(
-			py::
+			py::array_t<float, py::array::c_style | py::array::forcecast> quad_n9,
+			float iou_threshold) {
+		auto pbuf = quad_n9.request();
+		if (pbuf.ndim != 2 || pbuf.shape[1] != 9)
+			throw std
