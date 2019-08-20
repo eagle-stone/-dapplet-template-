@@ -16,4 +16,12 @@ namespace lanms_adaptor {
 			auto &p = polys[i];
 			auto &poly = p.poly;
 			ret.emplace_back(std::vector<float>{
-					float(poly[0].X), flo
+					float(poly[0].X), float(poly[0].Y),
+					float(poly[1].X), float(poly[1].Y),
+					float(poly[2].X), float(poly[2].Y),
+					float(poly[3].X), float(poly[3].Y),
+					float(p.score),
+					});
+		}
+
+	
