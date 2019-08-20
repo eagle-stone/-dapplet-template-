@@ -32,4 +32,10 @@ namespace lanms_adaptor {
 	 *
 	 * \param quad_n9 an n-by-9 numpy array, where first 8 numbers denote the
 	 *		quadrangle, and the last one is the score
-	 * \param iou_threshold two quadrangles wit
+	 * \param iou_threshold two quadrangles with iou score above this threshold
+	 *		will be merged
+	 *
+	 * \return an n-by-9 numpy array, the merged quadrangles
+	 */
+	std::vector<std::vector<float>> merge_quadrangle_n9(
+			py::
