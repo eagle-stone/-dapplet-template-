@@ -42,4 +42,7 @@ namespace lanms_adaptor {
 			float iou_threshold) {
 		auto pbuf = quad_n9.request();
 		if (pbuf.ndim != 2 || pbuf.shape[1] != 9)
-			throw std
+			throw std::runtime_error("quadrangles must have a shape of (n, 9)");
+		auto n = pbuf.shape[0];
+		auto ptr = static_cast<float *>(pbuf.ptr);
+		return polys2fl
