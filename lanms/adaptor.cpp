@@ -45,4 +45,12 @@ namespace lanms_adaptor {
 			throw std::runtime_error("quadrangles must have a shape of (n, 9)");
 		auto n = pbuf.shape[0];
 		auto ptr = static_cast<float *>(pbuf.ptr);
-		return polys2fl
+		return polys2floats(lanms::merge_quadrangle_n9(ptr, n, iou_threshold));
+	}
+
+}
+
+PYBIND11_PLUGIN(adaptor) {
+	py::module m("adaptor", "NMS");
+
+	m.def("merge_quadrangle_n9", &lanms_adaptor::merge_qu
