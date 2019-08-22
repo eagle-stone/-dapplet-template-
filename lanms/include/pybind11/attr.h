@@ -441,3 +441,32 @@ template <typename... Args> struct process_attributes {
     }
     static void init(const Args&... args, type_record *r) {
         int unused[] = { 0, (process_attribute<typename std::decay<Args>::type>::init(args, r), 0) ... };
+        ignore_unused(unused);
+    }
+    static void precall(function_call &call) {
+        int unused[] = { 0, (process_attribute<typename std::decay<Args>::type>::precall(call), 0) ... };
+        ignore_unused(unused);
+    }
+    static void postcall(function_call &call, handle fn_ret) {
+        int unused[] = { 0, (process_attribute<typename std::decay<Args>::type>::postcall(call, fn_ret), 0) ... };
+        ignore_unused(unused);
+    }
+};
+
+template <typename T>
+using is_call_guard = is_instantiation<call_guard, T>;
+
+/// Extract the ``type`` from the first `call_guard` in `Extras...` (or `void_type` if none found)
+template <typename... Extra>
+using extract_guard_t = typename exactly_one_t<is_call_guard, call_guard<>, Extra...>::type;
+
+/// Check the number of named arguments at compile time
+template <typename... Extra,
+          size_t named = constexpr_sum(std::is_base_of<arg, Extra>::value...),
+          size_t self  = constexpr_sum(std::is_same<is_method, Extra>::value...)>
+constexpr bool expected_num_args(size_t nargs, bool has_args, bool has_kwargs) {
+    return named == 0 || (self + named + has_args + has_kwargs) == nargs;
+}
+
+NAMESPACE_END(detail)
+NAMESPACE_END(pybind11)
