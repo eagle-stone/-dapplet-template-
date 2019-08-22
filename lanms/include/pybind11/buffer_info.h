@@ -13,4 +13,7 @@
 
 NAMESPACE_BEGIN(pybind11)
 
-/// Information rec
+/// Information record describing a Python buffer object
+struct buffer_info {
+    void *ptr = nullptr;          // Pointer to the underlying storage
+    ssize_t itemsize = 0;         // Size of individual items i
