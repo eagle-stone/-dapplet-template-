@@ -107,3 +107,175 @@ struct call_guard<T, Ts...> {
 };
 
 /// @} annotations
+
+NAMESPACE_BEGIN(detail)
+/* Forward declarations */
+enum op_id : int;
+enum op_type : int;
+struct undefined_t;
+template <op_id id, op_type ot, typename L = undefined_t, typename R = undefined_t> struct op_;
+template <typename... Args> struct init;
+template <typename... Args> struct init_alias;
+inline void keep_alive_impl(size_t Nurse, size_t Patient, function_call &call, handle ret);
+
+/// Internal data structure which holds metadata about a keyword argument
+struct argument_record {
+    const char *name;  ///< Argument name
+    const char *descr; ///< Human-readable version of the argument value
+    handle value;      ///< Associated Python object
+    bool convert : 1;  ///< True if the argument is allowed to convert when loading
+    bool none : 1;     ///< True if None is allowed when loading
+
+    argument_record(const char *name, const char *descr, handle value, bool convert, bool none)
+        : name(name), descr(descr), value(value), convert(convert), none(none) { }
+};
+
+/// Internal data structure which holds metadata about a bound function (signature, overloads, etc.)
+struct function_record {
+    function_record()
+        : is_constructor(false), is_stateless(false), is_operator(false),
+          has_args(false), has_kwargs(false), is_method(false) { }
+
+    /// Function name
+    char *name = nullptr; /* why no C++ strings? They generate heavier code.. */
+
+    // User-specified documentation string
+    char *doc = nullptr;
+
+    /// Human-readable version of the function signature
+    char *signature = nullptr;
+
+    /// List of registered keyword arguments
+    std::vector<argument_record> args;
+
+    /// Pointer to lambda function which converts arguments and performs the actual call
+    handle (*impl) (function_call &) = nullptr;
+
+    /// Storage for the wrapped function pointer and captured data, if any
+    void *data[3] = { };
+
+    /// Pointer to custom destructor for 'data' (if needed)
+    void (*free_data) (function_record *ptr) = nullptr;
+
+    /// Return value policy associated with this function
+    return_value_policy policy = return_value_policy::automatic;
+
+    /// True if name == '__init__'
+    bool is_constructor : 1;
+
+    /// True if this is a stateless function pointer
+    bool is_stateless : 1;
+
+    /// True if this is an operator (__add__), etc.
+    bool is_operator : 1;
+
+    /// True if the function has a '*args' argument
+    bool has_args : 1;
+
+    /// True if the function has a '**kwargs' argument
+    bool has_kwargs : 1;
+
+    /// True if this is a method
+    bool is_method : 1;
+
+    /// Number of arguments (including py::args and/or py::kwargs, if present)
+    std::uint16_t nargs;
+
+    /// Python method object
+    PyMethodDef *def = nullptr;
+
+    /// Python handle to the parent scope (a class or a module)
+    handle scope;
+
+    /// Python handle to the sibling function representing an overload chain
+    handle sibling;
+
+    /// Pointer to next overload
+    function_record *next = nullptr;
+};
+
+/// Special data structure which (temporarily) holds metadata about a bound class
+struct type_record {
+    PYBIND11_NOINLINE type_record()
+        : multiple_inheritance(false), dynamic_attr(false), buffer_protocol(false) { }
+
+    /// Handle to the parent scope
+    handle scope;
+
+    /// Name of the class
+    const char *name = nullptr;
+
+    // Pointer to RTTI type_info data structure
+    const std::type_info *type = nullptr;
+
+    /// How large is the underlying C++ type?
+    size_t type_size = 0;
+
+    /// How large is the type's holder?
+    size_t holder_size = 0;
+
+    /// The global operator new can be overridden with a class-specific variant
+    void *(*operator_new)(size_t) = ::operator new;
+
+    /// Function pointer to class_<..>::init_instance
+    void (*init_instance)(instance *, const void *) = nullptr;
+
+    /// Function pointer to class_<..>::dealloc
+    void (*dealloc)(const detail::value_and_holder &) = nullptr;
+
+    /// List of base classes of the newly created type
+    list bases;
+
+    /// Optional docstring
+    const char *doc = nullptr;
+
+    /// Custom metaclass (optional)
+    handle metaclass;
+
+    /// Multiple inheritance marker
+    bool multiple_inheritance : 1;
+
+    /// Does the class manage a __dict__?
+    bool dynamic_attr : 1;
+
+    /// Does the class implement the buffer protocol?
+    bool buffer_protocol : 1;
+
+    /// Is the default (unique_ptr) holder type used?
+    bool default_holder : 1;
+
+    PYBIND11_NOINLINE void add_base(const std::type_info &base, void *(*caster)(void *)) {
+        auto base_info = detail::get_type_info(base, false);
+        if (!base_info) {
+            std::string tname(base.name());
+            detail::clean_type_id(tname);
+            pybind11_fail("generic_type: type \"" + std::string(name) +
+                          "\" referenced unknown base type \"" + tname + "\"");
+        }
+
+        if (default_holder != base_info->default_holder) {
+            std::string tname(base.name());
+            detail::clean_type_id(tname);
+            pybind11_fail("generic_type: type \"" + std::string(name) + "\" " +
+                    (default_holder ? "does not have" : "has") +
+                    " a non-default holder type while its base \"" + tname + "\" " +
+                    (base_info->default_holder ? "does not" : "does"));
+        }
+
+        bases.append((PyObject *) base_info->type);
+
+        if (base_info->type->tp_dictoffset != 0)
+            dynamic_attr = true;
+
+        if (caster)
+            base_info->implicit_casts.emplace_back(type, caster);
+    }
+};
+
+inline function_call::function_call(function_record &f, handle p) :
+        func(f), parent(p) {
+    args.reserve(f.nargs);
+    args_convert.reserve(f.nargs);
+}
+
+/**
