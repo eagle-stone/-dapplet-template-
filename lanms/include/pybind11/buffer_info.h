@@ -26,4 +26,6 @@ struct buffer_info {
     buffer_info() { }
 
     buffer_info(void *ptr, ssize_t itemsize, const std::string &format, ssize_t ndim,
-                detai
+                detail::any_container<ssize_t> shape_in, detail::any_container<ssize_t> strides_in)
+    : ptr(ptr), itemsize(itemsize), size(1), format(format), ndim(ndim),
+      shape(s
