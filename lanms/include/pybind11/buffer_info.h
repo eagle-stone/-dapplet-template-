@@ -30,4 +30,6 @@ struct buffer_info {
     : ptr(ptr), itemsize(itemsize), size(1), format(format), ndim(ndim),
       shape(std::move(shape_in)), strides(std::move(strides_in)) {
         if (ndim != (ssize_t) shape.size() || ndim != (ssize_t) strides.size())
-            pybind1
+            pybind11_fail("buffer_info: ndim doesn't match shape and/or strides length");
+        for (size_t i = 0; i < (size_t) ndim; ++i)
+            size *= sha
