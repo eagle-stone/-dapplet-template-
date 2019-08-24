@@ -32,4 +32,9 @@ struct buffer_info {
         if (ndim != (ssize_t) shape.size() || ndim != (ssize_t) strides.size())
             pybind11_fail("buffer_info: ndim doesn't match shape and/or strides length");
         for (size_t i = 0; i < (size_t) ndim; ++i)
-            size *= sha
+            size *= shape[i];
+    }
+
+    template <typename T>
+    buffer_info(T *ptr, detail::any_container<ssize_t> shape_in, detail::any_container<ssize_t> strides_in)
+    : buff
