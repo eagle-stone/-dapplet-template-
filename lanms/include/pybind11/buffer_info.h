@@ -28,4 +28,6 @@ struct buffer_info {
     buffer_info(void *ptr, ssize_t itemsize, const std::string &format, ssize_t ndim,
                 detail::any_container<ssize_t> shape_in, detail::any_container<ssize_t> strides_in)
     : ptr(ptr), itemsize(itemsize), size(1), format(format), ndim(ndim),
-      shape(s
+      shape(std::move(shape_in)), strides(std::move(strides_in)) {
+        if (ndim != (ssize_t) shape.size() || ndim != (ssize_t) strides.size())
+            pybind1
