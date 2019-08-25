@@ -37,4 +37,6 @@ struct buffer_info {
 
     template <typename T>
     buffer_info(T *ptr, detail::any_container<ssize_t> shape_in, detail::any_container<ssize_t> strides_in)
-    : buff
+    : buffer_info(private_ctr_tag(), ptr, sizeof(T), format_descriptor<T>::format(), static_cast<ssize_t>(shape_in->size()), std::move(shape_in), std::move(strides_in)) { }
+
+    buffer_info(void *p
