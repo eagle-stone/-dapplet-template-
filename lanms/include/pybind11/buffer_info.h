@@ -43,4 +43,8 @@ struct buffer_info {
     : buffer_info(ptr, itemsize, format, 1, {size}, {itemsize}) { }
 
     template <typename T>
-    buffe
+    buffer_info(T *ptr, ssize_t size)
+    : buffer_info(ptr, sizeof(T), format_descriptor<T>::format(), size) { }
+
+    explicit buffer_info(Py_buffer *view, bool ownview = true)
+    : buffer_info(view->buf, view
