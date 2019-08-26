@@ -47,4 +47,9 @@ struct buffer_info {
     : buffer_info(ptr, sizeof(T), format_descriptor<T>::format(), size) { }
 
     explicit buffer_info(Py_buffer *view, bool ownview = true)
-    : buffer_info(view->buf, view
+    : buffer_info(view->buf, view->itemsize, view->format, view->ndim,
+            {view->shape, view->shape + view->ndim}, {view->strides, view->strides + view->ndim}) {
+        this->view = view;
+        this->ownview = ownview;
+    }
+
