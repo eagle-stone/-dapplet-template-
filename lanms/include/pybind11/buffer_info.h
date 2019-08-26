@@ -57,4 +57,11 @@ struct buffer_info {
     buffer_info& operator=(const buffer_info &) = delete;
 
     buffer_info(buffer_info &&other) {
-        (*this) = st
+        (*this) = std::move(other);
+    }
+
+    buffer_info& operator=(buffer_info &&rhs) {
+        ptr = rhs.ptr;
+        itemsize = rhs.itemsize;
+        size = rhs.size;
+        format 
