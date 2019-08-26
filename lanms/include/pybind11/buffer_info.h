@@ -69,4 +69,13 @@ struct buffer_info {
         shape = std::move(rhs.shape);
         strides = std::move(rhs.strides);
         std::swap(view, rhs.view);
-        std
+        std::swap(ownview, rhs.ownview);
+        return *this;
+    }
+
+    ~buffer_info() {
+        if (view && ownview) { PyBuffer_Release(view); delete view; }
+    }
+
+private:
+    struct private_ctr
