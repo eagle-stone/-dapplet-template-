@@ -85,3 +85,10 @@ private:
     : buffer_info(ptr, itemsize, format, ndim, std::move(shape_in), std::move(strides_in)) { }
 
     Py_buffer *view = nullptr;
+    bool ownview = false;
+};
+
+NAMESPACE_BEGIN(detail)
+
+template <typename T, typename SFINAE = void> struct compare_buffer_info {
+    static bool compare(const buffer_info& b
