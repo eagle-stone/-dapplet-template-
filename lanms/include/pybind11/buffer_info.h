@@ -78,4 +78,7 @@ struct buffer_info {
     }
 
 private:
-    struct private_ctr
+    struct private_ctr_tag { };
+
+    buffer_info(private_ctr_tag, void *ptr, ssize_t itemsize, const std::string &format, ssize_t ndim,
+                detail::any_container<ssize_t> &&s
