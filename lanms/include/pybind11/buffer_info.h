@@ -64,4 +64,9 @@ struct buffer_info {
         ptr = rhs.ptr;
         itemsize = rhs.itemsize;
         size = rhs.size;
-        format 
+        format = std::move(rhs.format);
+        ndim = rhs.ndim;
+        shape = std::move(rhs.shape);
+        strides = std::move(rhs.strides);
+        std::swap(view, rhs.view);
+        std
