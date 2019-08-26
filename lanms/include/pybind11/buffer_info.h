@@ -53,3 +53,8 @@ struct buffer_info {
         this->ownview = ownview;
     }
 
+    buffer_info(const buffer_info &) = delete;
+    buffer_info& operator=(const buffer_info &) = delete;
+
+    buffer_info(buffer_info &&other) {
+        (*this) = st
