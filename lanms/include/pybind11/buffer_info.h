@@ -81,4 +81,7 @@ private:
     struct private_ctr_tag { };
 
     buffer_info(private_ctr_tag, void *ptr, ssize_t itemsize, const std::string &format, ssize_t ndim,
-                detail::any_container<ssize_t> &&s
+                detail::any_container<ssize_t> &&shape_in, detail::any_container<ssize_t> &&strides_in)
+    : buffer_info(ptr, itemsize, format, ndim, std::move(shape_in), std::move(strides_in)) { }
+
+    Py_buffer *view = nullptr;
