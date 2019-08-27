@@ -91,4 +91,9 @@ private:
 NAMESPACE_BEGIN(detail)
 
 template <typename T, typename SFINAE = void> struct compare_buffer_info {
-    static bool compare(const buffer_info& b
+    static bool compare(const buffer_info& b) {
+        return b.format == format_descriptor<T>::format() && b.itemsize == (ssize_t) sizeof(T);
+    }
+};
+
+template <typename T> struct compare_buffer_info<T, detail::enable_if_t<std::is_in
