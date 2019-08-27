@@ -100,4 +100,9 @@ template <typename T> struct compare_buffer_info<T, detail::enable_if_t<std::is_
     static bool compare(const buffer_info& b) {
         return (size_t) b.itemsize == sizeof(T) && (b.format == format_descriptor<T>::value ||
             ((sizeof(T) == sizeof(long)) && b.format == (std::is_unsigned<T>::value ? "L" : "l")) ||
-            ((sizeof(T) == sizeof(size_t)) && b.format == (std::is_unsigned<T>::value ? "N" : "n
+            ((sizeof(T) == sizeof(size_t)) && b.format == (std::is_unsigned<T>::value ? "N" : "n")));
+    }
+};
+
+NAMESPACE_END(detail)
+NAMESPACE_END(pybind11)
