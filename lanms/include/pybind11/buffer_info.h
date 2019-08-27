@@ -96,4 +96,7 @@ template <typename T, typename SFINAE = void> struct compare_buffer_info {
     }
 };
 
-template <typename T> struct compare_buffer_info<T, detail::enable_if_t<std::is_in
+template <typename T> struct compare_buffer_info<T, detail::enable_if_t<std::is_integral<T>::value>> {
+    static bool compare(const buffer_info& b) {
+        return (size_t) b.itemsize == sizeof(T) && (b.format == format_descriptor<T>::value ||
+            ((
