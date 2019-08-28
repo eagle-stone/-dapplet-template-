@@ -478,3 +478,178 @@ PYBIND11_NOINLINE inline std::string error_string() {
 #if !defined(PYPY_VERSION)
     if (scope.trace) {
         PyTracebackObject *trace = (PyTracebackObject *) scope.trace;
+
+        /* Get the deepest trace possible */
+        while (trace->tb_next)
+            trace = trace->tb_next;
+
+        PyFrameObject *frame = trace->tb_frame;
+        errorString += "\n\nAt:\n";
+        while (frame) {
+            int lineno = PyFrame_GetLineNumber(frame);
+            errorString +=
+                "  " + handle(frame->f_code->co_filename).cast<std::string>() +
+                "(" + std::to_string(lineno) + "): " +
+                handle(frame->f_code->co_name).cast<std::string>() + "\n";
+            frame = frame->f_back;
+        }
+        trace = trace->tb_next;
+    }
+#endif
+
+    return errorString;
+}
+
+PYBIND11_NOINLINE inline handle get_object_handle(const void *ptr, const detail::type_info *type ) {
+    auto &instances = get_internals().registered_instances;
+    auto range = instances.equal_range(ptr);
+    for (auto it = range.first; it != range.second; ++it) {
+        for (auto vh : values_and_holders(it->second)) {
+            if (vh.type == type)
+                return handle((PyObject *) it->second);
+        }
+    }
+    return handle();
+}
+
+inline PyThreadState *get_thread_state_unchecked() {
+#if defined(PYPY_VERSION)
+    return PyThreadState_GET();
+#elif PY_VERSION_HEX < 0x03000000
+    return _PyThreadState_Current;
+#elif PY_VERSION_HEX < 0x03050000
+    return (PyThreadState*) _Py_atomic_load_relaxed(&_PyThreadState_Current);
+#elif PY_VERSION_HEX < 0x03050200
+    return (PyThreadState*) _PyThreadState_Current.value;
+#else
+    return _PyThreadState_UncheckedGet();
+#endif
+}
+
+// Forward declarations
+inline void keep_alive_impl(handle nurse, handle patient);
+inline PyObject *make_new_instance(PyTypeObject *type, bool allocate_value = true);
+
+class type_caster_generic {
+public:
+    PYBIND11_NOINLINE type_caster_generic(const std::type_info &type_info)
+     : typeinfo(get_type_info(type_info)) { }
+
+    bool load(handle src, bool convert) {
+        return load_impl<type_caster_generic>(src, convert);
+    }
+
+    PYBIND11_NOINLINE static handle cast(const void *_src, return_value_policy policy, handle parent,
+                                         const detail::type_info *tinfo,
+                                         void *(*copy_constructor)(const void *),
+                                         void *(*move_constructor)(const void *),
+                                         const void *existing_holder = nullptr) {
+        if (!tinfo) // no type info: error will be set already
+            return handle();
+
+        void *src = const_cast<void *>(_src);
+        if (src == nullptr)
+            return none().release();
+
+        auto it_instances = get_internals().registered_instances.equal_range(src);
+        for (auto it_i = it_instances.first; it_i != it_instances.second; ++it_i) {
+            for (auto instance_type : detail::all_type_info(Py_TYPE(it_i->second))) {
+                if (instance_type && instance_type == tinfo)
+                    return handle((PyObject *) it_i->second).inc_ref();
+            }
+        }
+
+        auto inst = reinterpret_steal<object>(make_new_instance(tinfo->type, false /* don't allocate value */));
+        auto wrapper = reinterpret_cast<instance *>(inst.ptr());
+        wrapper->owned = false;
+        void *&valueptr = values_and_holders(wrapper).begin()->value_ptr();
+
+        switch (policy) {
+            case return_value_policy::automatic:
+            case return_value_policy::take_ownership:
+                valueptr = src;
+                wrapper->owned = true;
+                break;
+
+            case return_value_policy::automatic_reference:
+            case return_value_policy::reference:
+                valueptr = src;
+                wrapper->owned = false;
+                break;
+
+            case return_value_policy::copy:
+                if (copy_constructor)
+                    valueptr = copy_constructor(src);
+                else
+                    throw cast_error("return_value_policy = copy, but the "
+                                     "object is non-copyable!");
+                wrapper->owned = true;
+                break;
+
+            case return_value_policy::move:
+                if (move_constructor)
+                    valueptr = move_constructor(src);
+                else if (copy_constructor)
+                    valueptr = copy_constructor(src);
+                else
+                    throw cast_error("return_value_policy = move, but the "
+                                     "object is neither movable nor copyable!");
+                wrapper->owned = true;
+                break;
+
+            case return_value_policy::reference_internal:
+                valueptr = src;
+                wrapper->owned = false;
+                keep_alive_impl(inst, parent);
+                break;
+
+            default:
+                throw cast_error("unhandled return_value_policy: should not happen!");
+        }
+
+        tinfo->init_instance(wrapper, existing_holder);
+
+        return inst.release();
+    }
+
+protected:
+
+    // Base methods for generic caster; there are overridden in copyable_holder_caster
+    void load_value(const value_and_holder &v_h) {
+        value = v_h.value_ptr();
+    }
+    bool try_implicit_casts(handle src, bool convert) {
+        for (auto &cast : typeinfo->implicit_casts) {
+            type_caster_generic sub_caster(*cast.first);
+            if (sub_caster.load(src, convert)) {
+                value = cast.second(sub_caster.value);
+                return true;
+            }
+        }
+        return false;
+    }
+    bool try_direct_conversions(handle src) {
+        for (auto &converter : *typeinfo->direct_conversions) {
+            if (converter(src.ptr(), value))
+                return true;
+        }
+        return false;
+    }
+    void check_holder_compat() {}
+
+    // Implementation of `load`; this takes the type of `this` so that it can dispatch the relevant
+    // bits of code between here and copyable_holder_caster where the two classes need different
+    // logic (without having to resort to virtual inheritance).
+    template <typename ThisT>
+    PYBIND11_NOINLINE bool load_impl(handle src, bool convert) {
+        if (!src || !typeinfo)
+            return false;
+        if (src.is_none()) {
+            // Defer accepting None to other overloads (if we aren't in convert mode):
+            if (!convert) return false;
+            value = nullptr;
+            return true;
+        }
+
+        auto &this_ = static_cast<ThisT &>(*this);
+        this_.check_holder_compat();
