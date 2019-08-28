@@ -653,3 +653,179 @@ protected:
 
         auto &this_ = static_cast<ThisT &>(*this);
         this_.check_holder_compat();
+
+        PyTypeObject *srctype = Py_TYPE(src.ptr());
+
+        // Case 1: If src is an exact type match for the target type then we can reinterpret_cast
+        // the instance's value pointer to the target type:
+        if (srctype == typeinfo->type) {
+            this_.load_value(reinterpret_cast<instance *>(src.ptr())->get_value_and_holder());
+            return true;
+        }
+        // Case 2: We have a derived class
+        else if (PyType_IsSubtype(srctype, typeinfo->type)) {
+            auto &bases = all_type_info(srctype);
+            bool no_cpp_mi = typeinfo->simple_type;
+
+            // Case 2a: the python type is a Python-inherited derived class that inherits from just
+            // one simple (no MI) pybind11 class, or is an exact match, so the C++ instance is of
+            // the right type and we can use reinterpret_cast.
+            // (This is essentially the same as case 2b, but because not using multiple inheritance
+            // is extremely common, we handle it specially to avoid the loop iterator and type
+            // pointer lookup overhead)
+            if (bases.size() == 1 && (no_cpp_mi || bases.front()->type == typeinfo->type)) {
+                this_.load_value(reinterpret_cast<instance *>(src.ptr())->get_value_and_holder());
+                return true;
+            }
+            // Case 2b: the python type inherits from multiple C++ bases.  Check the bases to see if
+            // we can find an exact match (or, for a simple C++ type, an inherited match); if so, we
+            // can safely reinterpret_cast to the relevant pointer.
+            else if (bases.size() > 1) {
+                for (auto base : bases) {
+                    if (no_cpp_mi ? PyType_IsSubtype(base->type, typeinfo->type) : base->type == typeinfo->type) {
+                        this_.load_value(reinterpret_cast<instance *>(src.ptr())->get_value_and_holder(base));
+                        return true;
+                    }
+                }
+            }
+
+            // Case 2c: C++ multiple inheritance is involved and we couldn't find an exact type match
+            // in the registered bases, above, so try implicit casting (needed for proper C++ casting
+            // when MI is involved).
+            if (this_.try_implicit_casts(src, convert))
+                return true;
+        }
+
+        // Perform an implicit conversion
+        if (convert) {
+            for (auto &converter : typeinfo->implicit_conversions) {
+                auto temp = reinterpret_steal<object>(converter(src.ptr(), typeinfo->type));
+                if (load_impl<ThisT>(temp, false)) {
+                    loader_life_support::add_patient(temp);
+                    return true;
+                }
+            }
+            if (this_.try_direct_conversions(src))
+                return true;
+        }
+        return false;
+    }
+
+
+    // Called to do type lookup and wrap the pointer and type in a pair when a dynamic_cast
+    // isn't needed or can't be used.  If the type is unknown, sets the error and returns a pair
+    // with .second = nullptr.  (p.first = nullptr is not an error: it becomes None).
+    PYBIND11_NOINLINE static std::pair<const void *, const type_info *> src_and_type(
+            const void *src, const std::type_info &cast_type, const std::type_info *rtti_type = nullptr) {
+        auto &internals = get_internals();
+        auto it = internals.registered_types_cpp.find(std::type_index(cast_type));
+        if (it != internals.registered_types_cpp.end())
+            return {src, (const type_info *) it->second};
+
+        // Not found, set error:
+        std::string tname = rtti_type ? rtti_type->name() : cast_type.name();
+        detail::clean_type_id(tname);
+        std::string msg = "Unregistered type : " + tname;
+        PyErr_SetString(PyExc_TypeError, msg.c_str());
+        return {nullptr, nullptr};
+    }
+
+    const type_info *typeinfo = nullptr;
+    void *value = nullptr;
+};
+
+/**
+ * Determine suitable casting operator for pointer-or-lvalue-casting type casters.  The type caster
+ * needs to provide `operator T*()` and `operator T&()` operators.
+ *
+ * If the type supports moving the value away via an `operator T&&() &&` method, it should use
+ * `movable_cast_op_type` instead.
+ */
+template <typename T>
+using cast_op_type =
+    conditional_t<std::is_pointer<remove_reference_t<T>>::value,
+        typename std::add_pointer<intrinsic_t<T>>::type,
+        typename std::add_lvalue_reference<intrinsic_t<T>>::type>;
+
+/**
+ * Determine suitable casting operator for a type caster with a movable value.  Such a type caster
+ * needs to provide `operator T*()`, `operator T&()`, and `operator T&&() &&`.  The latter will be
+ * called in appropriate contexts where the value can be moved rather than copied.
+ *
+ * These operator are automatically provided when using the PYBIND11_TYPE_CASTER macro.
+ */
+template <typename T>
+using movable_cast_op_type =
+    conditional_t<std::is_pointer<typename std::remove_reference<T>::type>::value,
+        typename std::add_pointer<intrinsic_t<T>>::type,
+    conditional_t<std::is_rvalue_reference<T>::value,
+        typename std::add_rvalue_reference<intrinsic_t<T>>::type,
+        typename std::add_lvalue_reference<intrinsic_t<T>>::type>>;
+
+// std::is_copy_constructible isn't quite enough: it lets std::vector<T> (and similar) through when
+// T is non-copyable, but code containing such a copy constructor fails to actually compile.
+template <typename T, typename SFINAE = void> struct is_copy_constructible : std::is_copy_constructible<T> {};
+
+// Specialization for types that appear to be copy constructible but also look like stl containers
+// (we specifically check for: has `value_type` and `reference` with `reference = value_type&`): if
+// so, copy constructability depends on whether the value_type is copy constructible.
+template <typename Container> struct is_copy_constructible<Container, enable_if_t<all_of<
+        std::is_copy_constructible<Container>,
+        std::is_same<typename Container::value_type &, typename Container::reference>
+    >::value>> : is_copy_constructible<typename Container::value_type> {};
+
+#if !defined(PYBIND11_CPP17)
+// Likewise for std::pair before C++17 (which mandates that the copy constructor not exist when the
+// two types aren't themselves copy constructible).
+template <typename T1, typename T2> struct is_copy_constructible<std::pair<T1, T2>>
+    : all_of<is_copy_constructible<T1>, is_copy_constructible<T2>> {};
+#endif
+
+/// Generic type caster for objects stored on the heap
+template <typename type> class type_caster_base : public type_caster_generic {
+    using itype = intrinsic_t<type>;
+public:
+    static PYBIND11_DESCR name() { return type_descr(_<type>()); }
+
+    type_caster_base() : type_caster_base(typeid(type)) { }
+    explicit type_caster_base(const std::type_info &info) : type_caster_generic(info) { }
+
+    static handle cast(const itype &src, return_value_policy policy, handle parent) {
+        if (policy == return_value_policy::automatic || policy == return_value_policy::automatic_reference)
+            policy = return_value_policy::copy;
+        return cast(&src, policy, parent);
+    }
+
+    static handle cast(itype &&src, return_value_policy, handle parent) {
+        return cast(&src, return_value_policy::move, parent);
+    }
+
+    // Returns a (pointer, type_info) pair taking care of necessary RTTI type lookup for a
+    // polymorphic type.  If the instance isn't derived, returns the non-RTTI base version.
+    template <typename T = itype, enable_if_t<std::is_polymorphic<T>::value, int> = 0>
+    static std::pair<const void *, const type_info *> src_and_type(const itype *src) {
+        const void *vsrc = src;
+        auto &internals = get_internals();
+        auto &cast_type = typeid(itype);
+        const std::type_info *instance_type = nullptr;
+        if (vsrc) {
+            instance_type = &typeid(*src);
+            if (!same_type(cast_type, *instance_type)) {
+                // This is a base pointer to a derived type; if it is a pybind11-registered type, we
+                // can get the correct derived pointer (which may be != base pointer) by a
+                // dynamic_cast to most derived type:
+                auto it = internals.registered_types_cpp.find(std::type_index(*instance_type));
+                if (it != internals.registered_types_cpp.end())
+                    return {dynamic_cast<const void *>(src), (const type_info *) it->second};
+            }
+        }
+        // Otherwise we have either a nullptr, an `itype` pointer, or an unknown derived pointer, so
+        // don't do a cast
+        return type_caster_generic::src_and_type(vsrc, cast_type, instance_type);
+    }
+
+    // Non-polymorphic type, so no dynamic casting; just call the generic version directly
+    template <typename T = itype, enable_if_t<!std::is_polymorphic<T>::value, int> = 0>
+    static std::pair<const void *, const type_info *> src_and_type(const itype *src) {
+        return type_caster_generic::src_and_type(src, typeid(itype));
+    }
