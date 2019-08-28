@@ -286,3 +286,195 @@ struct value_and_holder {
     template <typename H> H &holder() const {
         return reinterpret_cast<H &>(vh[1]);
     }
+    bool holder_constructed() const {
+        return inst->simple_layout
+            ? inst->simple_holder_constructed
+            : inst->nonsimple.status[index] & instance::status_holder_constructed;
+    }
+    void set_holder_constructed() {
+        if (inst->simple_layout)
+            inst->simple_holder_constructed = true;
+        else
+            inst->nonsimple.status[index] |= instance::status_holder_constructed;
+    }
+    bool instance_registered() const {
+        return inst->simple_layout
+            ? inst->simple_instance_registered
+            : inst->nonsimple.status[index] & instance::status_instance_registered;
+    }
+    void set_instance_registered() {
+        if (inst->simple_layout)
+            inst->simple_instance_registered = true;
+        else
+            inst->nonsimple.status[index] |= instance::status_instance_registered;
+    }
+};
+
+// Container for accessing and iterating over an instance's values/holders
+struct values_and_holders {
+private:
+    instance *inst;
+    using type_vec = std::vector<detail::type_info *>;
+    const type_vec &tinfo;
+
+public:
+    values_and_holders(instance *inst) : inst{inst}, tinfo(all_type_info(Py_TYPE(inst))) {}
+
+    struct iterator {
+    private:
+        instance *inst;
+        const type_vec *types;
+        value_and_holder curr;
+        friend struct values_and_holders;
+        iterator(instance *inst, const type_vec *tinfo)
+            : inst{inst}, types{tinfo},
+            curr(inst /* instance */,
+                 types->empty() ? nullptr : (*types)[0] /* type info */,
+                 0, /* vpos: (non-simple types only): the first vptr comes first */
+                 0 /* index */)
+        {}
+        // Past-the-end iterator:
+        iterator(size_t end) : curr(end) {}
+    public:
+        bool operator==(const iterator &other) { return curr.index == other.curr.index; }
+        bool operator!=(const iterator &other) { return curr.index != other.curr.index; }
+        iterator &operator++() {
+            if (!inst->simple_layout)
+                curr.vh += 1 + (*types)[curr.index]->holder_size_in_ptrs;
+            ++curr.index;
+            curr.type = curr.index < types->size() ? (*types)[curr.index] : nullptr;
+            return *this;
+        }
+        value_and_holder &operator*() { return curr; }
+        value_and_holder *operator->() { return &curr; }
+    };
+
+    iterator begin() { return iterator(inst, &tinfo); }
+    iterator end() { return iterator(tinfo.size()); }
+
+    iterator find(const type_info *find_type) {
+        auto it = begin(), endit = end();
+        while (it != endit && it->type != find_type) ++it;
+        return it;
+    }
+
+    size_t size() { return tinfo.size(); }
+};
+
+/**
+ * Extracts C++ value and holder pointer references from an instance (which may contain multiple
+ * values/holders for python-side multiple inheritance) that match the given type.  Throws an error
+ * if the given type (or ValueType, if omitted) is not a pybind11 base of the given instance.  If
+ * `find_type` is omitted (or explicitly specified as nullptr) the first value/holder are returned,
+ * regardless of type (and the resulting .type will be nullptr).
+ *
+ * The returned object should be short-lived: in particular, it must not outlive the called-upon
+ * instance.
+ */
+PYBIND11_NOINLINE inline value_and_holder instance::get_value_and_holder(const type_info *find_type /*= nullptr default in common.h*/) {
+    // Optimize common case:
+    if (!find_type || Py_TYPE(this) == find_type->type)
+        return value_and_holder(this, find_type, 0, 0);
+
+    detail::values_and_holders vhs(this);
+    auto it = vhs.find(find_type);
+    if (it != vhs.end())
+        return *it;
+
+#if defined(NDEBUG)
+    pybind11_fail("pybind11::detail::instance::get_value_and_holder: "
+            "type is not a pybind11 base of the given instance "
+            "(compile in debug mode for type details)");
+#else
+    pybind11_fail("pybind11::detail::instance::get_value_and_holder: `" +
+            std::string(find_type->type->tp_name) + "' is not a pybind11 base of the given `" +
+            std::string(Py_TYPE(this)->tp_name) + "' instance");
+#endif
+}
+
+PYBIND11_NOINLINE inline void instance::allocate_layout() {
+    auto &tinfo = all_type_info(Py_TYPE(this));
+
+    const size_t n_types = tinfo.size();
+
+    if (n_types == 0)
+        pybind11_fail("instance allocation failed: new instance has no pybind11-registered base types");
+
+    simple_layout =
+        n_types == 1 && tinfo.front()->holder_size_in_ptrs <= instance_simple_holder_in_ptrs();
+
+    // Simple path: no python-side multiple inheritance, and a small-enough holder
+    if (simple_layout) {
+        simple_value_holder[0] = nullptr;
+        simple_holder_constructed = false;
+        simple_instance_registered = false;
+    }
+    else { // multiple base types or a too-large holder
+        // Allocate space to hold: [v1*][h1][v2*][h2]...[bb...] where [vN*] is a value pointer,
+        // [hN] is the (uninitialized) holder instance for value N, and [bb...] is a set of bool
+        // values that tracks whether each associated holder has been initialized.  Each [block] is
+        // padded, if necessary, to an integer multiple of sizeof(void *).
+        size_t space = 0;
+        for (auto t : tinfo) {
+            space += 1; // value pointer
+            space += t->holder_size_in_ptrs; // holder instance
+        }
+        size_t flags_at = space;
+        space += size_in_ptrs(n_types); // status bytes (holder_constructed and instance_registered)
+
+        // Allocate space for flags, values, and holders, and initialize it to 0 (flags and values,
+        // in particular, need to be 0).  Use Python's memory allocation functions: in Python 3.6
+        // they default to using pymalloc, which is designed to be efficient for small allocations
+        // like the one we're doing here; in earlier versions (and for larger allocations) they are
+        // just wrappers around malloc.
+#if PY_VERSION_HEX >= 0x03050000
+        nonsimple.values_and_holders = (void **) PyMem_Calloc(space, sizeof(void *));
+        if (!nonsimple.values_and_holders) throw std::bad_alloc();
+#else
+        nonsimple.values_and_holders = (void **) PyMem_New(void *, space);
+        if (!nonsimple.values_and_holders) throw std::bad_alloc();
+        std::memset(nonsimple.values_and_holders, 0, space * sizeof(void *));
+#endif
+        nonsimple.status = reinterpret_cast<uint8_t *>(&nonsimple.values_and_holders[flags_at]);
+    }
+    owned = true;
+}
+
+PYBIND11_NOINLINE inline void instance::deallocate_layout() {
+    if (!simple_layout)
+        PyMem_Free(nonsimple.values_and_holders);
+}
+
+PYBIND11_NOINLINE inline bool isinstance_generic(handle obj, const std::type_info &tp) {
+    handle type = detail::get_type_handle(tp, false);
+    if (!type)
+        return false;
+    return isinstance(obj, type);
+}
+
+PYBIND11_NOINLINE inline std::string error_string() {
+    if (!PyErr_Occurred()) {
+        PyErr_SetString(PyExc_RuntimeError, "Unknown internal error occurred");
+        return "Unknown internal error occurred";
+    }
+
+    error_scope scope; // Preserve error state
+
+    std::string errorString;
+    if (scope.type) {
+        errorString += handle(scope.type).attr("__name__").cast<std::string>();
+        errorString += ": ";
+    }
+    if (scope.value)
+        errorString += (std::string) str(scope.value);
+
+    PyErr_NormalizeException(&scope.type, &scope.value, &scope.trace);
+
+#if PY_MAJOR_VERSION >= 3
+    if (scope.trace != nullptr)
+        PyException_SetTraceback(scope.value, scope.trace);
+#endif
+
+#if !defined(PYPY_VERSION)
+    if (scope.trace) {
+        PyTracebackObject *trace = (PyTracebackObject *) scope.trace;
