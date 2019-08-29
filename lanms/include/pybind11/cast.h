@@ -829,3 +829,199 @@ public:
     static std::pair<const void *, const type_info *> src_and_type(const itype *src) {
         return type_caster_generic::src_and_type(src, typeid(itype));
     }
+
+    static handle cast(const itype *src, return_value_policy policy, handle parent) {
+        auto st = src_and_type(src);
+        return type_caster_generic::cast(
+            st.first, policy, parent, st.second,
+            make_copy_constructor(src), make_move_constructor(src));
+    }
+
+    static handle cast_holder(const itype *src, const void *holder) {
+        auto st = src_and_type(src);
+        return type_caster_generic::cast(
+            st.first, return_value_policy::take_ownership, {}, st.second,
+            nullptr, nullptr, holder);
+    }
+
+    template <typename T> using cast_op_type = cast_op_type<T>;
+
+    operator itype*() { return (type *) value; }
+    operator itype&() { if (!value) throw reference_cast_error(); return *((itype *) value); }
+
+protected:
+    using Constructor = void *(*)(const void *);
+
+    /* Only enabled when the types are {copy,move}-constructible *and* when the type
+       does not have a private operator new implementation. */
+    template <typename T, typename = enable_if_t<is_copy_constructible<T>::value>>
+    static auto make_copy_constructor(const T *x) -> decltype(new T(*x), Constructor{}) {
+        return [](const void *arg) -> void * {
+            return new T(*reinterpret_cast<const T *>(arg));
+        };
+    }
+
+    template <typename T, typename = enable_if_t<std::is_move_constructible<T>::value>>
+    static auto make_move_constructor(const T *x) -> decltype(new T(std::move(*const_cast<T *>(x))), Constructor{}) {
+        return [](const void *arg) -> void * {
+            return new T(std::move(*const_cast<T *>(reinterpret_cast<const T *>(arg))));
+        };
+    }
+
+    static Constructor make_copy_constructor(...) { return nullptr; }
+    static Constructor make_move_constructor(...) { return nullptr; }
+};
+
+template <typename type, typename SFINAE = void> class type_caster : public type_caster_base<type> { };
+template <typename type> using make_caster = type_caster<intrinsic_t<type>>;
+
+// Shortcut for calling a caster's `cast_op_type` cast operator for casting a type_caster to a T
+template <typename T> typename make_caster<T>::template cast_op_type<T> cast_op(make_caster<T> &caster) {
+    return caster.operator typename make_caster<T>::template cast_op_type<T>();
+}
+template <typename T> typename make_caster<T>::template cast_op_type<typename std::add_rvalue_reference<T>::type>
+cast_op(make_caster<T> &&caster) {
+    return std::move(caster).operator
+        typename make_caster<T>::template cast_op_type<typename std::add_rvalue_reference<T>::type>();
+}
+
+template <typename type> class type_caster<std::reference_wrapper<type>> {
+private:
+    using caster_t = make_caster<type>;
+    caster_t subcaster;
+    using subcaster_cast_op_type = typename caster_t::template cast_op_type<type>;
+    static_assert(std::is_same<typename std::remove_const<type>::type &, subcaster_cast_op_type>::value,
+            "std::reference_wrapper<T> caster requires T to have a caster with an `T &` operator");
+public:
+    bool load(handle src, bool convert) { return subcaster.load(src, convert); }
+    static PYBIND11_DESCR name() { return caster_t::name(); }
+    static handle cast(const std::reference_wrapper<type> &src, return_value_policy policy, handle parent) {
+        // It is definitely wrong to take ownership of this pointer, so mask that rvp
+        if (policy == return_value_policy::take_ownership || policy == return_value_policy::automatic)
+            policy = return_value_policy::automatic_reference;
+        return caster_t::cast(&src.get(), policy, parent);
+    }
+    template <typename T> using cast_op_type = std::reference_wrapper<type>;
+    operator std::reference_wrapper<type>() { return subcaster.operator subcaster_cast_op_type&(); }
+};
+
+#define PYBIND11_TYPE_CASTER(type, py_name) \
+    protected: \
+        type value; \
+    public: \
+        static PYBIND11_DESCR name() { return type_descr(py_name); } \
+        template <typename T_, enable_if_t<std::is_same<type, remove_cv_t<T_>>::value, int> = 0> \
+        static handle cast(T_ *src, return_value_policy policy, handle parent) { \
+            if (!src) return none().release(); \
+            if (policy == return_value_policy::take_ownership) { \
+                auto h = cast(std::move(*src), policy, parent); delete src; return h; \
+            } else { \
+                return cast(*src, policy, parent); \
+            } \
+        } \
+        operator type*() { return &value; } \
+        operator type&() { return value; } \
+        operator type&&() && { return std::move(value); } \
+        template <typename T_> using cast_op_type = pybind11::detail::movable_cast_op_type<T_>
+
+
+template <typename CharT> using is_std_char_type = any_of<
+    std::is_same<CharT, char>, /* std::string */
+    std::is_same<CharT, char16_t>, /* std::u16string */
+    std::is_same<CharT, char32_t>, /* std::u32string */
+    std::is_same<CharT, wchar_t> /* std::wstring */
+>;
+
+template <typename T>
+struct type_caster<T, enable_if_t<std::is_arithmetic<T>::value && !is_std_char_type<T>::value>> {
+    using _py_type_0 = conditional_t<sizeof(T) <= sizeof(long), long, long long>;
+    using _py_type_1 = conditional_t<std::is_signed<T>::value, _py_type_0, typename std::make_unsigned<_py_type_0>::type>;
+    using py_type = conditional_t<std::is_floating_point<T>::value, double, _py_type_1>;
+public:
+
+    bool load(handle src, bool convert) {
+        py_type py_value;
+
+        if (!src)
+            return false;
+
+        if (std::is_floating_point<T>::value) {
+            if (convert || PyFloat_Check(src.ptr()))
+                py_value = (py_type) PyFloat_AsDouble(src.ptr());
+            else
+                return false;
+        } else if (PyFloat_Check(src.ptr())) {
+            return false;
+        } else if (std::is_unsigned<py_type>::value) {
+            py_value = as_unsigned<py_type>(src.ptr());
+        } else { // signed integer:
+            py_value = sizeof(T) <= sizeof(long)
+                ? (py_type) PyLong_AsLong(src.ptr())
+                : (py_type) PYBIND11_LONG_AS_LONGLONG(src.ptr());
+        }
+
+        bool py_err = py_value == (py_type) -1 && PyErr_Occurred();
+        if (py_err || (std::is_integral<T>::value && sizeof(py_type) != sizeof(T) &&
+                       (py_value < (py_type) std::numeric_limits<T>::min() ||
+                        py_value > (py_type) std::numeric_limits<T>::max()))) {
+            bool type_error = py_err && PyErr_ExceptionMatches(
+#if PY_VERSION_HEX < 0x03000000 && !defined(PYPY_VERSION)
+                PyExc_SystemError
+#else
+                PyExc_TypeError
+#endif
+            );
+            PyErr_Clear();
+            if (type_error && convert && PyNumber_Check(src.ptr())) {
+                auto tmp = reinterpret_borrow<object>(std::is_floating_point<T>::value
+                                                      ? PyNumber_Float(src.ptr())
+                                                      : PyNumber_Long(src.ptr()));
+                PyErr_Clear();
+                return load(tmp, false);
+            }
+            return false;
+        }
+
+        value = (T) py_value;
+        return true;
+    }
+
+    static handle cast(T src, return_value_policy /* policy */, handle /* parent */) {
+        if (std::is_floating_point<T>::value) {
+            return PyFloat_FromDouble((double) src);
+        } else if (sizeof(T) <= sizeof(long)) {
+            if (std::is_signed<T>::value)
+                return PyLong_FromLong((long) src);
+            else
+                return PyLong_FromUnsignedLong((unsigned long) src);
+        } else {
+            if (std::is_signed<T>::value)
+                return PyLong_FromLongLong((long long) src);
+            else
+                return PyLong_FromUnsignedLongLong((unsigned long long) src);
+        }
+    }
+
+    PYBIND11_TYPE_CASTER(T, _<std::is_integral<T>::value>("int", "float"));
+};
+
+template<typename T> struct void_caster {
+public:
+    bool load(handle src, bool) {
+        if (src && src.is_none())
+            return true;
+        return false;
+    }
+    static handle cast(T, return_value_policy /* policy */, handle /* parent */) {
+        return none().inc_ref();
+    }
+    PYBIND11_TYPE_CASTER(T, _("None"));
+};
+
+template <> class type_caster<void_type> : public void_caster<void_type> {};
+
+template <> class type_caster<void> : public type_caster<void_type> {
+public:
+    using type_caster<void_type>::cast;
+
+    bool load(handle h, bool) {
