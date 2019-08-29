@@ -1025,3 +1025,187 @@ public:
     using type_caster<void_type>::cast;
 
     bool load(handle h, bool) {
+        if (!h) {
+            return false;
+        } else if (h.is_none()) {
+            value = nullptr;
+            return true;
+        }
+
+        /* Check if this is a capsule */
+        if (isinstance<capsule>(h)) {
+            value = reinterpret_borrow<capsule>(h);
+            return true;
+        }
+
+        /* Check if this is a C++ type */
+        auto &bases = all_type_info((PyTypeObject *) h.get_type().ptr());
+        if (bases.size() == 1) { // Only allowing loading from a single-value type
+            value = values_and_holders(reinterpret_cast<instance *>(h.ptr())).begin()->value_ptr();
+            return true;
+        }
+
+        /* Fail */
+        return false;
+    }
+
+    static handle cast(const void *ptr, return_value_policy /* policy */, handle /* parent */) {
+        if (ptr)
+            return capsule(ptr).release();
+        else
+            return none().inc_ref();
+    }
+
+    template <typename T> using cast_op_type = void*&;
+    operator void *&() { return value; }
+    static PYBIND11_DESCR name() { return type_descr(_("capsule")); }
+private:
+    void *value = nullptr;
+};
+
+template <> class type_caster<std::nullptr_t> : public void_caster<std::nullptr_t> { };
+
+template <> class type_caster<bool> {
+public:
+    bool load(handle src, bool convert) {
+        if (!src) return false;
+        else if (src.ptr() == Py_True) { value = true; return true; }
+        else if (src.ptr() == Py_False) { value = false; return true; }
+        else if (convert || !strcmp("numpy.bool_", Py_TYPE(src.ptr())->tp_name)) {
+            // (allow non-implicit conversion for numpy booleans)
+
+            Py_ssize_t res = -1;
+            if (src.is_none()) {
+                res = 0;  // None is implicitly converted to False
+            }
+            #if defined(PYPY_VERSION)
+            // On PyPy, check that "__bool__" (or "__nonzero__" on Python 2.7) attr exists
+            else if (hasattr(src, PYBIND11_BOOL_ATTR)) {
+                res = PyObject_IsTrue(src.ptr());
+            }
+            #else
+            // Alternate approach for CPython: this does the same as the above, but optimized
+            // using the CPython API so as to avoid an unneeded attribute lookup.
+            else if (auto tp_as_number = src.ptr()->ob_type->tp_as_number) {
+                if (PYBIND11_NB_BOOL(tp_as_number)) {
+                    res = (*PYBIND11_NB_BOOL(tp_as_number))(src.ptr());
+                }
+            }
+            #endif
+            if (res == 0 || res == 1) {
+                value = (bool) res;
+                return true;
+            }
+        }
+        return false;
+    }
+    static handle cast(bool src, return_value_policy /* policy */, handle /* parent */) {
+        return handle(src ? Py_True : Py_False).inc_ref();
+    }
+    PYBIND11_TYPE_CASTER(bool, _("bool"));
+};
+
+// Helper class for UTF-{8,16,32} C++ stl strings:
+template <typename StringType, bool IsView = false> struct string_caster {
+    using CharT = typename StringType::value_type;
+
+    // Simplify life by being able to assume standard char sizes (the standard only guarantees
+    // minimums, but Python requires exact sizes)
+    static_assert(!std::is_same<CharT, char>::value || sizeof(CharT) == 1, "Unsupported char size != 1");
+    static_assert(!std::is_same<CharT, char16_t>::value || sizeof(CharT) == 2, "Unsupported char16_t size != 2");
+    static_assert(!std::is_same<CharT, char32_t>::value || sizeof(CharT) == 4, "Unsupported char32_t size != 4");
+    // wchar_t can be either 16 bits (Windows) or 32 (everywhere else)
+    static_assert(!std::is_same<CharT, wchar_t>::value || sizeof(CharT) == 2 || sizeof(CharT) == 4,
+            "Unsupported wchar_t size != 2/4");
+    static constexpr size_t UTF_N = 8 * sizeof(CharT);
+
+    bool load(handle src, bool) {
+#if PY_MAJOR_VERSION < 3
+        object temp;
+#endif
+        handle load_src = src;
+        if (!src) {
+            return false;
+        } else if (!PyUnicode_Check(load_src.ptr())) {
+#if PY_MAJOR_VERSION >= 3
+            return load_bytes(load_src);
+#else
+            if (sizeof(CharT) == 1) {
+                return load_bytes(load_src);
+            }
+
+            // The below is a guaranteed failure in Python 3 when PyUnicode_Check returns false
+            if (!PYBIND11_BYTES_CHECK(load_src.ptr()))
+                return false;
+
+            temp = reinterpret_steal<object>(PyUnicode_FromObject(load_src.ptr()));
+            if (!temp) { PyErr_Clear(); return false; }
+            load_src = temp;
+#endif
+        }
+
+        object utfNbytes = reinterpret_steal<object>(PyUnicode_AsEncodedString(
+            load_src.ptr(), UTF_N == 8 ? "utf-8" : UTF_N == 16 ? "utf-16" : "utf-32", nullptr));
+        if (!utfNbytes) { PyErr_Clear(); return false; }
+
+        const CharT *buffer = reinterpret_cast<const CharT *>(PYBIND11_BYTES_AS_STRING(utfNbytes.ptr()));
+        size_t length = (size_t) PYBIND11_BYTES_SIZE(utfNbytes.ptr()) / sizeof(CharT);
+        if (UTF_N > 8) { buffer++; length--; } // Skip BOM for UTF-16/32
+        value = StringType(buffer, length);
+
+        // If we're loading a string_view we need to keep the encoded Python object alive:
+        if (IsView)
+            loader_life_support::add_patient(utfNbytes);
+
+        return true;
+    }
+
+    static handle cast(const StringType &src, return_value_policy /* policy */, handle /* parent */) {
+        const char *buffer = reinterpret_cast<const char *>(src.data());
+        ssize_t nbytes = ssize_t(src.size() * sizeof(CharT));
+        handle s = decode_utfN(buffer, nbytes);
+        if (!s) throw error_already_set();
+        return s;
+    }
+
+    PYBIND11_TYPE_CASTER(StringType, _(PYBIND11_STRING_NAME));
+
+private:
+    static handle decode_utfN(const char *buffer, ssize_t nbytes) {
+#if !defined(PYPY_VERSION)
+        return
+            UTF_N == 8  ? PyUnicode_DecodeUTF8(buffer, nbytes, nullptr) :
+            UTF_N == 16 ? PyUnicode_DecodeUTF16(buffer, nbytes, nullptr, nullptr) :
+                          PyUnicode_DecodeUTF32(buffer, nbytes, nullptr, nullptr);
+#else
+        // PyPy seems to have multiple problems related to PyUnicode_UTF*: the UTF8 version
+        // sometimes segfaults for unknown reasons, while the UTF16 and 32 versions require a
+        // non-const char * arguments, which is also a nuissance, so bypass the whole thing by just
+        // passing the encoding as a string value, which works properly:
+        return PyUnicode_Decode(buffer, nbytes, UTF_N == 8 ? "utf-8" : UTF_N == 16 ? "utf-16" : "utf-32", nullptr);
+#endif
+    }
+
+    // When loading into a std::string or char*, accept a bytes object as-is (i.e.
+    // without any encoding/decoding attempt).  For other C++ char sizes this is a no-op.
+    // which supports loading a unicode from a str, doesn't take this path.
+    template <typename C = CharT>
+    bool load_bytes(enable_if_t<sizeof(C) == 1, handle> src) {
+        if (PYBIND11_BYTES_CHECK(src.ptr())) {
+            // We were passed a Python 3 raw bytes; accept it into a std::string or char*
+            // without any encoding attempt.
+            const char *bytes = PYBIND11_BYTES_AS_STRING(src.ptr());
+            if (bytes) {
+                value = StringType(bytes, (size_t) PYBIND11_BYTES_SIZE(src.ptr()));
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    template <typename C = CharT>
+    bool load_bytes(enable_if_t<sizeof(C) != 1, handle>) { return false; }
+};
+
+template <typename CharT, class Traits, class Allocator>
