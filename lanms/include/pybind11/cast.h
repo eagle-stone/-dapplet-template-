@@ -1547,3 +1547,181 @@ template <typename T> struct move_always<T, enable_if_t<all_of<
     std::is_move_constructible<T>,
     std::is_same<decltype(std::declval<make_caster<T>>().operator T&()), T&>
 >::value>> : std::true_type {};
+template <typename T, typename SFINAE = void> struct move_if_unreferenced : std::false_type {};
+template <typename T> struct move_if_unreferenced<T, enable_if_t<all_of<
+    move_is_plain_type<T>,
+    negation<move_always<T>>,
+    std::is_move_constructible<T>,
+    std::is_same<decltype(std::declval<make_caster<T>>().operator T&()), T&>
+>::value>> : std::true_type {};
+template <typename T> using move_never = none_of<move_always<T>, move_if_unreferenced<T>>;
+
+// Detect whether returning a `type` from a cast on type's type_caster is going to result in a
+// reference or pointer to a local variable of the type_caster.  Basically, only
+// non-reference/pointer `type`s and reference/pointers from a type_caster_generic are safe;
+// everything else returns a reference/pointer to a local variable.
+template <typename type> using cast_is_temporary_value_reference = bool_constant<
+    (std::is_reference<type>::value || std::is_pointer<type>::value) &&
+    !std::is_base_of<type_caster_generic, make_caster<type>>::value
+>;
+
+// When a value returned from a C++ function is being cast back to Python, we almost always want to
+// force `policy = move`, regardless of the return value policy the function/method was declared
+// with.  Some classes (most notably Eigen::Ref and related) need to avoid this, and so can do so by
+// specializing this struct.
+template <typename Return, typename SFINAE = void> struct return_value_policy_override {
+    static return_value_policy policy(return_value_policy p) {
+        return !std::is_lvalue_reference<Return>::value && !std::is_pointer<Return>::value
+            ? return_value_policy::move : p;
+    }
+};
+
+// Basic python -> C++ casting; throws if casting fails
+template <typename T, typename SFINAE> type_caster<T, SFINAE> &load_type(type_caster<T, SFINAE> &conv, const handle &handle) {
+    if (!conv.load(handle, true)) {
+#if defined(NDEBUG)
+        throw cast_error("Unable to cast Python instance to C++ type (compile in debug mode for details)");
+#else
+        throw cast_error("Unable to cast Python instance of type " +
+            (std::string) str(handle.get_type()) + " to C++ type '" + type_id<T>() + "''");
+#endif
+    }
+    return conv;
+}
+// Wrapper around the above that also constructs and returns a type_caster
+template <typename T> make_caster<T> load_type(const handle &handle) {
+    make_caster<T> conv;
+    load_type(conv, handle);
+    return conv;
+}
+
+NAMESPACE_END(detail)
+
+// pytype -> C++ type
+template <typename T, detail::enable_if_t<!detail::is_pyobject<T>::value, int> = 0>
+T cast(const handle &handle) {
+    using namespace detail;
+    static_assert(!cast_is_temporary_value_reference<T>::value,
+            "Unable to cast type to reference: value is local to type caster");
+    return cast_op<T>(load_type<T>(handle));
+}
+
+// pytype -> pytype (calls converting constructor)
+template <typename T, detail::enable_if_t<detail::is_pyobject<T>::value, int> = 0>
+T cast(const handle &handle) { return T(reinterpret_borrow<object>(handle)); }
+
+// C++ type -> py::object
+template <typename T, detail::enable_if_t<!detail::is_pyobject<T>::value, int> = 0>
+object cast(const T &value, return_value_policy policy = return_value_policy::automatic_reference,
+            handle parent = handle()) {
+    if (policy == return_value_policy::automatic)
+        policy = std::is_pointer<T>::value ? return_value_policy::take_ownership : return_value_policy::copy;
+    else if (policy == return_value_policy::automatic_reference)
+        policy = std::is_pointer<T>::value ? return_value_policy::reference : return_value_policy::copy;
+    return reinterpret_steal<object>(detail::make_caster<T>::cast(value, policy, parent));
+}
+
+template <typename T> T handle::cast() const { return pybind11::cast<T>(*this); }
+template <> inline void handle::cast() const { return; }
+
+template <typename T>
+detail::enable_if_t<!detail::move_never<T>::value, T> move(object &&obj) {
+    if (obj.ref_count() > 1)
+#if defined(NDEBUG)
+        throw cast_error("Unable to cast Python instance to C++ rvalue: instance has multiple references"
+            " (compile in debug mode for details)");
+#else
+        throw cast_error("Unable to move from Python " + (std::string) str(obj.get_type()) +
+                " instance to C++ " + type_id<T>() + " instance: instance has multiple references");
+#endif
+
+    // Move into a temporary and return that, because the reference may be a local value of `conv`
+    T ret = std::move(detail::load_type<T>(obj).operator T&());
+    return ret;
+}
+
+// Calling cast() on an rvalue calls pybind::cast with the object rvalue, which does:
+// - If we have to move (because T has no copy constructor), do it.  This will fail if the moved
+//   object has multiple references, but trying to copy will fail to compile.
+// - If both movable and copyable, check ref count: if 1, move; otherwise copy
+// - Otherwise (not movable), copy.
+template <typename T> detail::enable_if_t<detail::move_always<T>::value, T> cast(object &&object) {
+    return move<T>(std::move(object));
+}
+template <typename T> detail::enable_if_t<detail::move_if_unreferenced<T>::value, T> cast(object &&object) {
+    if (object.ref_count() > 1)
+        return cast<T>(object);
+    else
+        return move<T>(std::move(object));
+}
+template <typename T> detail::enable_if_t<detail::move_never<T>::value, T> cast(object &&object) {
+    return cast<T>(object);
+}
+
+template <typename T> T object::cast() const & { return pybind11::cast<T>(*this); }
+template <typename T> T object::cast() && { return pybind11::cast<T>(std::move(*this)); }
+template <> inline void object::cast() const & { return; }
+template <> inline void object::cast() && { return; }
+
+NAMESPACE_BEGIN(detail)
+
+// Declared in pytypes.h:
+template <typename T, enable_if_t<!is_pyobject<T>::value, int>>
+object object_or_cast(T &&o) { return pybind11::cast(std::forward<T>(o)); }
+
+struct overload_unused {}; // Placeholder type for the unneeded (and dead code) static variable in the OVERLOAD_INT macro
+template <typename ret_type> using overload_caster_t = conditional_t<
+    cast_is_temporary_value_reference<ret_type>::value, make_caster<ret_type>, overload_unused>;
+
+// Trampoline use: for reference/pointer types to value-converted values, we do a value cast, then
+// store the result in the given variable.  For other types, this is a no-op.
+template <typename T> enable_if_t<cast_is_temporary_value_reference<T>::value, T> cast_ref(object &&o, make_caster<T> &caster) {
+    return cast_op<T>(load_type(caster, o));
+}
+template <typename T> enable_if_t<!cast_is_temporary_value_reference<T>::value, T> cast_ref(object &&, overload_unused &) {
+    pybind11_fail("Internal error: cast_ref fallback invoked"); }
+
+// Trampoline use: Having a pybind11::cast with an invalid reference type is going to static_assert, even
+// though if it's in dead code, so we provide a "trampoline" to pybind11::cast that only does anything in
+// cases where pybind11::cast is valid.
+template <typename T> enable_if_t<!cast_is_temporary_value_reference<T>::value, T> cast_safe(object &&o) {
+    return pybind11::cast<T>(std::move(o)); }
+template <typename T> enable_if_t<cast_is_temporary_value_reference<T>::value, T> cast_safe(object &&) {
+    pybind11_fail("Internal error: cast_safe fallback invoked"); }
+template <> inline void cast_safe<void>(object &&) {}
+
+NAMESPACE_END(detail)
+
+template <return_value_policy policy = return_value_policy::automatic_reference,
+          typename... Args> tuple make_tuple(Args&&... args_) {
+    constexpr size_t size = sizeof...(Args);
+    std::array<object, size> args {
+        { reinterpret_steal<object>(detail::make_caster<Args>::cast(
+            std::forward<Args>(args_), policy, nullptr))... }
+    };
+    for (size_t i = 0; i < args.size(); i++) {
+        if (!args[i]) {
+#if defined(NDEBUG)
+            throw cast_error("make_tuple(): unable to convert arguments to Python object (compile in debug mode for details)");
+#else
+            std::array<std::string, size> argtypes { {type_id<Args>()...} };
+            throw cast_error("make_tuple(): unable to convert argument of type '" +
+                argtypes[i] + "' to Python object");
+#endif
+        }
+    }
+    tuple result(size);
+    int counter = 0;
+    for (auto &arg_value : args)
+        PyTuple_SET_ITEM(result.ptr(), counter++, arg_value.release().ptr());
+    return result;
+}
+
+/// \ingroup annotations
+/// Annotation for arguments
+struct arg {
+    /// Constructs an argument with the name of the argument; if null or omitted, this is a positional argument.
+    constexpr explicit arg(const char *name = nullptr) : name(name), flag_noconvert(false), flag_none(true) { }
+    /// Assign a value to this argument
+    template <typename T> arg_v operator=(T &&value) const;
+    /// Indicate that the type should not be converted in the type caster
