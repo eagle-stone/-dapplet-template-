@@ -1209,3 +1209,162 @@ private:
 };
 
 template <typename CharT, class Traits, class Allocator>
+struct type_caster<std::basic_string<CharT, Traits, Allocator>, enable_if_t<is_std_char_type<CharT>::value>>
+    : string_caster<std::basic_string<CharT, Traits, Allocator>> {};
+
+#ifdef PYBIND11_HAS_STRING_VIEW
+template <typename CharT, class Traits>
+struct type_caster<std::basic_string_view<CharT, Traits>, enable_if_t<is_std_char_type<CharT>::value>>
+    : string_caster<std::basic_string_view<CharT, Traits>, true> {};
+#endif
+
+// Type caster for C-style strings.  We basically use a std::string type caster, but also add the
+// ability to use None as a nullptr char* (which the string caster doesn't allow).
+template <typename CharT> struct type_caster<CharT, enable_if_t<is_std_char_type<CharT>::value>> {
+    using StringType = std::basic_string<CharT>;
+    using StringCaster = type_caster<StringType>;
+    StringCaster str_caster;
+    bool none = false;
+public:
+    bool load(handle src, bool convert) {
+        if (!src) return false;
+        if (src.is_none()) {
+            // Defer accepting None to other overloads (if we aren't in convert mode):
+            if (!convert) return false;
+            none = true;
+            return true;
+        }
+        return str_caster.load(src, convert);
+    }
+
+    static handle cast(const CharT *src, return_value_policy policy, handle parent) {
+        if (src == nullptr) return pybind11::none().inc_ref();
+        return StringCaster::cast(StringType(src), policy, parent);
+    }
+
+    static handle cast(CharT src, return_value_policy policy, handle parent) {
+        if (std::is_same<char, CharT>::value) {
+            handle s = PyUnicode_DecodeLatin1((const char *) &src, 1, nullptr);
+            if (!s) throw error_already_set();
+            return s;
+        }
+        return StringCaster::cast(StringType(1, src), policy, parent);
+    }
+
+    operator CharT*() { return none ? nullptr : const_cast<CharT *>(static_cast<StringType &>(str_caster).c_str()); }
+    operator CharT() {
+        if (none)
+            throw value_error("Cannot convert None to a character");
+
+        auto &value = static_cast<StringType &>(str_caster);
+        size_t str_len = value.size();
+        if (str_len == 0)
+            throw value_error("Cannot convert empty string to a character");
+
+        // If we're in UTF-8 mode, we have two possible failures: one for a unicode character that
+        // is too high, and one for multiple unicode characters (caught later), so we need to figure
+        // out how long the first encoded character is in bytes to distinguish between these two
+        // errors.  We also allow want to allow unicode characters U+0080 through U+00FF, as those
+        // can fit into a single char value.
+        if (StringCaster::UTF_N == 8 && str_len > 1 && str_len <= 4) {
+            unsigned char v0 = static_cast<unsigned char>(value[0]);
+            size_t char0_bytes = !(v0 & 0x80) ? 1 : // low bits only: 0-127
+                (v0 & 0xE0) == 0xC0 ? 2 : // 0b110xxxxx - start of 2-byte sequence
+                (v0 & 0xF0) == 0xE0 ? 3 : // 0b1110xxxx - start of 3-byte sequence
+                4; // 0b11110xxx - start of 4-byte sequence
+
+            if (char0_bytes == str_len) {
+                // If we have a 128-255 value, we can decode it into a single char:
+                if (char0_bytes == 2 && (v0 & 0xFC) == 0xC0) { // 0x110000xx 0x10xxxxxx
+                    return static_cast<CharT>(((v0 & 3) << 6) + (static_cast<unsigned char>(value[1]) & 0x3F));
+                }
+                // Otherwise we have a single character, but it's > U+00FF
+                throw value_error("Character code point not in range(0x100)");
+            }
+        }
+
+        // UTF-16 is much easier: we can only have a surrogate pair for values above U+FFFF, thus a
+        // surrogate pair with total length 2 instantly indicates a range error (but not a "your
+        // string was too long" error).
+        else if (StringCaster::UTF_N == 16 && str_len == 2) {
+            char16_t v0 = static_cast<char16_t>(value[0]);
+            if (v0 >= 0xD800 && v0 < 0xE000)
+                throw value_error("Character code point not in range(0x10000)");
+        }
+
+        if (str_len != 1)
+            throw value_error("Expected a character, but multi-character string found");
+
+        return value[0];
+    }
+
+    static PYBIND11_DESCR name() { return type_descr(_(PYBIND11_STRING_NAME)); }
+    template <typename _T> using cast_op_type = remove_reference_t<pybind11::detail::cast_op_type<_T>>;
+};
+
+// Base implementation for std::tuple and std::pair
+template <template<typename...> class Tuple, typename... Ts> class tuple_caster {
+    using type = Tuple<Ts...>;
+    static constexpr auto size = sizeof...(Ts);
+    using indices = make_index_sequence<size>;
+public:
+
+    bool load(handle src, bool convert) {
+        if (!isinstance<sequence>(src))
+            return false;
+        const auto seq = reinterpret_borrow<sequence>(src);
+        if (seq.size() != size)
+            return false;
+        return load_impl(seq, convert, indices{});
+    }
+
+    template <typename T>
+    static handle cast(T &&src, return_value_policy policy, handle parent) {
+        return cast_impl(std::forward<T>(src), policy, parent, indices{});
+    }
+
+    static PYBIND11_DESCR name() {
+        return type_descr(_("Tuple[") + detail::concat(make_caster<Ts>::name()...) + _("]"));
+    }
+
+    template <typename T> using cast_op_type = type;
+
+    operator type() & { return implicit_cast(indices{}); }
+    operator type() && { return std::move(*this).implicit_cast(indices{}); }
+
+protected:
+    template <size_t... Is>
+    type implicit_cast(index_sequence<Is...>) & { return type(cast_op<Ts>(std::get<Is>(subcasters))...); }
+    template <size_t... Is>
+    type implicit_cast(index_sequence<Is...>) && { return type(cast_op<Ts>(std::move(std::get<Is>(subcasters)))...); }
+
+    static constexpr bool load_impl(const sequence &, bool, index_sequence<>) { return true; }
+
+    template <size_t... Is>
+    bool load_impl(const sequence &seq, bool convert, index_sequence<Is...>) {
+        for (bool r : {std::get<Is>(subcasters).load(seq[Is], convert)...})
+            if (!r)
+                return false;
+        return true;
+    }
+
+    /* Implementation: Convert a C++ tuple into a Python tuple */
+    template <typename T, size_t... Is>
+    static handle cast_impl(T &&src, return_value_policy policy, handle parent, index_sequence<Is...>) {
+        std::array<object, size> entries{{
+            reinterpret_steal<object>(make_caster<Ts>::cast(std::get<Is>(std::forward<T>(src)), policy, parent))...
+        }};
+        for (const auto &entry: entries)
+            if (!entry)
+                return handle();
+        tuple result(size);
+        int counter = 0;
+        for (auto & entry: entries)
+            PyTuple_SET_ITEM(result.ptr(), counter++, entry.release().ptr());
+        return result.release();
+    }
+
+    Tuple<make_caster<Ts>...> subcasters;
+};
+
+template <typename T1, typename T2> class type_caster<std::pair<T1, T2>>
