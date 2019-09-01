@@ -1725,3 +1725,167 @@ struct arg {
     /// Assign a value to this argument
     template <typename T> arg_v operator=(T &&value) const;
     /// Indicate that the type should not be converted in the type caster
+    arg &noconvert(bool flag = true) { flag_noconvert = flag; return *this; }
+    /// Indicates that the argument should/shouldn't allow None (e.g. for nullable pointer args)
+    arg &none(bool flag = true) { flag_none = flag; return *this; }
+
+    const char *name; ///< If non-null, this is a named kwargs argument
+    bool flag_noconvert : 1; ///< If set, do not allow conversion (requires a supporting type caster!)
+    bool flag_none : 1; ///< If set (the default), allow None to be passed to this argument
+};
+
+/// \ingroup annotations
+/// Annotation for arguments with values
+struct arg_v : arg {
+private:
+    template <typename T>
+    arg_v(arg &&base, T &&x, const char *descr = nullptr)
+        : arg(base),
+          value(reinterpret_steal<object>(
+              detail::make_caster<T>::cast(x, return_value_policy::automatic, {})
+          )),
+          descr(descr)
+#if !defined(NDEBUG)
+        , type(type_id<T>())
+#endif
+    { }
+
+public:
+    /// Direct construction with name, default, and description
+    template <typename T>
+    arg_v(const char *name, T &&x, const char *descr = nullptr)
+        : arg_v(arg(name), std::forward<T>(x), descr) { }
+
+    /// Called internally when invoking `py::arg("a") = value`
+    template <typename T>
+    arg_v(const arg &base, T &&x, const char *descr = nullptr)
+        : arg_v(arg(base), std::forward<T>(x), descr) { }
+
+    /// Same as `arg::noconvert()`, but returns *this as arg_v&, not arg&
+    arg_v &noconvert(bool flag = true) { arg::noconvert(flag); return *this; }
+
+    /// Same as `arg::nonone()`, but returns *this as arg_v&, not arg&
+    arg_v &none(bool flag = true) { arg::none(flag); return *this; }
+
+    /// The default value
+    object value;
+    /// The (optional) description of the default value
+    const char *descr;
+#if !defined(NDEBUG)
+    /// The C++ type name of the default value (only available when compiled in debug mode)
+    std::string type;
+#endif
+};
+
+template <typename T>
+arg_v arg::operator=(T &&value) const { return {std::move(*this), std::forward<T>(value)}; }
+
+/// Alias for backward compatibility -- to be removed in version 2.0
+template <typename /*unused*/> using arg_t = arg_v;
+
+inline namespace literals {
+/** \rst
+    String literal version of `arg`
+ \endrst */
+constexpr arg operator"" _a(const char *name, size_t) { return arg(name); }
+}
+
+NAMESPACE_BEGIN(detail)
+
+// forward declaration (definition in attr.h)
+struct function_record;
+
+/// Internal data associated with a single function call
+struct function_call {
+    function_call(function_record &f, handle p); // Implementation in attr.h
+
+    /// The function data:
+    const function_record &func;
+
+    /// Arguments passed to the function:
+    std::vector<handle> args;
+
+    /// The `convert` value the arguments should be loaded with
+    std::vector<bool> args_convert;
+
+    /// The parent, if any
+    handle parent;
+};
+
+
+/// Helper class which loads arguments for C++ functions called from Python
+template <typename... Args>
+class argument_loader {
+    using indices = make_index_sequence<sizeof...(Args)>;
+
+    template <typename Arg> using argument_is_args   = std::is_same<intrinsic_t<Arg>, args>;
+    template <typename Arg> using argument_is_kwargs = std::is_same<intrinsic_t<Arg>, kwargs>;
+    // Get args/kwargs argument positions relative to the end of the argument list:
+    static constexpr auto args_pos = constexpr_first<argument_is_args, Args...>() - (int) sizeof...(Args),
+                        kwargs_pos = constexpr_first<argument_is_kwargs, Args...>() - (int) sizeof...(Args);
+
+    static constexpr bool args_kwargs_are_last = kwargs_pos >= - 1 && args_pos >= kwargs_pos - 1;
+
+    static_assert(args_kwargs_are_last, "py::args/py::kwargs are only permitted as the last argument(s) of a function");
+
+public:
+    static constexpr bool has_kwargs = kwargs_pos < 0;
+    static constexpr bool has_args = args_pos < 0;
+
+    static PYBIND11_DESCR arg_names() { return detail::concat(make_caster<Args>::name()...); }
+
+    bool load_args(function_call &call) {
+        return load_impl_sequence(call, indices{});
+    }
+
+    template <typename Return, typename Guard, typename Func>
+    enable_if_t<!std::is_void<Return>::value, Return> call(Func &&f) && {
+        return std::move(*this).template call_impl<Return>(std::forward<Func>(f), indices{}, Guard{});
+    }
+
+    template <typename Return, typename Guard, typename Func>
+    enable_if_t<std::is_void<Return>::value, void_type> call(Func &&f) && {
+        std::move(*this).template call_impl<Return>(std::forward<Func>(f), indices{}, Guard{});
+        return void_type();
+    }
+
+private:
+
+    static bool load_impl_sequence(function_call &, index_sequence<>) { return true; }
+
+    template <size_t... Is>
+    bool load_impl_sequence(function_call &call, index_sequence<Is...>) {
+        for (bool r : {std::get<Is>(argcasters).load(call.args[Is], call.args_convert[Is])...})
+            if (!r)
+                return false;
+        return true;
+    }
+
+    template <typename Return, typename Func, size_t... Is, typename Guard>
+    Return call_impl(Func &&f, index_sequence<Is...>, Guard &&) {
+        return std::forward<Func>(f)(cast_op<Args>(std::move(std::get<Is>(argcasters)))...);
+    }
+
+    std::tuple<make_caster<Args>...> argcasters;
+};
+
+/// Helper class which collects only positional arguments for a Python function call.
+/// A fancier version below can collect any argument, but this one is optimal for simple calls.
+template <return_value_policy policy>
+class simple_collector {
+public:
+    template <typename... Ts>
+    explicit simple_collector(Ts &&...values)
+        : m_args(pybind11::make_tuple<policy>(std::forward<Ts>(values)...)) { }
+
+    const tuple &args() const & { return m_args; }
+    dict kwargs() const { return {}; }
+
+    tuple args() && { return std::move(m_args); }
+
+    /// Call a Python function and pass the collected arguments
+    object call(PyObject *ptr) const {
+        PyObject *result = PyObject_CallObject(ptr, m_args.ptr());
+        if (!result)
+            throw error_already_set();
+        return reinterpret_steal<object>(result);
