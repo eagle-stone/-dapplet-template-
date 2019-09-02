@@ -274,3 +274,185 @@ extern "C" {
             return nullptr;                                                    \
         }                                                                      \
         auto m = pybind11::module(#name);                                      \
+        try {                                                                  \
+            pybind11_init_##name(m);                                           \
+            return m.ptr();                                                    \
+        } catch (pybind11::error_already_set &e) {                             \
+            PyErr_SetString(PyExc_ImportError, e.what());                      \
+            return nullptr;                                                    \
+        } catch (const std::exception &e) {                                    \
+            PyErr_SetString(PyExc_ImportError, e.what());                      \
+            return nullptr;                                                    \
+        }                                                                      \
+    }                                                                          \
+    void pybind11_init_##name(pybind11::module &variable)
+
+
+NAMESPACE_BEGIN(pybind11)
+
+using ssize_t = Py_ssize_t;
+using size_t  = std::size_t;
+
+/// Approach used to cast a previously unknown C++ instance into a Python object
+enum class return_value_policy : uint8_t {
+    /** This is the default return value policy, which falls back to the policy
+        return_value_policy::take_ownership when the return value is a pointer.
+        Otherwise, it uses return_value::move or return_value::copy for rvalue
+        and lvalue references, respectively. See below for a description of what
+        all of these different policies do. */
+    automatic = 0,
+
+    /** As above, but use policy return_value_policy::reference when the return
+        value is a pointer. This is the default conversion policy for function
+        arguments when calling Python functions manually from C++ code (i.e. via
+        handle::operator()). You probably won't need to use this. */
+    automatic_reference,
+
+    /** Reference an existing object (i.e. do not create a new copy) and take
+        ownership. Python will call the destructor and delete operator when the
+        object’s reference count reaches zero. Undefined behavior ensues when
+        the C++ side does the same.. */
+    take_ownership,
+
+    /** Create a new copy of the returned object, which will be owned by
+        Python. This policy is comparably safe because the lifetimes of the two
+        instances are decoupled. */
+    copy,
+
+    /** Use std::move to move the return value contents into a new instance
+        that will be owned by Python. This policy is comparably safe because the
+        lifetimes of the two instances (move source and destination) are
+        decoupled. */
+    move,
+
+    /** Reference an existing object, but do not take ownership. The C++ side
+        is responsible for managing the object’s lifetime and deallocating it
+        when it is no longer used. Warning: undefined behavior will ensue when
+        the C++ side deletes an object that is still referenced and used by
+        Python. */
+    reference,
+
+    /** This policy only applies to methods and properties. It references the
+        object without taking ownership similar to the above
+        return_value_policy::reference policy. In contrast to that policy, the
+        function or property’s implicit this argument (called the parent) is
+        considered to be the the owner of the return value (the child).
+        pybind11 then couples the lifetime of the parent to the child via a
+        reference relationship that ensures that the parent cannot be garbage
+        collected while Python is still using the child. More advanced
+        variations of this scheme are also possible using combinations of
+        return_value_policy::reference and the keep_alive call policy */
+    reference_internal
+};
+
+NAMESPACE_BEGIN(detail)
+
+inline static constexpr int log2(size_t n, int k = 0) { return (n <= 1) ? k : log2(n >> 1, k + 1); }
+
+// Returns the size as a multiple of sizeof(void *), rounded up.
+inline static constexpr size_t size_in_ptrs(size_t s) { return 1 + ((s - 1) >> log2(sizeof(void *))); }
+
+/**
+ * The space to allocate for simple layout instance holders (see below) in multiple of the size of
+ * a pointer (e.g.  2 means 16 bytes on 64-bit architectures).  The default is the minimum required
+ * to holder either a std::unique_ptr or std::shared_ptr (which is almost always
+ * sizeof(std::shared_ptr<T>)).
+ */
+constexpr size_t instance_simple_holder_in_ptrs() {
+    static_assert(sizeof(std::shared_ptr<int>) >= sizeof(std::unique_ptr<int>),
+            "pybind assumes std::shared_ptrs are at least as big as std::unique_ptrs");
+    return size_in_ptrs(sizeof(std::shared_ptr<int>));
+}
+
+// Forward declarations
+struct type_info;
+struct value_and_holder;
+
+/// The 'instance' type which needs to be standard layout (need to be able to use 'offsetof')
+struct instance {
+    PyObject_HEAD
+    /// Storage for pointers and holder; see simple_layout, below, for a description
+    union {
+        void *simple_value_holder[1 + instance_simple_holder_in_ptrs()];
+        struct {
+            void **values_and_holders;
+            uint8_t *status;
+        } nonsimple;
+    };
+    /// Weak references (needed for keep alive):
+    PyObject *weakrefs;
+    /// If true, the pointer is owned which means we're free to manage it with a holder.
+    bool owned : 1;
+    /**
+     * An instance has two possible value/holder layouts.
+     *
+     * Simple layout (when this flag is true), means the `simple_value_holder` is set with a pointer
+     * and the holder object governing that pointer, i.e. [val1*][holder].  This layout is applied
+     * whenever there is no python-side multiple inheritance of bound C++ types *and* the type's
+     * holder will fit in the default space (which is large enough to hold either a std::unique_ptr
+     * or std::shared_ptr).
+     *
+     * Non-simple layout applies when using custom holders that require more space than `shared_ptr`
+     * (which is typically the size of two pointers), or when multiple inheritance is used on the
+     * python side.  Non-simple layout allocates the required amount of memory to have multiple
+     * bound C++ classes as parents.  Under this layout, `nonsimple.values_and_holders` is set to a
+     * pointer to allocated space of the required space to hold a a sequence of value pointers and
+     * holders followed `status`, a set of bit flags (1 byte each), i.e.
+     * [val1*][holder1][val2*][holder2]...[bb...]  where each [block] is rounded up to a multiple of
+     * `sizeof(void *)`.  `nonsimple.holder_constructed` is, for convenience, a pointer to the
+     * beginning of the [bb...] block (but not independently allocated).
+     *
+     * Status bits indicate whether the associated holder is constructed (&
+     * status_holder_constructed) and whether the value pointer is registered (&
+     * status_instance_registered) in `registered_instances`.
+     */
+    bool simple_layout : 1;
+    /// For simple layout, tracks whether the holder has been constructed
+    bool simple_holder_constructed : 1;
+    /// For simple layout, tracks whether the instance is registered in `registered_instances`
+    bool simple_instance_registered : 1;
+    /// If true, get_internals().patients has an entry for this object
+    bool has_patients : 1;
+
+    /// Initializes all of the above type/values/holders data
+    void allocate_layout();
+
+    /// Destroys/deallocates all of the above
+    void deallocate_layout();
+
+    /// Returns the value_and_holder wrapper for the given type (or the first, if `find_type`
+    /// omitted)
+    value_and_holder get_value_and_holder(const type_info *find_type = nullptr);
+
+    /// Bit values for the non-simple status flags
+    static constexpr uint8_t status_holder_constructed  = 1;
+    static constexpr uint8_t status_instance_registered = 2;
+};
+
+static_assert(std::is_standard_layout<instance>::value, "Internal error: `pybind11::detail::instance` is not standard layout!");
+
+struct overload_hash {
+    inline size_t operator()(const std::pair<const PyObject *, const char *>& v) const {
+        size_t value = std::hash<const void *>()(v.first);
+        value ^= std::hash<const void *>()(v.second)  + 0x9e3779b9 + (value<<6) + (value>>2);
+        return value;
+    }
+};
+
+// Python loads modules by default with dlopen with the RTLD_LOCAL flag; under libc++ and possibly
+// other stls, this means `typeid(A)` from one module won't equal `typeid(A)` from another module
+// even when `A` is the same, non-hidden-visibility type (e.g. from a common include).  Under
+// stdlibc++, this doesn't happen: equality and the type_index hash are based on the type name,
+// which works.  If not under a known-good stl, provide our own name-based hasher and equality
+// functions that use the type name.
+#if defined(__GLIBCXX__)
+inline bool same_type(const std::type_info &lhs, const std::type_info &rhs) { return lhs == rhs; }
+using type_hash = std::hash<std::type_index>;
+using type_equal_to = std::equal_to<std::type_index>;
+#else
+inline bool same_type(const std::type_info &lhs, const std::type_info &rhs) {
+    return lhs.name() == rhs.name() ||
+        std::strcmp(lhs.name(), rhs.name()) == 0;
+}
+struct type_hash {
+    size_t operator()(const std::type_index &t) const {
