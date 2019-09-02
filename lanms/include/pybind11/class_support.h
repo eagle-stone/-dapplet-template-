@@ -371,3 +371,175 @@ inline PyObject *make_object_base_type(PyTypeObject *metaclass) {
     type->tp_base = type_incref(&PyBaseObject_Type);
     type->tp_basicsize = static_cast<ssize_t>(sizeof(instance));
     type->tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE | Py_TPFLAGS_HEAPTYPE;
+
+    type->tp_new = pybind11_object_new;
+    type->tp_init = pybind11_object_init;
+    type->tp_dealloc = pybind11_object_dealloc;
+
+    /* Support weak references (needed for the keep_alive feature) */
+    type->tp_weaklistoffset = offsetof(instance, weakrefs);
+
+    if (PyType_Ready(type) < 0)
+        pybind11_fail("PyType_Ready failed in make_object_base_type():" + error_string());
+
+    setattr((PyObject *) type, "__module__", str("pybind11_builtins"));
+
+    assert(!PyType_HasFeature(type, Py_TPFLAGS_HAVE_GC));
+    return (PyObject *) heap_type;
+}
+
+/// dynamic_attr: Support for `d = instance.__dict__`.
+extern "C" inline PyObject *pybind11_get_dict(PyObject *self, void *) {
+    PyObject *&dict = *_PyObject_GetDictPtr(self);
+    if (!dict)
+        dict = PyDict_New();
+    Py_XINCREF(dict);
+    return dict;
+}
+
+/// dynamic_attr: Support for `instance.__dict__ = dict()`.
+extern "C" inline int pybind11_set_dict(PyObject *self, PyObject *new_dict, void *) {
+    if (!PyDict_Check(new_dict)) {
+        PyErr_Format(PyExc_TypeError, "__dict__ must be set to a dictionary, not a '%.200s'",
+                     Py_TYPE(new_dict)->tp_name);
+        return -1;
+    }
+    PyObject *&dict = *_PyObject_GetDictPtr(self);
+    Py_INCREF(new_dict);
+    Py_CLEAR(dict);
+    dict = new_dict;
+    return 0;
+}
+
+/// dynamic_attr: Allow the garbage collector to traverse the internal instance `__dict__`.
+extern "C" inline int pybind11_traverse(PyObject *self, visitproc visit, void *arg) {
+    PyObject *&dict = *_PyObject_GetDictPtr(self);
+    Py_VISIT(dict);
+    return 0;
+}
+
+/// dynamic_attr: Allow the GC to clear the dictionary.
+extern "C" inline int pybind11_clear(PyObject *self) {
+    PyObject *&dict = *_PyObject_GetDictPtr(self);
+    Py_CLEAR(dict);
+    return 0;
+}
+
+/// Give instances of this type a `__dict__` and opt into garbage collection.
+inline void enable_dynamic_attributes(PyHeapTypeObject *heap_type) {
+    auto type = &heap_type->ht_type;
+#if defined(PYPY_VERSION)
+    pybind11_fail(std::string(type->tp_name) + ": dynamic attributes are "
+                                               "currently not supported in "
+                                               "conjunction with PyPy!");
+#endif
+    type->tp_flags |= Py_TPFLAGS_HAVE_GC;
+    type->tp_dictoffset = type->tp_basicsize; // place dict at the end
+    type->tp_basicsize += (ssize_t)sizeof(PyObject *); // and allocate enough space for it
+    type->tp_traverse = pybind11_traverse;
+    type->tp_clear = pybind11_clear;
+
+    static PyGetSetDef getset[] = {
+        {const_cast<char*>("__dict__"), pybind11_get_dict, pybind11_set_dict, nullptr, nullptr},
+        {nullptr, nullptr, nullptr, nullptr, nullptr}
+    };
+    type->tp_getset = getset;
+}
+
+/// buffer_protocol: Fill in the view as specified by flags.
+extern "C" inline int pybind11_getbuffer(PyObject *obj, Py_buffer *view, int flags) {
+    // Look for a `get_buffer` implementation in this type's info or any bases (following MRO).
+    type_info *tinfo = nullptr;
+    for (auto type : reinterpret_borrow<tuple>(Py_TYPE(obj)->tp_mro)) {
+        tinfo = get_type_info((PyTypeObject *) type.ptr());
+        if (tinfo && tinfo->get_buffer)
+            break;
+    }
+    if (view == nullptr || obj == nullptr || !tinfo || !tinfo->get_buffer) {
+        if (view)
+            view->obj = nullptr;
+        PyErr_SetString(PyExc_BufferError, "pybind11_getbuffer(): Internal error");
+        return -1;
+    }
+    std::memset(view, 0, sizeof(Py_buffer));
+    buffer_info *info = tinfo->get_buffer(obj, tinfo->get_buffer_data);
+    view->obj = obj;
+    view->ndim = 1;
+    view->internal = info;
+    view->buf = info->ptr;
+    view->itemsize = info->itemsize;
+    view->len = view->itemsize;
+    for (auto s : info->shape)
+        view->len *= s;
+    if ((flags & PyBUF_FORMAT) == PyBUF_FORMAT)
+        view->format = const_cast<char *>(info->format.c_str());
+    if ((flags & PyBUF_STRIDES) == PyBUF_STRIDES) {
+        view->ndim = (int) info->ndim;
+        view->strides = &info->strides[0];
+        view->shape = &info->shape[0];
+    }
+    Py_INCREF(view->obj);
+    return 0;
+}
+
+/// buffer_protocol: Release the resources of the buffer.
+extern "C" inline void pybind11_releasebuffer(PyObject *, Py_buffer *view) {
+    delete (buffer_info *) view->internal;
+}
+
+/// Give this type a buffer interface.
+inline void enable_buffer_protocol(PyHeapTypeObject *heap_type) {
+    heap_type->ht_type.tp_as_buffer = &heap_type->as_buffer;
+#if PY_MAJOR_VERSION < 3
+    heap_type->ht_type.tp_flags |= Py_TPFLAGS_HAVE_NEWBUFFER;
+#endif
+
+    heap_type->as_buffer.bf_getbuffer = pybind11_getbuffer;
+    heap_type->as_buffer.bf_releasebuffer = pybind11_releasebuffer;
+}
+
+/** Create a brand new Python type according to the `type_record` specification.
+    Return value: New reference. */
+inline PyObject* make_new_python_type(const type_record &rec) {
+    auto name = reinterpret_steal<object>(PYBIND11_FROM_STRING(rec.name));
+
+#if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 3
+    auto ht_qualname = name;
+    if (rec.scope && hasattr(rec.scope, "__qualname__")) {
+        ht_qualname = reinterpret_steal<object>(
+            PyUnicode_FromFormat("%U.%U", rec.scope.attr("__qualname__").ptr(), name.ptr()));
+    }
+#endif
+
+    object module;
+    if (rec.scope) {
+        if (hasattr(rec.scope, "__module__"))
+            module = rec.scope.attr("__module__");
+        else if (hasattr(rec.scope, "__name__"))
+            module = rec.scope.attr("__name__");
+    }
+
+#if !defined(PYPY_VERSION)
+    const auto full_name = module ? str(module).cast<std::string>() + "." + rec.name
+                                  : std::string(rec.name);
+#else
+    const auto full_name = std::string(rec.name);
+#endif
+
+    char *tp_doc = nullptr;
+    if (rec.doc && options::show_user_defined_docstrings()) {
+        /* Allocate memory for docstring (using PyObject_MALLOC, since
+           Python will free this later on) */
+        size_t size = strlen(rec.doc) + 1;
+        tp_doc = (char *) PyObject_MALLOC(size);
+        memcpy((void *) tp_doc, rec.doc, size);
+    }
+
+    auto &internals = get_internals();
+    auto bases = tuple(rec.bases);
+    auto base = (bases.size() == 0) ? internals.instance_base
+                                    : bases[0].ptr();
+
+    /* Danger zone: from now (and until PyType_Ready), make sure to
+       issue no Python C API calls which could potentially invoke the
+       garbage collector (the GC will call type_traverse(), which will in
