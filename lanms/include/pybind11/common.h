@@ -620,3 +620,194 @@ struct exactly_one {
     static_assert(found <= 1, "Found more than one type matching the predicate");
 
     static constexpr auto index = found ? constexpr_first<Predicate, Ts...>() : 0;
+    using type = conditional_t<found, typename pack_element<index, Ts...>::type, Default>;
+};
+template <template<typename> class P, typename Default>
+struct exactly_one<P, Default> { using type = Default; };
+
+template <template<typename> class Predicate, typename Default, typename... Ts>
+using exactly_one_t = typename exactly_one<Predicate, Default, Ts...>::type;
+
+/// Defer the evaluation of type T until types Us are instantiated
+template <typename T, typename... /*Us*/> struct deferred_type { using type = T; };
+template <typename T, typename... Us> using deferred_t = typename deferred_type<T, Us...>::type;
+
+/// Like is_base_of, but requires a strict base (i.e. `is_strict_base_of<T, T>::value == false`,
+/// unlike `std::is_base_of`)
+template <typename Base, typename Derived> using is_strict_base_of = bool_constant<
+    std::is_base_of<Base, Derived>::value && !std::is_same<Base, Derived>::value>;
+
+template <template<typename...> class Base>
+struct is_template_base_of_impl {
+    template <typename... Us> static std::true_type check(Base<Us...> *);
+    static std::false_type check(...);
+};
+
+/// Check if a template is the base of a type. For example:
+/// `is_template_base_of<Base, T>` is true if `struct T : Base<U> {}` where U can be anything
+template <template<typename...> class Base, typename T>
+#if !defined(_MSC_VER)
+using is_template_base_of = decltype(is_template_base_of_impl<Base>::check((remove_cv_t<T>*)nullptr));
+#else // MSVC2015 has trouble with decltype in template aliases
+struct is_template_base_of : decltype(is_template_base_of_impl<Base>::check((remove_cv_t<T>*)nullptr)) { };
+#endif
+
+/// Check if T is an instantiation of the template `Class`. For example:
+/// `is_instantiation<shared_ptr, T>` is true if `T == shared_ptr<U>` where U can be anything.
+template <template<typename...> class Class, typename T>
+struct is_instantiation : std::false_type { };
+template <template<typename...> class Class, typename... Us>
+struct is_instantiation<Class, Class<Us...>> : std::true_type { };
+
+/// Check if T is std::shared_ptr<U> where U can be anything
+template <typename T> using is_shared_ptr = is_instantiation<std::shared_ptr, T>;
+
+/// Check if T looks like an input iterator
+template <typename T, typename = void> struct is_input_iterator : std::false_type {};
+template <typename T>
+struct is_input_iterator<T, void_t<decltype(*std::declval<T &>()), decltype(++std::declval<T &>())>>
+    : std::true_type {};
+
+/// Ignore that a variable is unused in compiler warnings
+inline void ignore_unused(const int *) { }
+
+/// Apply a function over each element of a parameter pack
+#ifdef __cpp_fold_expressions
+#define PYBIND11_EXPAND_SIDE_EFFECTS(PATTERN) (((PATTERN), void()), ...)
+#else
+using expand_side_effects = bool[];
+#define PYBIND11_EXPAND_SIDE_EFFECTS(PATTERN) pybind11::detail::expand_side_effects{ ((PATTERN), void(), false)..., false }
+#endif
+
+NAMESPACE_END(detail)
+
+/// Returns a named pointer that is shared among all extension modules (using the same
+/// pybind11 version) running in the current interpreter. Names starting with underscores
+/// are reserved for internal usage. Returns `nullptr` if no matching entry was found.
+inline PYBIND11_NOINLINE void* get_shared_data(const std::string& name) {
+    auto& internals = detail::get_internals();
+    auto it = internals.shared_data.find(name);
+    return it != internals.shared_data.end() ? it->second : nullptr;
+}
+
+/// Set the shared data that can be later recovered by `get_shared_data()`.
+inline PYBIND11_NOINLINE void *set_shared_data(const std::string& name, void *data) {
+    detail::get_internals().shared_data[name] = data;
+    return data;
+}
+
+/// Returns a typed reference to a shared data entry (by using `get_shared_data()`) if
+/// such entry exists. Otherwise, a new object of default-constructible type `T` is
+/// added to the shared data under the given name and a reference to it is returned.
+template<typename T> T& get_or_create_shared_data(const std::string& name) {
+    auto& internals = detail::get_internals();
+    auto it = internals.shared_data.find(name);
+    T* ptr = (T*) (it != internals.shared_data.end() ? it->second : nullptr);
+    if (!ptr) {
+        ptr = new T();
+        internals.shared_data[name] = ptr;
+    }
+    return *ptr;
+}
+
+/// C++ bindings of builtin Python exceptions
+class builtin_exception : public std::runtime_error {
+public:
+    using std::runtime_error::runtime_error;
+    /// Set the error using the Python C API
+    virtual void set_error() const = 0;
+};
+
+#define PYBIND11_RUNTIME_EXCEPTION(name, type) \
+    class name : public builtin_exception { public: \
+        using builtin_exception::builtin_exception; \
+        name() : name("") { } \
+        void set_error() const override { PyErr_SetString(type, what()); } \
+    };
+
+PYBIND11_RUNTIME_EXCEPTION(stop_iteration, PyExc_StopIteration)
+PYBIND11_RUNTIME_EXCEPTION(index_error, PyExc_IndexError)
+PYBIND11_RUNTIME_EXCEPTION(key_error, PyExc_KeyError)
+PYBIND11_RUNTIME_EXCEPTION(value_error, PyExc_ValueError)
+PYBIND11_RUNTIME_EXCEPTION(type_error, PyExc_TypeError)
+PYBIND11_RUNTIME_EXCEPTION(cast_error, PyExc_RuntimeError) /// Thrown when pybind11::cast or handle::call fail due to a type casting error
+PYBIND11_RUNTIME_EXCEPTION(reference_cast_error, PyExc_RuntimeError) /// Used internally
+
+[[noreturn]] PYBIND11_NOINLINE inline void pybind11_fail(const char *reason) { throw std::runtime_error(reason); }
+[[noreturn]] PYBIND11_NOINLINE inline void pybind11_fail(const std::string &reason) { throw std::runtime_error(reason); }
+
+template <typename T, typename SFINAE = void> struct format_descriptor { };
+
+NAMESPACE_BEGIN(detail)
+// Returns the index of the given type in the type char array below, and in the list in numpy.h
+// The order here is: bool; 8 ints ((signed,unsigned)x(8,16,32,64)bits); float,double,long double;
+// complex float,double,long double.  Note that the long double types only participate when long
+// double is actually longer than double (it isn't under MSVC).
+// NB: not only the string below but also complex.h and numpy.h rely on this order.
+template <typename T, typename SFINAE = void> struct is_fmt_numeric { static constexpr bool value = false; };
+template <typename T> struct is_fmt_numeric<T, enable_if_t<std::is_arithmetic<T>::value>> {
+    static constexpr bool value = true;
+    static constexpr int index = std::is_same<T, bool>::value ? 0 : 1 + (
+        std::is_integral<T>::value ? detail::log2(sizeof(T))*2 + std::is_unsigned<T>::value : 8 + (
+        std::is_same<T, double>::value ? 1 : std::is_same<T, long double>::value ? 2 : 0));
+};
+NAMESPACE_END(detail)
+
+template <typename T> struct format_descriptor<T, detail::enable_if_t<std::is_arithmetic<T>::value>> {
+    static constexpr const char c = "?bBhHiIqQfdg"[detail::is_fmt_numeric<T>::index];
+    static constexpr const char value[2] = { c, '\0' };
+    static std::string format() { return std::string(1, c); }
+};
+
+template <typename T> constexpr const char format_descriptor<
+    T, detail::enable_if_t<std::is_arithmetic<T>::value>>::value[2];
+
+/// RAII wrapper that temporarily clears any Python error state
+struct error_scope {
+    PyObject *type, *value, *trace;
+    error_scope() { PyErr_Fetch(&type, &value, &trace); }
+    ~error_scope() { PyErr_Restore(type, value, trace); }
+};
+
+/// Dummy destructor wrapper that can be used to expose classes with a private destructor
+struct nodelete { template <typename T> void operator()(T*) { } };
+
+// overload_cast requires variable templates: C++14
+#if defined(PYBIND11_CPP14)
+#define PYBIND11_OVERLOAD_CAST 1
+
+NAMESPACE_BEGIN(detail)
+template <typename... Args>
+struct overload_cast_impl {
+    template <typename Return>
+    constexpr auto operator()(Return (*pf)(Args...)) const noexcept
+                              -> decltype(pf) { return pf; }
+
+    template <typename Return, typename Class>
+    constexpr auto operator()(Return (Class::*pmf)(Args...), std::false_type = {}) const noexcept
+                              -> decltype(pmf) { return pmf; }
+
+    template <typename Return, typename Class>
+    constexpr auto operator()(Return (Class::*pmf)(Args...) const, std::true_type) const noexcept
+                              -> decltype(pmf) { return pmf; }
+};
+NAMESPACE_END(detail)
+
+/// Syntax sugar for resolving overloaded function pointers:
+///  - regular: static_cast<Return (Class::*)(Arg0, Arg1, Arg2)>(&Class::func)
+///  - sweet:   overload_cast<Arg0, Arg1, Arg2>(&Class::func)
+template <typename... Args>
+static constexpr detail::overload_cast_impl<Args...> overload_cast = {};
+// MSVC 2015 only accepts this particular initialization syntax for this variable template.
+
+/// Const member function selector for overload_cast
+///  - regular: static_cast<Return (Class::*)(Arg) const>(&Class::func)
+///  - sweet:   overload_cast<Arg>(&Class::func, const_)
+static constexpr auto const_ = std::true_type{};
+
+#else // no overload_cast: providing something that static_assert-fails:
+template <typename... Args> struct overload_cast {
+    static_assert(detail::deferred_t<std::false_type, Args...>::value,
+                  "pybind11::overload_cast<...> requires compiling in C++14 mode");
+};
+#endif // overload_cast
