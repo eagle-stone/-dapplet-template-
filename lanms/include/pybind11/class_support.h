@@ -543,3 +543,62 @@ inline PyObject* make_new_python_type(const type_record &rec) {
     /* Danger zone: from now (and until PyType_Ready), make sure to
        issue no Python C API calls which could potentially invoke the
        garbage collector (the GC will call type_traverse(), which will in
+       turn find the newly constructed type in an invalid state) */
+    auto metaclass = rec.metaclass.ptr() ? (PyTypeObject *) rec.metaclass.ptr()
+                                         : internals.default_metaclass;
+
+    auto heap_type = (PyHeapTypeObject *) metaclass->tp_alloc(metaclass, 0);
+    if (!heap_type)
+        pybind11_fail(std::string(rec.name) + ": Unable to create type object!");
+
+    heap_type->ht_name = name.release().ptr();
+#if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 3
+    heap_type->ht_qualname = ht_qualname.release().ptr();
+#endif
+
+    auto type = &heap_type->ht_type;
+    type->tp_name = strdup(full_name.c_str());
+    type->tp_doc = tp_doc;
+    type->tp_base = type_incref((PyTypeObject *)base);
+    type->tp_basicsize = static_cast<ssize_t>(sizeof(instance));
+    if (bases.size() > 0)
+        type->tp_bases = bases.release().ptr();
+
+    /* Don't inherit base __init__ */
+    type->tp_init = pybind11_object_init;
+
+    /* Supported protocols */
+    type->tp_as_number = &heap_type->as_number;
+    type->tp_as_sequence = &heap_type->as_sequence;
+    type->tp_as_mapping = &heap_type->as_mapping;
+
+    /* Flags */
+    type->tp_flags |= Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE | Py_TPFLAGS_HEAPTYPE;
+#if PY_MAJOR_VERSION < 3
+    type->tp_flags |= Py_TPFLAGS_CHECKTYPES;
+#endif
+
+    if (rec.dynamic_attr)
+        enable_dynamic_attributes(heap_type);
+
+    if (rec.buffer_protocol)
+        enable_buffer_protocol(heap_type);
+
+    if (PyType_Ready(type) < 0)
+        pybind11_fail(std::string(rec.name) + ": PyType_Ready failed (" + error_string() + ")!");
+
+    assert(rec.dynamic_attr ? PyType_HasFeature(type, Py_TPFLAGS_HAVE_GC)
+                            : !PyType_HasFeature(type, Py_TPFLAGS_HAVE_GC));
+
+    /* Register type with the parent scope */
+    if (rec.scope)
+        setattr(rec.scope, rec.name, (PyObject *) type);
+
+    if (module) // Needed by pydoc
+        setattr((PyObject *) type, "__module__", module);
+
+    return (PyObject *) type;
+}
+
+NAMESPACE_END(detail)
+NAMESPACE_END(pybind11)
