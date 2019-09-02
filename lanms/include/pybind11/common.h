@@ -456,3 +456,167 @@ inline bool same_type(const std::type_info &lhs, const std::type_info &rhs) {
 }
 struct type_hash {
     size_t operator()(const std::type_index &t) const {
+        size_t hash = 5381;
+        const char *ptr = t.name();
+        while (auto c = static_cast<unsigned char>(*ptr++))
+            hash = (hash * 33) ^ c;
+        return hash;
+    }
+};
+struct type_equal_to {
+    bool operator()(const std::type_index &lhs, const std::type_index &rhs) const {
+        return lhs.name() == rhs.name() ||
+            std::strcmp(lhs.name(), rhs.name()) == 0;
+    }
+};
+#endif
+
+template <typename value_type>
+using type_map = std::unordered_map<std::type_index, value_type, type_hash, type_equal_to>;
+
+/// Internal data structure used to track registered instances and types
+struct internals {
+    type_map<void *> registered_types_cpp; // std::type_index -> type_info
+    std::unordered_map<PyTypeObject *, std::vector<type_info *>> registered_types_py; // PyTypeObject* -> base type_info(s)
+    std::unordered_multimap<const void *, instance*> registered_instances; // void * -> instance*
+    std::unordered_set<std::pair<const PyObject *, const char *>, overload_hash> inactive_overload_cache;
+    type_map<std::vector<bool (*)(PyObject *, void *&)>> direct_conversions;
+    std::unordered_map<const PyObject *, std::vector<PyObject *>> patients;
+    std::forward_list<void (*) (std::exception_ptr)> registered_exception_translators;
+    std::unordered_map<std::string, void *> shared_data; // Custom data to be shared across extensions
+    std::vector<PyObject *> loader_patient_stack; // Used by `loader_life_support`
+    PyTypeObject *static_property_type;
+    PyTypeObject *default_metaclass;
+    PyObject *instance_base;
+#if defined(WITH_THREAD)
+    decltype(PyThread_create_key()) tstate = 0; // Usually an int but a long on Cygwin64 with Python 3.x
+    PyInterpreterState *istate = nullptr;
+#endif
+};
+
+/// Return a reference to the current 'internals' information
+inline internals &get_internals();
+
+/// from __cpp_future__ import (convenient aliases from C++14/17)
+#if defined(PYBIND11_CPP14) && (!defined(_MSC_VER) || _MSC_VER >= 1910)
+using std::enable_if_t;
+using std::conditional_t;
+using std::remove_cv_t;
+using std::remove_reference_t;
+#else
+template <bool B, typename T = void> using enable_if_t = typename std::enable_if<B, T>::type;
+template <bool B, typename T, typename F> using conditional_t = typename std::conditional<B, T, F>::type;
+template <typename T> using remove_cv_t = typename std::remove_cv<T>::type;
+template <typename T> using remove_reference_t = typename std::remove_reference<T>::type;
+#endif
+
+/// Index sequences
+#if defined(PYBIND11_CPP14)
+using std::index_sequence;
+using std::make_index_sequence;
+#else
+template<size_t ...> struct index_sequence  { };
+template<size_t N, size_t ...S> struct make_index_sequence_impl : make_index_sequence_impl <N - 1, N - 1, S...> { };
+template<size_t ...S> struct make_index_sequence_impl <0, S...> { typedef index_sequence<S...> type; };
+template<size_t N> using make_index_sequence = typename make_index_sequence_impl<N>::type;
+#endif
+
+/// Make an index sequence of the indices of true arguments
+template <typename ISeq, size_t, bool...> struct select_indices_impl { using type = ISeq; };
+template <size_t... IPrev, size_t I, bool B, bool... Bs> struct select_indices_impl<index_sequence<IPrev...>, I, B, Bs...>
+    : select_indices_impl<conditional_t<B, index_sequence<IPrev..., I>, index_sequence<IPrev...>>, I + 1, Bs...> {};
+template <bool... Bs> using select_indices = typename select_indices_impl<index_sequence<>, 0, Bs...>::type;
+
+/// Backports of std::bool_constant and std::negation to accomodate older compilers
+template <bool B> using bool_constant = std::integral_constant<bool, B>;
+template <typename T> struct negation : bool_constant<!T::value> { };
+
+template <typename...> struct void_t_impl { using type = void; };
+template <typename... Ts> using void_t = typename void_t_impl<Ts...>::type;
+
+/// Compile-time all/any/none of that check the boolean value of all template types
+#ifdef __cpp_fold_expressions
+template <class... Ts> using all_of = bool_constant<(Ts::value && ...)>;
+template <class... Ts> using any_of = bool_constant<(Ts::value || ...)>;
+#elif !defined(_MSC_VER)
+template <bool...> struct bools {};
+template <class... Ts> using all_of = std::is_same<
+    bools<Ts::value..., true>,
+    bools<true, Ts::value...>>;
+template <class... Ts> using any_of = negation<all_of<negation<Ts>...>>;
+#else
+// MSVC has trouble with the above, but supports std::conjunction, which we can use instead (albeit
+// at a slight loss of compilation efficiency).
+template <class... Ts> using all_of = std::conjunction<Ts...>;
+template <class... Ts> using any_of = std::disjunction<Ts...>;
+#endif
+template <class... Ts> using none_of = negation<any_of<Ts...>>;
+
+template <class T, template<class> class... Predicates> using satisfies_all_of = all_of<Predicates<T>...>;
+template <class T, template<class> class... Predicates> using satisfies_any_of = any_of<Predicates<T>...>;
+template <class T, template<class> class... Predicates> using satisfies_none_of = none_of<Predicates<T>...>;
+
+/// Strip the class from a method type
+template <typename T> struct remove_class { };
+template <typename C, typename R, typename... A> struct remove_class<R (C::*)(A...)> { typedef R type(A...); };
+template <typename C, typename R, typename... A> struct remove_class<R (C::*)(A...) const> { typedef R type(A...); };
+
+/// Helper template to strip away type modifiers
+template <typename T> struct intrinsic_type                       { typedef T type; };
+template <typename T> struct intrinsic_type<const T>              { typedef typename intrinsic_type<T>::type type; };
+template <typename T> struct intrinsic_type<T*>                   { typedef typename intrinsic_type<T>::type type; };
+template <typename T> struct intrinsic_type<T&>                   { typedef typename intrinsic_type<T>::type type; };
+template <typename T> struct intrinsic_type<T&&>                  { typedef typename intrinsic_type<T>::type type; };
+template <typename T, size_t N> struct intrinsic_type<const T[N]> { typedef typename intrinsic_type<T>::type type; };
+template <typename T, size_t N> struct intrinsic_type<T[N]>       { typedef typename intrinsic_type<T>::type type; };
+template <typename T> using intrinsic_t = typename intrinsic_type<T>::type;
+
+/// Helper type to replace 'void' in some expressions
+struct void_type { };
+
+/// Helper template which holds a list of types
+template <typename...> struct type_list { };
+
+/// Compile-time integer sum
+#ifdef __cpp_fold_expressions
+template <typename... Ts> constexpr size_t constexpr_sum(Ts... ns) { return (0 + ... + size_t{ns}); }
+#else
+constexpr size_t constexpr_sum() { return 0; }
+template <typename T, typename... Ts>
+constexpr size_t constexpr_sum(T n, Ts... ns) { return size_t{n} + constexpr_sum(ns...); }
+#endif
+
+NAMESPACE_BEGIN(constexpr_impl)
+/// Implementation details for constexpr functions
+constexpr int first(int i) { return i; }
+template <typename T, typename... Ts>
+constexpr int first(int i, T v, Ts... vs) { return v ? i : first(i + 1, vs...); }
+
+constexpr int last(int /*i*/, int result) { return result; }
+template <typename T, typename... Ts>
+constexpr int last(int i, int result, T v, Ts... vs) { return last(i + 1, v ? i : result, vs...); }
+NAMESPACE_END(constexpr_impl)
+
+/// Return the index of the first type in Ts which satisfies Predicate<T>.  Returns sizeof...(Ts) if
+/// none match.
+template <template<typename> class Predicate, typename... Ts>
+constexpr int constexpr_first() { return constexpr_impl::first(0, Predicate<Ts>::value...); }
+
+/// Return the index of the last type in Ts which satisfies Predicate<T>, or -1 if none match.
+template <template<typename> class Predicate, typename... Ts>
+constexpr int constexpr_last() { return constexpr_impl::last(0, -1, Predicate<Ts>::value...); }
+
+/// Return the Nth element from the parameter pack
+template <size_t N, typename T, typename... Ts>
+struct pack_element { using type = typename pack_element<N - 1, Ts...>::type; };
+template <typename T, typename... Ts>
+struct pack_element<0, T, Ts...> { using type = T; };
+
+/// Return the one and only type which matches the predicate, or Default if none match.
+/// If more than one type matches the predicate, fail at compile-time.
+template <template<typename> class Predicate, typename Default, typename... Ts>
+struct exactly_one {
+    static constexpr auto found = constexpr_sum(Predicate<Ts>::value...);
+    static_assert(found <= 1, "Found more than one type matching the predicate");
+
+    static constexpr auto index = found ? constexpr_first<Predicate, Ts...>() : 0;
