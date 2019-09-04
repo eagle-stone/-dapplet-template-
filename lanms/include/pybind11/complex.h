@@ -19,4 +19,6 @@
 
 NAMESPACE_BEGIN(pybind11)
 
-template <typename T> struct forma
+template <typename T> struct format_descriptor<std::complex<T>, detail::enable_if_t<std::is_floating_point<T>::value>> {
+    static constexpr const char c = format_descriptor<T>::c;
+    static constexpr const char value[3
