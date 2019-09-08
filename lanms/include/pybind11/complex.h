@@ -46,4 +46,9 @@ public:
         if (result.real == -1.0 && PyErr_Occurred()) {
             PyErr_Clear();
             return false;
-      
+        }
+        value = std::complex<T>((T) result.real, (T) result.imag);
+        return true;
+    }
+
+    static handle cast(const std::complex<T> &src, return_value_
