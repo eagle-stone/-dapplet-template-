@@ -42,4 +42,8 @@ public:
             return false;
         if (!convert && !PyComplex_Check(src.ptr()))
             return false;
-        Py
+        Py_complex result = PyComplex_AsCComplex(src.ptr());
+        if (result.real == -1.0 && PyErr_Occurred()) {
+            PyErr_Clear();
+            return false;
+      
