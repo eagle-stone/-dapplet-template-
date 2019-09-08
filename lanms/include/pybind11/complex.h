@@ -26,4 +26,8 @@ template <typename T> struct format_descriptor<std::complex<T>, detail::enable_i
 };
 
 template <typename T> constexpr const char format_descriptor<
-    std::complex<T>, detail::enab
+    std::complex<T>, detail::enable_if_t<std::is_floating_point<T>::value>>::value[3];
+
+NAMESPACE_BEGIN(detail)
+
+template <typename T> struct is_fmt_numeric<std::complex<T>, detail::enable_if_t<std::is_floating_point<T>::value>>
