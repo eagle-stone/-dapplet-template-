@@ -30,4 +30,11 @@ template <typename T> constexpr const char format_descriptor<
 
 NAMESPACE_BEGIN(detail)
 
-template <typename T> struct is_fmt_numeric<std::complex<T>, detail::enable_if_t<std::is_floating_point<T>::value>>
+template <typename T> struct is_fmt_numeric<std::complex<T>, detail::enable_if_t<std::is_floating_point<T>::value>> {
+    static constexpr bool value = true;
+    static constexpr int index = is_fmt_numeric<T>::index + 3;
+};
+
+template <typename T> class type_caster<std::complex<T>> {
+public:
+    bool l
