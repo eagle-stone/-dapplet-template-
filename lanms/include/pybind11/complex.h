@@ -37,4 +37,9 @@ template <typename T> struct is_fmt_numeric<std::complex<T>, detail::enable_if_t
 
 template <typename T> class type_caster<std::complex<T>> {
 public:
-    bool l
+    bool load(handle src, bool convert) {
+        if (!src)
+            return false;
+        if (!convert && !PyComplex_Check(src.ptr()))
+            return false;
+        Py
