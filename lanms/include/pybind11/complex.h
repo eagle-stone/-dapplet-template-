@@ -51,4 +51,8 @@ public:
         return true;
     }
 
-    static handle cast(const std::complex<T> &src, return_value_
+    static handle cast(const std::complex<T> &src, return_value_policy /* policy */, handle /* parent */) {
+        return PyComplex_FromDoubles((double) src.real(), (double) src.imag());
+    }
+
+    PYBIND11_TYPE_CASTER(std::complex<T>, _
