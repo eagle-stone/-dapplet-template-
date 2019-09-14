@@ -28,4 +28,7 @@ public:
                 make_index_sequence<Size2>()) { }
 
     constexpr const char *text() const { return m_text; }
-    constexpr const std::type_info * const * types()
+    constexpr const std::type_info * const * types() const { return m_types; }
+
+    template <size_t OtherSize1, size_t OtherSize2>
+    constexpr descr<Size1 + OtherSize1, Size2 + OtherSize2> operator+(const descr<OtherSi
