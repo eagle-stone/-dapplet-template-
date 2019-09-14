@@ -20,4 +20,8 @@ NAMESPACE_BEGIN(detail)
 #define PYBIND11_CONSTEXPR_DESCR
 
 template <size_t Size1, size_t Size2> class descr {
-    template <size_t Size1_, size_t Size2_> friend cl
+    template <size_t Size1_, size_t Size2_> friend class descr;
+public:
+    constexpr descr(char const (&text) [Size1+1], const std::type_info * const (&types)[Size2+1])
+        : descr(text, types,
+                make_index_sequ
