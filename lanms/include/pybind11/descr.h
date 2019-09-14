@@ -24,4 +24,8 @@ template <size_t Size1, size_t Size2> class descr {
 public:
     constexpr descr(char const (&text) [Size1+1], const std::type_info * const (&types)[Size2+1])
         : descr(text, types,
-                make_index_sequ
+                make_index_sequence<Size1>(),
+                make_index_sequence<Size2>()) { }
+
+    constexpr const char *text() const { return m_text; }
+    constexpr const std::type_info * const * types()
