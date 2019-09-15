@@ -44,4 +44,8 @@ protected:
     constexpr descr(
         char const (&text) [Size1+1],
         const std::type_info * const (&types) [Size2+1],
-        index_sequence<Indices
+        index_sequence<Indices1...>, index_sequence<Indices2...>)
+        : m_text{text[Indices1]..., '\0'},
+          m_types{types[Indices2]...,  nullptr } {}
+
+    template <si
