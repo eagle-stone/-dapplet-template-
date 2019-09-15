@@ -48,4 +48,6 @@ protected:
         : m_text{text[Indices1]..., '\0'},
           m_types{types[Indices2]...,  nullptr } {}
 
-    template <si
+    template <size_t OtherSize1, size_t OtherSize2, size_t... Indices1,
+              size_t... Indices2, size_t... OtherIndices1, size_t... OtherIndices2>
+    constexpr descr<Size1 + OtherSiz
