@@ -50,4 +50,7 @@ protected:
 
     template <size_t OtherSize1, size_t OtherSize2, size_t... Indices1,
               size_t... Indices2, size_t... OtherIndices1, size_t... OtherIndices2>
-    constexpr descr<Size1 + OtherSiz
+    constexpr descr<Size1 + OtherSize1, Size2 + OtherSize2>
+    concat(const descr<OtherSize1, OtherSize2> &other,
+           index_sequence<Indices1...>, index_sequence<Indices2...>,
+           index
