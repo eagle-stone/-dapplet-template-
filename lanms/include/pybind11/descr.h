@@ -55,4 +55,11 @@ protected:
            index_sequence<Indices1...>, index_sequence<Indices2...>,
            index_sequence<OtherIndices1...>, index_sequence<OtherIndices2...>) const {
         return descr<Size1 + OtherSize1, Size2 + OtherSize2>(
-            { m_text[Indices1]..., other.m_
+            { m_text[Indices1]..., other.m_text[OtherIndices1]..., '\0' },
+            { m_types[Indices2]..., other.m_types[OtherIndices2]..., nullptr }
+        );
+    }
+
+protected:
+    char m_text[Size1 + 1];
+ 
