@@ -31,4 +31,7 @@ public:
     constexpr const std::type_info * const * types() const { return m_types; }
 
     template <size_t OtherSize1, size_t OtherSize2>
-    constexpr descr<Size1 + OtherSize1, Size2 + OtherSize2> operator+(const descr<OtherSi
+    constexpr descr<Size1 + OtherSize1, Size2 + OtherSize2> operator+(const descr<OtherSize1, OtherSize2> &other) const {
+        return concat(other,
+                      make_index_sequence<Size1>(),
+                      make_index_sequence<Size2
