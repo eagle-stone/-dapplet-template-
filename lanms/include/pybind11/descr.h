@@ -53,4 +53,6 @@ protected:
     constexpr descr<Size1 + OtherSize1, Size2 + OtherSize2>
     concat(const descr<OtherSize1, OtherSize2> &other,
            index_sequence<Indices1...>, index_sequence<Indices2...>,
-           index
+           index_sequence<OtherIndices1...>, index_sequence<OtherIndices2...>) const {
+        return descr<Size1 + OtherSize1, Size2 + OtherSize2>(
+            { m_text[Indices1]..., other.m_
