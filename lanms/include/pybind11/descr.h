@@ -40,4 +40,8 @@ public:
     }
 
 protected:
-    template <size_t... Indices1, size_t..
+    template <size_t... Indices1, size_t... Indices2>
+    constexpr descr(
+        char const (&text) [Size1+1],
+        const std::type_info * const (&types) [Size2+1],
+        index_sequence<Indices
