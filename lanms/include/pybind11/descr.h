@@ -34,4 +34,10 @@ public:
     constexpr descr<Size1 + OtherSize1, Size2 + OtherSize2> operator+(const descr<OtherSize1, OtherSize2> &other) const {
         return concat(other,
                       make_index_sequence<Size1>(),
-                      make_index_sequence<Size2
+                      make_index_sequence<Size2>(),
+                      make_index_sequence<OtherSize1>(),
+                      make_index_sequence<OtherSize2>());
+    }
+
+protected:
+    template <size_t... Indices1, size_t..
