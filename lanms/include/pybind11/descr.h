@@ -62,4 +62,8 @@ protected:
 
 protected:
     char m_text[Size1 + 1];
- 
+    const std::type_info * m_types[Size2 + 1];
+};
+
+template <size_t Size> constexpr descr<Size - 1, 0> _(char const(&text)[Size]) {
+    return descr<Size - 1, 0>(text,
