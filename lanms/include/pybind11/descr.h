@@ -75,4 +75,8 @@ template <size_t...Digits> struct int_to_str<0, Digits...> {
 };
 
 // Ternary description (like std::conditional)
-template <bool B, si
+template <bool B, size_t Size1, size_t Size2>
+constexpr enable_if_t<B, descr<Size1 - 1, 0>> _(char const(&text1)[Size1], char const(&)[Size2]) {
+    return _(text1);
+}
+template <bool B, size_t
