@@ -83,4 +83,6 @@ template <bool B, size_t Size1, size_t Size2>
 constexpr enable_if_t<!B, descr<Size2 - 1, 0>> _(char const(&)[Size1], char const(&text2)[Size2]) {
     return _(text2);
 }
-template <bool B, size_t SizeA1, size_t 
+template <bool B, size_t SizeA1, size_t SizeA2, size_t SizeB1, size_t SizeB2>
+constexpr enable_if_t<B, descr<SizeA1, SizeA2>> _(descr<SizeA1, SizeA2> d, descr<SizeB1, SizeB2>) { return d; }
+template <bool B,
