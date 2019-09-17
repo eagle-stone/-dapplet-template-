@@ -66,4 +66,8 @@ protected:
 };
 
 template <size_t Size> constexpr descr<Size - 1, 0> _(char const(&text)[Size]) {
-    return descr<Size - 1, 0>(text,
+    return descr<Size - 1, 0>(text, { nullptr });
+}
+
+template <size_t Rem, size_t... Digits> struct int_to_str : int_to_str<Rem/10, Rem%10, Digits...> { };
+template <size_t...Digits> struct int_to_str<0, Digits...> {
