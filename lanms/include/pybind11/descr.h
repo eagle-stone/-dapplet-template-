@@ -96,4 +96,6 @@ template <typename Type> constexpr descr<1, 1> _() {
     return descr<1, 1>({ '%', '\0' }, { &typeid(Type), nullptr });
 }
 
-inline constexpr descr<0, 0> co
+inline constexpr descr<0, 0> concat() { return _(""); }
+template <size_t Size1, size_t Size2, typename... Args> auto constexpr concat(descr<Size1, Size2> descr) { return descr; }
+template <size_t Size1, size_t Siz
