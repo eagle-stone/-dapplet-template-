@@ -86,4 +86,7 @@ constexpr enable_if_t<!B, descr<Size2 - 1, 0>> _(char const(&)[Size1], char cons
 template <bool B, size_t SizeA1, size_t SizeA2, size_t SizeB1, size_t SizeB2>
 constexpr enable_if_t<B, descr<SizeA1, SizeA2>> _(descr<SizeA1, SizeA2> d, descr<SizeB1, SizeB2>) { return d; }
 template <bool B, size_t SizeA1, size_t SizeA2, size_t SizeB1, size_t SizeB2>
-constexpr enable_if_t<!B, descr<SizeB1, SizeB2>> _(descr<SizeA1, SizeA2>, descr<SizeB
+constexpr enable_if_t<!B, descr<SizeB1, SizeB2>> _(descr<SizeA1, SizeA2>, descr<SizeB1, SizeB2> d) { return d; }
+
+template <size_t Size> auto constexpr _() -> decltype(int_to_str<Size / 10, Size % 10>::digits) {
+    return int_to_str<Size / 1
