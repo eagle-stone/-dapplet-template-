@@ -103,4 +103,9 @@ template <size_t Size1, size_t Size2> auto constexpr type_descr(descr<Size1, Siz
 
 #define PYBIND11_DESCR constexpr auto
 
-#else /* Simpler C++11 implementation b
+#else /* Simpler C++11 implementation based on run-time memory allocation and copying */
+
+class descr {
+public:
+    PYBIND11_NOINLINE descr(const char *text, const std::type_info * const * types) {
+        size_
