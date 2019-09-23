@@ -111,4 +111,10 @@ public:
         size_t nChars = len(text), nTypes = len(types);
         m_text  = new char[nChars];
         m_types = new const std::type_info *[nTypes];
-        memcpy(m_text, text, nChars * sizeof(char
+        memcpy(m_text, text, nChars * sizeof(char));
+        memcpy(m_types, types, nTypes * sizeof(const std::type_info *));
+    }
+
+    PYBIND11_NOINLINE descr operator+(descr &&d2) && {
+        descr r;
+
