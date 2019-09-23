@@ -126,4 +126,12 @@ public:
         memcpy(r.m_text, m_text, (nChars1-1) * sizeof(char));
         memcpy(r.m_text + nChars1 - 1, d2.m_text, nChars2 * sizeof(char));
         memcpy(r.m_types, m_types, (nTypes1-1) * sizeof(std::type_info *));
-        memcpy(r.m_types + nTypes
+        memcpy(r.m_types + nTypes1 - 1, d2.m_types, nTypes2 * sizeof(std::type_info *));
+
+        delete[] m_text;    delete[] m_types;
+        delete[] d2.m_text; delete[] d2.m_types;
+
+        return r;
+    }
+
+    char *text() { return m_
