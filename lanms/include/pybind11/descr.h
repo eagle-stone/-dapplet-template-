@@ -134,4 +134,10 @@ public:
         return r;
     }
 
-    char *text() { return m_
+    char *text() { return m_text; }
+    const std::type_info * * types() { return m_types; }
+
+protected:
+    PYBIND11_NOINLINE descr() { }
+
+    template <typename T> static size_t len(const T *ptr) { // return le
