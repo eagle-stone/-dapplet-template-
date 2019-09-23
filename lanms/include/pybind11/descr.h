@@ -108,4 +108,7 @@ template <size_t Size1, size_t Size2> auto constexpr type_descr(descr<Size1, Siz
 class descr {
 public:
     PYBIND11_NOINLINE descr(const char *text, const std::type_info * const * types) {
-        size_
+        size_t nChars = len(text), nTypes = len(types);
+        m_text  = new char[nChars];
+        m_types = new const std::type_info *[nTypes];
+        memcpy(m_text, text, nChars * sizeof(char
