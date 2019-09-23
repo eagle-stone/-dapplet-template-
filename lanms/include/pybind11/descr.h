@@ -118,3 +118,7 @@ public:
     PYBIND11_NOINLINE descr operator+(descr &&d2) && {
         descr r;
 
+        size_t nChars1 = len(m_text),    nTypes1 = len(m_types);
+        size_t nChars2 = len(d2.m_text), nTypes2 = len(d2.m_types);
+
+        r.m_text  = new char[n
