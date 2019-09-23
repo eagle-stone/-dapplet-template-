@@ -99,4 +99,8 @@ template <typename Type> constexpr descr<1, 1> _() {
 inline constexpr descr<0, 0> concat() { return _(""); }
 template <size_t Size1, size_t Size2, typename... Args> auto constexpr concat(descr<Size1, Size2> descr) { return descr; }
 template <size_t Size1, size_t Size2, typename... Args> auto constexpr concat(descr<Size1, Size2> descr, Args&&... args) { return descr + _(", ") + concat(args...); }
-template <size_t Si
+template <size_t Size1, size_t Size2> auto constexpr type_descr(descr<Size1, Size2> descr) { return _("{") + descr + _("}"); }
+
+#define PYBIND11_DESCR constexpr auto
+
+#else /* Simpler C++11 implementation b
