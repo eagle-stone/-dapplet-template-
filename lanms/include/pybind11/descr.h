@@ -121,4 +121,7 @@ public:
         size_t nChars1 = len(m_text),    nTypes1 = len(m_types);
         size_t nChars2 = len(d2.m_text), nTypes2 = len(d2.m_types);
 
-        r.m_text  = new char[n
+        r.m_text  = new char[nChars1 + nChars2 - 1];
+        r.m_types = new const std::type_info *[nTypes1 + nTypes2 - 1];
+        memcpy(r.m_text, m_text, (nChars1-1) * sizeof(char));
+        memcpy(r
