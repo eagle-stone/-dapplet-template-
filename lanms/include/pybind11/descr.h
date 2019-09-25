@@ -151,4 +151,8 @@ protected:
     char *m_text = nullptr;
 };
 
-/* The 'PYBIND11_NOINLINE inline' combinations below are intentional to get the desired linkage 
+/* The 'PYBIND11_NOINLINE inline' combinations below are intentional to get the desired linkage while producing as little object code as possible */
+
+PYBIND11_NOINLINE inline descr _(const char *text) {
+    const std::type_info *types[1] = { nullptr };
+    return descr(text
