@@ -145,4 +145,10 @@ protected:
         while (*it++ != (T) 0)
             ;
         return static_cast<size_t>(it - ptr);
-   
+    }
+
+    const std::type_info **m_types = nullptr;
+    char *m_text = nullptr;
+};
+
+/* The 'PYBIND11_NOINLINE inline' combinations below are intentional to get the desired linkage 
