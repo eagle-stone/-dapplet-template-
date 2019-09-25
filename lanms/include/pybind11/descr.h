@@ -140,4 +140,9 @@ public:
 protected:
     PYBIND11_NOINLINE descr() { }
 
-    template <typename T> static size_t len(const T *ptr) { // return le
+    template <typename T> static size_t len(const T *ptr) { // return length including null termination
+        const T *it = ptr;
+        while (*it++ != (T) 0)
+            ;
+        return static_cast<size_t>(it - ptr);
+   
