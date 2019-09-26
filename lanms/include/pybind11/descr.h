@@ -155,4 +155,8 @@ protected:
 
 PYBIND11_NOINLINE inline descr _(const char *text) {
     const std::type_info *types[1] = { nullptr };
-    return descr(text
+    return descr(text, types);
+}
+
+template <bool B> PYBIND11_NOINLINE enable_if_t<B, descr> _(const char *text1, const char *) { return _(text1); }
+template <bool B> PYBIND11_NOINLI
