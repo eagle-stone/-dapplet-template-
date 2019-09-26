@@ -160,4 +160,8 @@ PYBIND11_NOINLINE inline descr _(const char *text) {
 
 template <bool B> PYBIND11_NOINLINE enable_if_t<B, descr> _(const char *text1, const char *) { return _(text1); }
 template <bool B> PYBIND11_NOINLINE enable_if_t<!B, descr> _(char const *, const char *text2) { return _(text2); }
-template <bool B> PYBIND11_NOINLINE enable_if_t<B, descr> _(descr d, descr) { return d; 
+template <bool B> PYBIND11_NOINLINE enable_if_t<B, descr> _(descr d, descr) { return d; }
+template <bool B> PYBIND11_NOINLINE enable_if_t<!B, descr> _(descr, descr d) { return d; }
+
+template <typename Type> PYBIND11_NOINLINE descr _() {
+    const std::type_info *types[2] = { 
