@@ -134,3 +134,181 @@ template <typename Type_> struct EigenProps {
     static constexpr bool requires_col_major = !dynamic_stride && !vector && (row_major ? outer_stride : inner_stride) == 1;
 
     // Takes an input array and determines whether we can make it fit into the Eigen type.  If
+    // the array is a vector, we attempt to fit it into either an Eigen 1xN or Nx1 vector
+    // (preferring the latter if it will fit in either, i.e. for a fully dynamic matrix type).
+    static EigenConformable<row_major> conformable(const array &a) {
+        const auto dims = a.ndim();
+        if (dims < 1 || dims > 2)
+            return false;
+
+        if (dims == 2) { // Matrix type: require exact match (or dynamic)
+
+            EigenIndex
+                np_rows = a.shape(0),
+                np_cols = a.shape(1),
+                np_rstride = a.strides(0) / static_cast<ssize_t>(sizeof(Scalar)),
+                np_cstride = a.strides(1) / static_cast<ssize_t>(sizeof(Scalar));
+            if ((fixed_rows && np_rows != rows) || (fixed_cols && np_cols != cols))
+                return false;
+
+            return {np_rows, np_cols, np_rstride, np_cstride};
+        }
+
+        // Otherwise we're storing an n-vector.  Only one of the strides will be used, but whichever
+        // is used, we want the (single) numpy stride value.
+        const EigenIndex n = a.shape(0),
+              stride = a.strides(0) / static_cast<ssize_t>(sizeof(Scalar));
+
+        if (vector) { // Eigen type is a compile-time vector
+            if (fixed && size != n)
+                return false; // Vector size mismatch
+            return {rows == 1 ? 1 : n, cols == 1 ? 1 : n, stride};
+        }
+        else if (fixed) {
+            // The type has a fixed size, but is not a vector: abort
+            return false;
+        }
+        else if (fixed_cols) {
+            // Since this isn't a vector, cols must be != 1.  We allow this only if it exactly
+            // equals the number of elements (rows is Dynamic, and so 1 row is allowed).
+            if (cols != n) return false;
+            return {1, n, stride};
+        }
+        else {
+            // Otherwise it's either fully dynamic, or column dynamic; both become a column vector
+            if (fixed_rows && rows != n) return false;
+            return {n, 1, stride};
+        }
+    }
+
+    static PYBIND11_DESCR descriptor() {
+        constexpr bool show_writeable = is_eigen_dense_map<Type>::value && is_eigen_mutable_map<Type>::value;
+        constexpr bool show_order = is_eigen_dense_map<Type>::value;
+        constexpr bool show_c_contiguous = show_order && requires_row_major;
+        constexpr bool show_f_contiguous = !show_c_contiguous && show_order && requires_col_major;
+
+        return type_descr(_("numpy.ndarray[") + npy_format_descriptor<Scalar>::name() +
+            _("[")  + _<fixed_rows>(_<(size_t) rows>(), _("m")) +
+            _(", ") + _<fixed_cols>(_<(size_t) cols>(), _("n")) +
+            _("]") +
+            // For a reference type (e.g. Ref<MatrixXd>) we have other constraints that might need to be
+            // satisfied: writeable=True (for a mutable reference), and, depending on the map's stride
+            // options, possibly f_contiguous or c_contiguous.  We include them in the descriptor output
+            // to provide some hint as to why a TypeError is occurring (otherwise it can be confusing to
+            // see that a function accepts a 'numpy.ndarray[float64[3,2]]' and an error message that you
+            // *gave* a numpy.ndarray of the right type and dimensions.
+            _<show_writeable>(", flags.writeable", "") +
+            _<show_c_contiguous>(", flags.c_contiguous", "") +
+            _<show_f_contiguous>(", flags.f_contiguous", "") +
+            _("]")
+        );
+    }
+};
+
+// Casts an Eigen type to numpy array.  If given a base, the numpy array references the src data,
+// otherwise it'll make a copy.  writeable lets you turn off the writeable flag for the array.
+template <typename props> handle eigen_array_cast(typename props::Type const &src, handle base = handle(), bool writeable = true) {
+    constexpr ssize_t elem_size = sizeof(typename props::Scalar);
+    array a;
+    if (props::vector)
+        a = array({ src.size() }, { elem_size * src.innerStride() }, src.data(), base);
+    else
+        a = array({ src.rows(), src.cols() }, { elem_size * src.rowStride(), elem_size * src.colStride() },
+                  src.data(), base);
+
+    if (!writeable)
+        array_proxy(a.ptr())->flags &= ~detail::npy_api::NPY_ARRAY_WRITEABLE_;
+
+    return a.release();
+}
+
+// Takes an lvalue ref to some Eigen type and a (python) base object, creating a numpy array that
+// reference the Eigen object's data with `base` as the python-registered base class (if omitted,
+// the base will be set to None, and lifetime management is up to the caller).  The numpy array is
+// non-writeable if the given type is const.
+template <typename props, typename Type>
+handle eigen_ref_array(Type &src, handle parent = none()) {
+    // none here is to get past array's should-we-copy detection, which currently always
+    // copies when there is no base.  Setting the base to None should be harmless.
+    return eigen_array_cast<props>(src, parent, !std::is_const<Type>::value);
+}
+
+// Takes a pointer to some dense, plain Eigen type, builds a capsule around it, then returns a numpy
+// array that references the encapsulated data with a python-side reference to the capsule to tie
+// its destruction to that of any dependent python objects.  Const-ness is determined by whether or
+// not the Type of the pointer given is const.
+template <typename props, typename Type, typename = enable_if_t<is_eigen_dense_plain<Type>::value>>
+handle eigen_encapsulate(Type *src) {
+    capsule base(src, [](void *o) { delete static_cast<Type *>(o); });
+    return eigen_ref_array<props>(*src, base);
+}
+
+// Type caster for regular, dense matrix types (e.g. MatrixXd), but not maps/refs/etc. of dense
+// types.
+template<typename Type>
+struct type_caster<Type, enable_if_t<is_eigen_dense_plain<Type>::value>> {
+    using Scalar = typename Type::Scalar;
+    using props = EigenProps<Type>;
+
+    bool load(handle src, bool convert) {
+        // If we're in no-convert mode, only load if given an array of the correct type
+        if (!convert && !isinstance<array_t<Scalar>>(src))
+            return false;
+
+        // Coerce into an array, but don't do type conversion yet; the copy below handles it.
+        auto buf = array::ensure(src);
+
+        if (!buf)
+            return false;
+
+        auto dims = buf.ndim();
+        if (dims < 1 || dims > 2)
+            return false;
+
+        auto fits = props::conformable(buf);
+        if (!fits)
+            return false;
+
+        // Allocate the new type, then build a numpy reference into it
+        value = Type(fits.rows, fits.cols);
+        auto ref = reinterpret_steal<array>(eigen_ref_array<props>(value));
+        if (dims == 1) ref = ref.squeeze();
+
+        int result = detail::npy_api::get().PyArray_CopyInto_(ref.ptr(), buf.ptr());
+
+        if (result < 0) { // Copy failed!
+            PyErr_Clear();
+            return false;
+        }
+
+        return true;
+    }
+
+private:
+
+    // Cast implementation
+    template <typename CType>
+    static handle cast_impl(CType *src, return_value_policy policy, handle parent) {
+        switch (policy) {
+            case return_value_policy::take_ownership:
+            case return_value_policy::automatic:
+                return eigen_encapsulate<props>(src);
+            case return_value_policy::move:
+                return eigen_encapsulate<props>(new CType(std::move(*src)));
+            case return_value_policy::copy:
+                return eigen_array_cast<props>(*src);
+            case return_value_policy::reference:
+            case return_value_policy::automatic_reference:
+                return eigen_ref_array<props>(*src);
+            case return_value_policy::reference_internal:
+                return eigen_ref_array<props>(*src, parent);
+            default:
+                throw cast_error("unhandled return_value_policy: should not happen!");
+        };
+    }
+
+public:
+
+    // Normal returned non-reference, non-const value:
+    static handle cast(Type &&src, return_value_policy /* policy */, handle parent) {
+        return cast_impl(&src, return_value_policy::move, parent);
