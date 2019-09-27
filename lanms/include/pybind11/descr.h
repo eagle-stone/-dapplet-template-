@@ -181,4 +181,5 @@ PYBIND11_NOINLINE inline descr type_descr(descr&& d) { return _("{") + std::move
 #define PYBIND11_DESCR ::pybind11::detail::descr
 #endif
 
-NAMESPACE_END(
+NAMESPACE_END(detail)
+NAMESPACE_END(pybind11)
