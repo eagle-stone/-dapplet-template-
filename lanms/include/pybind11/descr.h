@@ -164,4 +164,10 @@ template <bool B> PYBIND11_NOINLINE enable_if_t<B, descr> _(descr d, descr) { re
 template <bool B> PYBIND11_NOINLINE enable_if_t<!B, descr> _(descr, descr d) { return d; }
 
 template <typename Type> PYBIND11_NOINLINE descr _() {
-    const std::type_info *types[2] = { 
+    const std::type_info *types[2] = { &typeid(Type), nullptr };
+    return descr("%", types);
+}
+
+template <size_t Size> PYBIND11_NOINLINE descr _() {
+    const std::type_info *types[1] = { nullptr };
+    return
