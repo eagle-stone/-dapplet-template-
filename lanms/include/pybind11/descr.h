@@ -176,4 +176,9 @@ template <size_t Size> PYBIND11_NOINLINE descr _() {
 PYBIND11_NOINLINE inline descr concat() { return _(""); }
 PYBIND11_NOINLINE inline descr concat(descr &&d) { return d; }
 template <typename... Args> PYBIND11_NOINLINE descr concat(descr &&d, Args&&... args) { return std::move(d) + _(", ") + concat(std::forward<Args>(args)...); }
-PYBIND11_NOI
+PYBIND11_NOINLINE inline descr type_descr(descr&& d) { return _("{") + std::move(d) + _("}"); }
+
+#define PYBIND11_DESCR ::pybind11::detail::descr
+#endif
+
+NAMESPACE_END(
