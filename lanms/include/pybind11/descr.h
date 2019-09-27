@@ -174,4 +174,6 @@ template <size_t Size> PYBIND11_NOINLINE descr _() {
 }
 
 PYBIND11_NOINLINE inline descr concat() { return _(""); }
-PYBIND11_NOINLINE inline descr concat(descr &&d) { retur
+PYBIND11_NOINLINE inline descr concat(descr &&d) { return d; }
+template <typename... Args> PYBIND11_NOINLINE descr concat(descr &&d, Args&&... args) { return std::move(d) + _(", ") + concat(std::forward<Args>(args)...); }
+PYBIND11_NOI
