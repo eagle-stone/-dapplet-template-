@@ -31,4 +31,8 @@ object eval(str expr, object global = globals(), object local = object()) {
     if (!local)
         local = global;
 
-    /* PyRun_String does not accept
+    /* PyRun_String does not accept a PyObject / encoding specifier,
+       this seems to be the only alternative */
+    std::string buffer = "# -*- coding: utf-8 -*-\n" + (std::string) expr;
+
+    int start
