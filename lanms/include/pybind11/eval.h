@@ -19,4 +19,11 @@ enum eval_mode {
     /// Evaluate a string containing an isolated expression
     eval_expr,
 
-    /// Evaluate a string containing a single statement. Re
+    /// Evaluate a string containing a single statement. Returns \c none
+    eval_single_statement,
+
+    /// Evaluate a string containing a sequence of statement. Returns \c none
+    eval_statements
+};
+
+template <eva
