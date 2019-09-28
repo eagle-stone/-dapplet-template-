@@ -35,4 +35,8 @@ object eval(str expr, object global = globals(), object local = object()) {
        this seems to be the only alternative */
     std::string buffer = "# -*- coding: utf-8 -*-\n" + (std::string) expr;
 
-    int start
+    int start;
+    switch (mode) {
+        case eval_expr:             start = Py_eval_input;   break;
+        case eval_single_statement: start = Py_single_input; break;
+        case eval_statements:   
