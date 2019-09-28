@@ -312,3 +312,201 @@ public:
     // Normal returned non-reference, non-const value:
     static handle cast(Type &&src, return_value_policy /* policy */, handle parent) {
         return cast_impl(&src, return_value_policy::move, parent);
+    }
+    // If you return a non-reference const, we mark the numpy array readonly:
+    static handle cast(const Type &&src, return_value_policy /* policy */, handle parent) {
+        return cast_impl(&src, return_value_policy::move, parent);
+    }
+    // lvalue reference return; default (automatic) becomes copy
+    static handle cast(Type &src, return_value_policy policy, handle parent) {
+        if (policy == return_value_policy::automatic || policy == return_value_policy::automatic_reference)
+            policy = return_value_policy::copy;
+        return cast_impl(&src, policy, parent);
+    }
+    // const lvalue reference return; default (automatic) becomes copy
+    static handle cast(const Type &src, return_value_policy policy, handle parent) {
+        if (policy == return_value_policy::automatic || policy == return_value_policy::automatic_reference)
+            policy = return_value_policy::copy;
+        return cast(&src, policy, parent);
+    }
+    // non-const pointer return
+    static handle cast(Type *src, return_value_policy policy, handle parent) {
+        return cast_impl(src, policy, parent);
+    }
+    // const pointer return
+    static handle cast(const Type *src, return_value_policy policy, handle parent) {
+        return cast_impl(src, policy, parent);
+    }
+
+    static PYBIND11_DESCR name() { return props::descriptor(); }
+
+    operator Type*() { return &value; }
+    operator Type&() { return value; }
+    operator Type&&() && { return std::move(value); }
+    template <typename T> using cast_op_type = movable_cast_op_type<T>;
+
+private:
+    Type value;
+};
+
+// Eigen Ref/Map classes have slightly different policy requirements, meaning we don't want to force
+// `move` when a Ref/Map rvalue is returned; we treat Ref<> sort of like a pointer (we care about
+// the underlying data, not the outer shell).
+template <typename Return>
+struct return_value_policy_override<Return, enable_if_t<is_eigen_dense_map<Return>::value>> {
+    static return_value_policy policy(return_value_policy p) { return p; }
+};
+
+// Base class for casting reference/map/block/etc. objects back to python.
+template <typename MapType> struct eigen_map_caster {
+private:
+    using props = EigenProps<MapType>;
+
+public:
+
+    // Directly referencing a ref/map's data is a bit dangerous (whatever the map/ref points to has
+    // to stay around), but we'll allow it under the assumption that you know what you're doing (and
+    // have an appropriate keep_alive in place).  We return a numpy array pointing directly at the
+    // ref's data (The numpy array ends up read-only if the ref was to a const matrix type.) Note
+    // that this means you need to ensure you don't destroy the object in some other way (e.g. with
+    // an appropriate keep_alive, or with a reference to a statically allocated matrix).
+    static handle cast(const MapType &src, return_value_policy policy, handle parent) {
+        switch (policy) {
+            case return_value_policy::copy:
+                return eigen_array_cast<props>(src);
+            case return_value_policy::reference_internal:
+                return eigen_array_cast<props>(src, parent, is_eigen_mutable_map<MapType>::value);
+            case return_value_policy::reference:
+            case return_value_policy::automatic:
+            case return_value_policy::automatic_reference:
+                return eigen_array_cast<props>(src, none(), is_eigen_mutable_map<MapType>::value);
+            default:
+                // move, take_ownership don't make any sense for a ref/map:
+                pybind11_fail("Invalid return_value_policy for Eigen Map/Ref/Block type");
+        }
+    }
+
+    static PYBIND11_DESCR name() { return props::descriptor(); }
+
+    // Explicitly delete these: support python -> C++ conversion on these (i.e. these can be return
+    // types but not bound arguments).  We still provide them (with an explicitly delete) so that
+    // you end up here if you try anyway.
+    bool load(handle, bool) = delete;
+    operator MapType() = delete;
+    template <typename> using cast_op_type = MapType;
+};
+
+// We can return any map-like object (but can only load Refs, specialized next):
+template <typename Type> struct type_caster<Type, enable_if_t<is_eigen_dense_map<Type>::value>>
+    : eigen_map_caster<Type> {};
+
+// Loader for Ref<...> arguments.  See the documentation for info on how to make this work without
+// copying (it requires some extra effort in many cases).
+template <typename PlainObjectType, typename StrideType>
+struct type_caster<
+    Eigen::Ref<PlainObjectType, 0, StrideType>,
+    enable_if_t<is_eigen_dense_map<Eigen::Ref<PlainObjectType, 0, StrideType>>::value>
+> : public eigen_map_caster<Eigen::Ref<PlainObjectType, 0, StrideType>> {
+private:
+    using Type = Eigen::Ref<PlainObjectType, 0, StrideType>;
+    using props = EigenProps<Type>;
+    using Scalar = typename props::Scalar;
+    using MapType = Eigen::Map<PlainObjectType, 0, StrideType>;
+    using Array = array_t<Scalar, array::forcecast |
+                ((props::row_major ? props::inner_stride : props::outer_stride) == 1 ? array::c_style :
+                 (props::row_major ? props::outer_stride : props::inner_stride) == 1 ? array::f_style : 0)>;
+    static constexpr bool need_writeable = is_eigen_mutable_map<Type>::value;
+    // Delay construction (these have no default constructor)
+    std::unique_ptr<MapType> map;
+    std::unique_ptr<Type> ref;
+    // Our array.  When possible, this is just a numpy array pointing to the source data, but
+    // sometimes we can't avoid copying (e.g. input is not a numpy array at all, has an incompatible
+    // layout, or is an array of a type that needs to be converted).  Using a numpy temporary
+    // (rather than an Eigen temporary) saves an extra copy when we need both type conversion and
+    // storage order conversion.  (Note that we refuse to use this temporary copy when loading an
+    // argument for a Ref<M> with M non-const, i.e. a read-write reference).
+    Array copy_or_ref;
+public:
+    bool load(handle src, bool convert) {
+        // First check whether what we have is already an array of the right type.  If not, we can't
+        // avoid a copy (because the copy is also going to do type conversion).
+        bool need_copy = !isinstance<Array>(src);
+
+        EigenConformable<props::row_major> fits;
+        if (!need_copy) {
+            // We don't need a converting copy, but we also need to check whether the strides are
+            // compatible with the Ref's stride requirements
+            Array aref = reinterpret_borrow<Array>(src);
+
+            if (aref && (!need_writeable || aref.writeable())) {
+                fits = props::conformable(aref);
+                if (!fits) return false; // Incompatible dimensions
+                if (!fits.template stride_compatible<props>())
+                    need_copy = true;
+                else
+                    copy_or_ref = std::move(aref);
+            }
+            else {
+                need_copy = true;
+            }
+        }
+
+        if (need_copy) {
+            // We need to copy: If we need a mutable reference, or we're not supposed to convert
+            // (either because we're in the no-convert overload pass, or because we're explicitly
+            // instructed not to copy (via `py::arg().noconvert()`) we have to fail loading.
+            if (!convert || need_writeable) return false;
+
+            Array copy = Array::ensure(src);
+            if (!copy) return false;
+            fits = props::conformable(copy);
+            if (!fits || !fits.template stride_compatible<props>())
+                return false;
+            copy_or_ref = std::move(copy);
+            loader_life_support::add_patient(copy_or_ref);
+        }
+
+        ref.reset();
+        map.reset(new MapType(data(copy_or_ref), fits.rows, fits.cols, make_stride(fits.stride.outer(), fits.stride.inner())));
+        ref.reset(new Type(*map));
+
+        return true;
+    }
+
+    operator Type*() { return ref.get(); }
+    operator Type&() { return *ref; }
+    template <typename _T> using cast_op_type = pybind11::detail::cast_op_type<_T>;
+
+private:
+    template <typename T = Type, enable_if_t<is_eigen_mutable_map<T>::value, int> = 0>
+    Scalar *data(Array &a) { return a.mutable_data(); }
+
+    template <typename T = Type, enable_if_t<!is_eigen_mutable_map<T>::value, int> = 0>
+    const Scalar *data(Array &a) { return a.data(); }
+
+    // Attempt to figure out a constructor of `Stride` that will work.
+    // If both strides are fixed, use a default constructor:
+    template <typename S> using stride_ctor_default = bool_constant<
+        S::InnerStrideAtCompileTime != Eigen::Dynamic && S::OuterStrideAtCompileTime != Eigen::Dynamic &&
+        std::is_default_constructible<S>::value>;
+    // Otherwise, if there is a two-index constructor, assume it is (outer,inner) like
+    // Eigen::Stride, and use it:
+    template <typename S> using stride_ctor_dual = bool_constant<
+        !stride_ctor_default<S>::value && std::is_constructible<S, EigenIndex, EigenIndex>::value>;
+    // Otherwise, if there is a one-index constructor, and just one of the strides is dynamic, use
+    // it (passing whichever stride is dynamic).
+    template <typename S> using stride_ctor_outer = bool_constant<
+        !any_of<stride_ctor_default<S>, stride_ctor_dual<S>>::value &&
+        S::OuterStrideAtCompileTime == Eigen::Dynamic && S::InnerStrideAtCompileTime != Eigen::Dynamic &&
+        std::is_constructible<S, EigenIndex>::value>;
+    template <typename S> using stride_ctor_inner = bool_constant<
+        !any_of<stride_ctor_default<S>, stride_ctor_dual<S>>::value &&
+        S::InnerStrideAtCompileTime == Eigen::Dynamic && S::OuterStrideAtCompileTime != Eigen::Dynamic &&
+        std::is_constructible<S, EigenIndex>::value>;
+
+    template <typename S = StrideType, enable_if_t<stride_ctor_default<S>::value, int> = 0>
+    static S make_stride(EigenIndex, EigenIndex) { return S(); }
+    template <typename S = StrideType, enable_if_t<stride_ctor_dual<S>::value, int> = 0>
+    static S make_stride(EigenIndex outer, EigenIndex inner) { return S(outer, inner); }
+    template <typename S = StrideType, enable_if_t<stride_ctor_outer<S>::value, int> = 0>
+    static S make_stride(EigenIndex outer, EigenIndex) { return S(outer); }
