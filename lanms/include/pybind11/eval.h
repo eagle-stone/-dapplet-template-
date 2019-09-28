@@ -26,4 +26,9 @@ enum eval_mode {
     eval_statements
 };
 
-template <eva
+template <eval_mode mode = eval_expr>
+object eval(str expr, object global = globals(), object local = object()) {
+    if (!local)
+        local = global;
+
+    /* PyRun_String does not accept
