@@ -12,3 +12,11 @@
 #pragma once
 
 #include "pybind11.h"
+
+NAMESPACE_BEGIN(pybind11)
+
+enum eval_mode {
+    /// Evaluate a string containing an isolated expression
+    eval_expr,
+
+    /// Evaluate a string containing a single statement. Re
