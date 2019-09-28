@@ -510,3 +510,102 @@ private:
     static S make_stride(EigenIndex outer, EigenIndex inner) { return S(outer, inner); }
     template <typename S = StrideType, enable_if_t<stride_ctor_outer<S>::value, int> = 0>
     static S make_stride(EigenIndex outer, EigenIndex) { return S(outer); }
+    template <typename S = StrideType, enable_if_t<stride_ctor_inner<S>::value, int> = 0>
+    static S make_stride(EigenIndex, EigenIndex inner) { return S(inner); }
+
+};
+
+// type_caster for special matrix types (e.g. DiagonalMatrix), which are EigenBase, but not
+// EigenDense (i.e. they don't have a data(), at least not with the usual matrix layout).
+// load() is not supported, but we can cast them into the python domain by first copying to a
+// regular Eigen::Matrix, then casting that.
+template <typename Type>
+struct type_caster<Type, enable_if_t<is_eigen_other<Type>::value>> {
+protected:
+    using Matrix = Eigen::Matrix<typename Type::Scalar, Type::RowsAtCompileTime, Type::ColsAtCompileTime>;
+    using props = EigenProps<Matrix>;
+public:
+    static handle cast(const Type &src, return_value_policy /* policy */, handle /* parent */) {
+        handle h = eigen_encapsulate<props>(new Matrix(src));
+        return h;
+    }
+    static handle cast(const Type *src, return_value_policy policy, handle parent) { return cast(*src, policy, parent); }
+
+    static PYBIND11_DESCR name() { return props::descriptor(); }
+
+    // Explicitly delete these: support python -> C++ conversion on these (i.e. these can be return
+    // types but not bound arguments).  We still provide them (with an explicitly delete) so that
+    // you end up here if you try anyway.
+    bool load(handle, bool) = delete;
+    operator Type() = delete;
+    template <typename> using cast_op_type = Type;
+};
+
+template<typename Type>
+struct type_caster<Type, enable_if_t<is_eigen_sparse<Type>::value>> {
+    typedef typename Type::Scalar Scalar;
+    typedef remove_reference_t<decltype(*std::declval<Type>().outerIndexPtr())> StorageIndex;
+    typedef typename Type::Index Index;
+    static constexpr bool rowMajor = Type::IsRowMajor;
+
+    bool load(handle src, bool) {
+        if (!src)
+            return false;
+
+        auto obj = reinterpret_borrow<object>(src);
+        object sparse_module = module::import("scipy.sparse");
+        object matrix_type = sparse_module.attr(
+            rowMajor ? "csr_matrix" : "csc_matrix");
+
+        if (!obj.get_type().is(matrix_type)) {
+            try {
+                obj = matrix_type(obj);
+            } catch (const error_already_set &) {
+                return false;
+            }
+        }
+
+        auto values = array_t<Scalar>((object) obj.attr("data"));
+        auto innerIndices = array_t<StorageIndex>((object) obj.attr("indices"));
+        auto outerIndices = array_t<StorageIndex>((object) obj.attr("indptr"));
+        auto shape = pybind11::tuple((pybind11::object) obj.attr("shape"));
+        auto nnz = obj.attr("nnz").cast<Index>();
+
+        if (!values || !innerIndices || !outerIndices)
+            return false;
+
+        value = Eigen::MappedSparseMatrix<Scalar, Type::Flags, StorageIndex>(
+            shape[0].cast<Index>(), shape[1].cast<Index>(), nnz,
+            outerIndices.mutable_data(), innerIndices.mutable_data(), values.mutable_data());
+
+        return true;
+    }
+
+    static handle cast(const Type &src, return_value_policy /* policy */, handle /* parent */) {
+        const_cast<Type&>(src).makeCompressed();
+
+        object matrix_type = module::import("scipy.sparse").attr(
+            rowMajor ? "csr_matrix" : "csc_matrix");
+
+        array data(src.nonZeros(), src.valuePtr());
+        array outerIndices((rowMajor ? src.rows() : src.cols()) + 1, src.outerIndexPtr());
+        array innerIndices(src.nonZeros(), src.innerIndexPtr());
+
+        return matrix_type(
+            std::make_tuple(data, innerIndices, outerIndices),
+            std::make_pair(src.rows(), src.cols())
+        ).release();
+    }
+
+    PYBIND11_TYPE_CASTER(Type, _<(Type::IsRowMajor) != 0>("scipy.sparse.csr_matrix[", "scipy.sparse.csc_matrix[")
+            + npy_format_descriptor<Scalar>::name() + _("]"));
+};
+
+NAMESPACE_END(detail)
+NAMESPACE_END(pybind11)
+
+#if defined(__GNUG__) || defined(__clang__)
+#  pragma GCC diagnostic pop
+#elif defined(_MSC_VER)
+#  pragma warning(pop)
+#endif
