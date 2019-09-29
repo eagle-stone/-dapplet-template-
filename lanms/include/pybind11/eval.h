@@ -39,4 +39,8 @@ object eval(str expr, object global = globals(), object local = object()) {
     switch (mode) {
         case eval_expr:             start = Py_eval_input;   break;
         case eval_single_statement: start = Py_single_input; break;
-        case eval_statements:   
+        case eval_statements:       start = Py_file_input;   break;
+        default: pybind11_fail("invalid evaluation mode");
+    }
+
+    PyObject *result = PyRun_String(buffer.c_str(), start, global.ptr(), lo
