@@ -43,4 +43,11 @@ object eval(str expr, object global = globals(), object local = object()) {
         default: pybind11_fail("invalid evaluation mode");
     }
 
-    PyObject *result = PyRun_String(buffer.c_str(), start, global.ptr(), lo
+    PyObject *result = PyRun_String(buffer.c_str(), start, global.ptr(), local.ptr());
+    if (!result)
+        throw error_already_set();
+    return reinterpret_steal<object>(result);
+}
+
+template <eval_mode mode = eval_expr, size_t N>
+object eval
