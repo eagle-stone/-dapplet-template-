@@ -95,3 +95,9 @@ object eval_file(str fname, object global = globals(), object local = object()) 
         f = PyFile_AsFile(fobj.ptr());
     closeFile = 0;
 #endif
+    if (!f) {
+        PyErr_Clear();
+        pybind11_fail("File \"" + fname_str + "\" could not be opened!");
+    }
+
+#if PY_VERSION_HEX < 0x03000000 && define
