@@ -62,4 +62,9 @@ inline void exec(str expr, object global = globals(), object local = object()) {
 }
 
 template <size_t N>
-void exec(const char (&s)[N], obje
+void exec(const char (&s)[N], object global = globals(), object local = object()) {
+    eval<eval_statements>(s, global, local);
+}
+
+template <eval_mode mode = eval_statements>
+object eval_file(str fname, object global
