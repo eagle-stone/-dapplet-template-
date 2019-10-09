@@ -67,4 +67,10 @@ void exec(const char (&s)[N], object global = globals(), object local = object()
 }
 
 template <eval_mode mode = eval_statements>
-object eval_file(str fname, object global
+object eval_file(str fname, object global = globals(), object local = object()) {
+    if (!local)
+        local = global;
+
+    int start;
+    switch (mode) {
+        case eval_expr:             start = Py_eval_input
