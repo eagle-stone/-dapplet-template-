@@ -77,4 +77,10 @@ object eval_file(str fname, object global = globals(), object local = object()) 
         case eval_single_statement: start = Py_single_input; break;
         case eval_statements:       start = Py_file_input;   break;
         default: pybind11_fail("invalid evaluation mode");
- 
+    }
+
+    int closeFile = 1;
+    std::string fname_str = (std::string) fname;
+#if PY_VERSION_HEX >= 0x03040000
+    FILE *f = _Py_fopen_obj(fname.ptr(), "r");
+#elif PY_VERSION_HEX >
