@@ -57,4 +57,9 @@ object eval(const char (&s)[N], object global = globals(), object local = object
     return eval<mode>(expr, global, local);
 }
 
-inline void exec(str ex
+inline void exec(str expr, object global = globals(), object local = object()) {
+    eval<eval_statements>(expr, global, local);
+}
+
+template <size_t N>
+void exec(const char (&s)[N], obje
