@@ -88,4 +88,10 @@ object eval_file(str fname, object global = globals(), object local = object()) 
 #else
     /* No unicode support in open() :( */
     auto fobj = reinterpret_steal<object>(PyFile_FromString(
-       
+        const_cast<char *>(fname_str.c_str()),
+        const_cast<char*>("r")));
+    FILE *f = nullptr;
+    if (fobj)
+        f = PyFile_AsFile(fobj.ptr());
+    closeFile = 0;
+#endif
