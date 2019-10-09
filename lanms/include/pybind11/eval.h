@@ -83,4 +83,9 @@ object eval_file(str fname, object global = globals(), object local = object()) 
     std::string fname_str = (std::string) fname;
 #if PY_VERSION_HEX >= 0x03040000
     FILE *f = _Py_fopen_obj(fname.ptr(), "r");
-#elif PY_VERSION_HEX >
+#elif PY_VERSION_HEX >= 0x03000000
+    FILE *f = _Py_fopen(fname.ptr(), "r");
+#else
+    /* No unicode support in open() :( */
+    auto fobj = reinterpret_steal<object>(PyFile_FromString(
+       
