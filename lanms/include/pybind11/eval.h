@@ -73,4 +73,8 @@ object eval_file(str fname, object global = globals(), object local = object()) 
 
     int start;
     switch (mode) {
-        case eval_expr:             start = Py_eval_input
+        case eval_expr:             start = Py_eval_input;   break;
+        case eval_single_statement: start = Py_single_input; break;
+        case eval_statements:       start = Py_file_input;   break;
+        default: pybind11_fail("invalid evaluation mode");
+ 
