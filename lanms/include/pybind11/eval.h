@@ -110,4 +110,8 @@ object eval_file(str fname, object global = globals(), object local = object()) 
 #endif
 
     if (!result)
-        throw e
+        throw error_already_set();
+    return reinterpret_steal<object>(result);
+}
+
+NAMESPACE_END(pybind11)
