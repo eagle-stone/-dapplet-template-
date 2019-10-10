@@ -105,4 +105,9 @@ object eval_file(str fname, object global = globals(), object local = object()) 
                                   local.ptr());
     (void) closeFile;
 #else
-    
+    PyObject *result = PyRun_FileEx(f, fname_str.c_str(), start, global.ptr(),
+                                    local.ptr(), closeFile);
+#endif
+
+    if (!result)
+        throw e
