@@ -38,4 +38,6 @@ public:
            When passing a C++ function as an argument to another C++
            function via Python, every function call would normally involve
            a full C++ -> Python -> C++ roundtrip, which can be prohibitive.
-           Here, we try to at least detect 
+           Here, we try to at least detect the case where the function is
+           stateless (i.e. function pointer or lambda function without
+           captured variables), in which case the roundtrip can be avoided.
