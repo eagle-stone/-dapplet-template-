@@ -29,4 +29,11 @@ public:
             return true;
         }
 
-        if (!isinstance<function
+        if (!isinstance<function>(src))
+            return false;
+
+        auto func = reinterpret_borrow<function>(src);
+
+        /*
+           When passing a C++ function as an argument to another C++
+           functio
