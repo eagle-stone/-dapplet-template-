@@ -41,3 +41,7 @@ public:
            Here, we try to at least detect the case where the function is
            stateless (i.e. function pointer or lambda function without
            captured variables), in which case the roundtrip can be avoided.
+         */
+        if (auto cfunc = func.cpp_function()) {
+            auto c = reinterpret_borrow<capsule>(PyCFunction_GET_SELF(cfunc.ptr()));
+            auto rec =
