@@ -36,4 +36,6 @@ public:
 
         /*
            When passing a C++ function as an argument to another C++
-           functio
+           function via Python, every function call would normally involve
+           a full C++ -> Python -> C++ roundtrip, which can be prohibitive.
+           Here, we try to at least detect 
