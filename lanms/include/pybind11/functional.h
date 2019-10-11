@@ -44,4 +44,8 @@ public:
          */
         if (auto cfunc = func.cpp_function()) {
             auto c = reinterpret_borrow<capsule>(PyCFunction_GET_SELF(cfunc.ptr()));
-            auto rec =
+            auto rec = (function_record *) c;
+
+            if (rec && rec->is_stateless &&
+                    same_type(typeid(function_type), *reinterpret_cast<const std::type_info *>(rec->data[1]))) {
+  
