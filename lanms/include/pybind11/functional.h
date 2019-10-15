@@ -68,4 +68,8 @@ public:
         if (!f_)
             return none().inc_ref();
 
-        auto result
+        auto result = f_.template target<function_type>();
+        if (result)
+            return cpp_function(*result, policy).release();
+        else
+            return cpp_function(std::forward<Func>(f_), policy).rel
