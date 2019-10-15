@@ -77,4 +77,9 @@ public:
 
     PYBIND11_TYPE_CASTER(type, _("Callable[[") +
             argument_loader<Args...>::arg_names() + _("], ") +
-            make_caster<retval
+            make_caster<retval_type>::name() +
+            _("]"));
+};
+
+NAMESPACE_END(detail)
+NAMESPACE_END(pybind11)
