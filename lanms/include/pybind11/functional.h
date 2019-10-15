@@ -72,4 +72,9 @@ public:
         if (result)
             return cpp_function(*result, policy).release();
         else
-            return cpp_function(std::forward<Func>(f_), policy).rel
+            return cpp_function(std::forward<Func>(f_), policy).release();
+    }
+
+    PYBIND11_TYPE_CASTER(type, _("Callable[[") +
+            argument_loader<Args...>::arg_names() + _("], ") +
+            make_caster<retval
