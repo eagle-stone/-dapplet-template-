@@ -57,4 +57,10 @@ public:
         value = [func](Args... args) -> Return {
             gil_scoped_acquire acq;
             object retval(func(std::forward<Args>(args)...));
-            /* Visual studio 2015 parser issue
+            /* Visual studio 2015 parser issue: need parentheses around this expression */
+            return (retval.template cast<Return>());
+        };
+        return true;
+    }
+
+    template <typename F
