@@ -16,4 +16,12 @@
 #include <array>
 #include <cstdlib>
 #include <cstring>
-#inclu
+#include <sstream>
+#include <string>
+#include <initializer_list>
+#include <functional>
+#include <utility>
+#include <typeindex>
+
+#if defined(_MSC_VER)
+#  pragma warning(push)
