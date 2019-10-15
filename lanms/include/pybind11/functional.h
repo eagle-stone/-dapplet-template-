@@ -54,4 +54,7 @@ public:
             }
         }
 
-        value = [func](Arg
+        value = [func](Args... args) -> Return {
+            gil_scoped_acquire acq;
+            object retval(func(std::forward<Args>(args)...));
+            /* Visual studio 2015 parser issue
