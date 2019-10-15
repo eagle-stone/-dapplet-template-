@@ -63,4 +63,9 @@ public:
         return true;
     }
 
-    template <typename F
+    template <typename Func>
+    static handle cast(Func &&f_, return_value_policy policy, handle /* parent */) {
+        if (!f_)
+            return none().inc_ref();
+
+        auto result
