@@ -29,4 +29,5 @@
 #endif
 
 /* This will be true on all flat address space platforms and allows us to reduce the
-   whol
+   whole npy_intp / ssize_t / Py_intptr_t business down to just ssize_t for all size
+   and dimension types (e.g. shape, strides, indexing), instead of inflicting 
