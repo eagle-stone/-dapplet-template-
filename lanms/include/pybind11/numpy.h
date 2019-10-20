@@ -45,4 +45,13 @@ struct PyArrayDescr_Proxy {
     PyObject_HEAD
     PyObject *typeobj;
     char kind;
-    char 
+    char type;
+    char byteorder;
+    char flags;
+    int type_num;
+    int elsize;
+    int alignment;
+    char *subarray;
+    PyObject *fields;
+    PyObject *names;
+};
