@@ -86,4 +86,10 @@ struct numpy_internals {
     numpy_type_info *get_type_info(const std::type_info& tinfo, bool throw_if_missing = true) {
         auto it = registered_dtypes.find(std::type_index(tinfo));
         if (it != registered_dtypes.end())
-            ret
+            return &(it->second);
+        if (throw_if_missing)
+            pybind11_fail(std::string("NumPy type info missing for ") + tinfo.name());
+        return nullptr;
+    }
+
+    template
