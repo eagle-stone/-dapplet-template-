@@ -68,4 +68,13 @@ struct PyArray_Proxy {
 };
 
 struct PyVoidScalarObject_Proxy {
-    PyObje
+    PyObject_VAR_HEAD
+    char *obval;
+    PyArrayDescr_Proxy *descr;
+    int flags;
+    PyObject *base;
+};
+
+struct numpy_type_info {
+    PyObject* dtype_ptr;
+    std::string format_
