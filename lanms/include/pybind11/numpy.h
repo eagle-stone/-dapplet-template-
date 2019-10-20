@@ -92,4 +92,5 @@ struct numpy_internals {
         return nullptr;
     }
 
-    template
+    template<typename T> numpy_type_info *get_type_info(bool throw_if_missing = true) {
+        return get_type_info(typeid(typename std::remove_cv<T>::type), throw
