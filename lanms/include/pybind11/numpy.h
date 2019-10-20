@@ -83,4 +83,7 @@ struct numpy_type_info {
 struct numpy_internals {
     std::unordered_map<std::type_index, numpy_type_info> registered_dtypes;
 
-    numpy_type_info *get_type_info(const std::ty
+    numpy_type_info *get_type_info(const std::type_info& tinfo, bool throw_if_missing = true) {
+        auto it = registered_dtypes.find(std::type_index(tinfo));
+        if (it != registered_dtypes.end())
+            ret
