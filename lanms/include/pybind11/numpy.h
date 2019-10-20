@@ -55,3 +55,17 @@ struct PyArrayDescr_Proxy {
     PyObject *fields;
     PyObject *names;
 };
+
+struct PyArray_Proxy {
+    PyObject_HEAD
+    char *data;
+    int nd;
+    ssize_t *dimensions;
+    ssize_t *strides;
+    PyObject *base;
+    PyObject *descr;
+    int flags;
+};
+
+struct PyVoidScalarObject_Proxy {
+    PyObje
