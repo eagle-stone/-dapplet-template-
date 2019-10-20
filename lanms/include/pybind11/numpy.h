@@ -38,4 +38,11 @@ NAMESPACE_BEGIN(pybind11)
 
 class array; // Forward declaration
 
-NAMESPAC
+NAMESPACE_BEGIN(detail)
+template <typename type, typename SFINAE = void> struct npy_format_descriptor;
+
+struct PyArrayDescr_Proxy {
+    PyObject_HEAD
+    PyObject *typeobj;
+    char kind;
+    char 
