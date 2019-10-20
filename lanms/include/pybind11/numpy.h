@@ -93,4 +93,12 @@ struct numpy_internals {
     }
 
     template<typename T> numpy_type_info *get_type_info(bool throw_if_missing = true) {
-        return get_type_info(typeid(typename std::remove_cv<T>::type), throw
+        return get_type_info(typeid(typename std::remove_cv<T>::type), throw_if_missing);
+    }
+};
+
+inline PYBIND11_NOINLINE void load_numpy_internals(numpy_internals* &ptr) {
+    ptr = &get_or_create_shared_data<numpy_internals>("_numpy_internals");
+}
+
+inline numpy_internals& get_numpy_
