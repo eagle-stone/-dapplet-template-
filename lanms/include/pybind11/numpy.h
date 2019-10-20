@@ -77,4 +77,10 @@ struct PyVoidScalarObject_Proxy {
 
 struct numpy_type_info {
     PyObject* dtype_ptr;
-    std::string format_
+    std::string format_str;
+};
+
+struct numpy_internals {
+    std::unordered_map<std::type_index, numpy_type_info> registered_dtypes;
+
+    numpy_type_info *get_type_info(const std::ty
