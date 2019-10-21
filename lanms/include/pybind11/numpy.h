@@ -109,4 +109,8 @@ inline numpy_internals& get_numpy_internals() {
 }
 
 struct npy_api {
-    enum constant
+    enum constants {
+        NPY_ARRAY_C_CONTIGUOUS_ = 0x0001,
+        NPY_ARRAY_F_CONTIGUOUS_ = 0x0002,
+        NPY_ARRAY_OWNDATA_ = 0x0004,
+        NPY_ARRAY_FORCEC
