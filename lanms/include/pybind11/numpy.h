@@ -123,4 +123,7 @@ struct npy_api {
         NPY_INT_, NPY_UINT_,
         NPY_LONG_, NPY_ULONG_,
         NPY_LONGLONG_, NPY_ULONGLONG_,
-       
+        NPY_FLOAT_, NPY_DOUBLE_, NPY_LONGDOUBLE_,
+        NPY_CFLOAT_, NPY_CDOUBLE_, NPY_CLONGDOUBLE_,
+        NPY_OBJECT_ = 17,
+        NPY_STRING_, NPY_UNICODE_, NPY_VOID_
