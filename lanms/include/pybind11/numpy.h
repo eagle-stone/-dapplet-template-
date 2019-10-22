@@ -118,4 +118,9 @@ struct npy_api {
         NPY_ARRAY_ALIGNED_ = 0x0100,
         NPY_ARRAY_WRITEABLE_ = 0x0400,
         NPY_BOOL_ = 0,
-        NPY_BYTE_, NPY_U
+        NPY_BYTE_, NPY_UBYTE_,
+        NPY_SHORT_, NPY_USHORT_,
+        NPY_INT_, NPY_UINT_,
+        NPY_LONG_, NPY_ULONG_,
+        NPY_LONGLONG_, NPY_ULONGLONG_,
+       
