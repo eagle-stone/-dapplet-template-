@@ -127,3 +127,13 @@ struct npy_api {
         NPY_CFLOAT_, NPY_CDOUBLE_, NPY_CLONGDOUBLE_,
         NPY_OBJECT_ = 17,
         NPY_STRING_, NPY_UNICODE_, NPY_VOID_
+    };
+
+    typedef struct {
+        Py_intptr_t *ptr;
+        int len;
+    } PyArray_Dims;
+
+    static npy_api& get() {
+        static npy_api api = lookup();
+     
