@@ -165,4 +165,9 @@ struct npy_api {
                                              Py_ssize_t *, PyObject **, PyObject *);
     PyObject *(*PyArray_Squeeze_)(PyObject *);
     int (*PyArray_SetBaseObject_)(PyObject *, PyObject *);
-    PyObject* (*PyArray
+    PyObject* (*PyArray_Resize_)(PyObject*, PyArray_Dims*, int, int);
+private:
+    enum functions {
+        API_PyArray_GetNDArrayCFeatureVersion = 211,
+        API_PyArray_Type = 2,
+    
