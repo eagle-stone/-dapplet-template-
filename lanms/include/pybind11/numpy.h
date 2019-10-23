@@ -158,4 +158,6 @@ struct npy_api {
     PyTypeObject *PyVoidArrType_Type_;
     PyTypeObject *PyArrayDescr_Type_;
     PyObject *(*PyArray_DescrFromScalar_)(PyObject *);
- 
+    PyObject *(*PyArray_FromAny_) (PyObject *, PyObject *, int, int, int, PyObject *);
+    int (*PyArray_DescrConverter_) (PyObject *, PyObject **);
+    bool (*PyArray
