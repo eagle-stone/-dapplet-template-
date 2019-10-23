@@ -142,4 +142,9 @@ struct npy_api {
     bool PyArray_Check_(PyObject *obj) const {
         return (bool) PyObject_TypeCheck(obj, PyArray_Type_);
     }
-    bool PyArrayDescr_Check_(Py
+    bool PyArrayDescr_Check_(PyObject *obj) const {
+        return (bool) PyObject_TypeCheck(obj, PyArrayDescr_Type_);
+    }
+
+    unsigned int (*PyArray_GetNDArrayCFeatureVersion_)();
+    PyObject *(
