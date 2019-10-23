@@ -147,4 +147,7 @@ struct npy_api {
     }
 
     unsigned int (*PyArray_GetNDArrayCFeatureVersion_)();
-    PyObject *(
+    PyObject *(*PyArray_DescrFromType_)(int);
+    PyObject *(*PyArray_NewFromDescr_)
+        (PyTypeObject *, PyObject *, int, Py_intptr_t *,
+         Py_intptr_t *, void *, int, 
