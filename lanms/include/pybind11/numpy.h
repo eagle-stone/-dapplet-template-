@@ -150,4 +150,8 @@ struct npy_api {
     PyObject *(*PyArray_DescrFromType_)(int);
     PyObject *(*PyArray_NewFromDescr_)
         (PyTypeObject *, PyObject *, int, Py_intptr_t *,
-         Py_intptr_t *, void *, int, 
+         Py_intptr_t *, void *, int, PyObject *);
+    PyObject *(*PyArray_DescrNewFromType_)(int);
+    int (*PyArray_CopyInto_)(PyObject *, PyObject *);
+    PyObject *(*PyArray_NewCopy_)(PyObject *, int);
+    
