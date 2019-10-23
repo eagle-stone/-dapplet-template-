@@ -162,4 +162,7 @@ struct npy_api {
     int (*PyArray_DescrConverter_) (PyObject *, PyObject **);
     bool (*PyArray_EquivTypes_) (PyObject *, PyObject *);
     int (*PyArray_GetArrayParamsFromObject_)(PyObject *, PyObject *, char, PyObject **, int *,
-                        
+                                             Py_ssize_t *, PyObject **, PyObject *);
+    PyObject *(*PyArray_Squeeze_)(PyObject *);
+    int (*PyArray_SetBaseObject_)(PyObject *, PyObject *);
+    PyObject* (*PyArray
