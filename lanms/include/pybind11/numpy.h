@@ -170,4 +170,9 @@ private:
     enum functions {
         API_PyArray_GetNDArrayCFeatureVersion = 211,
         API_PyArray_Type = 2,
-    
+        API_PyArrayDescr_Type = 3,
+        API_PyVoidArrType_Type = 39,
+        API_PyArray_DescrFromType = 45,
+        API_PyArray_DescrFromScalar = 57,
+        API_PyArray_FromAny = 69,
+      
