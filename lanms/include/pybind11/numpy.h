@@ -136,4 +136,10 @@ struct npy_api {
 
     static npy_api& get() {
         static npy_api api = lookup();
-     
+        return api;
+    }
+
+    bool PyArray_Check_(PyObject *obj) const {
+        return (bool) PyObject_TypeCheck(obj, PyArray_Type_);
+    }
+    bool PyArrayDescr_Check_(Py
