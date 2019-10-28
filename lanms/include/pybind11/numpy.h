@@ -226,4 +226,11 @@ inline PyArray_Proxy* array_proxy(void* ptr) {
 }
 
 inline const PyArray_Proxy* array_proxy(const void* ptr) {
-    return reinterpret_cast<const PyArray_Proxy
+    return reinterpret_cast<const PyArray_Proxy*>(ptr);
+}
+
+inline PyArrayDescr_Proxy* array_descriptor_proxy(PyObject* ptr) {
+   return reinterpret_cast<PyArrayDescr_Proxy*>(ptr);
+}
+
+inline const PyArrayDescr_Proxy* array_descriptor_pr
