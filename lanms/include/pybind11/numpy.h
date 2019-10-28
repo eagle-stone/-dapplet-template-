@@ -213,4 +213,12 @@ private:
         DECL_NPY_API(PyArray_DescrNewFromType);
         DECL_NPY_API(PyArray_DescrConverter);
         DECL_NPY_API(PyArray_EquivTypes);
-        DECL_NPY_API(PyArray_GetArrayParamsFr
+        DECL_NPY_API(PyArray_GetArrayParamsFromObject);
+        DECL_NPY_API(PyArray_Squeeze);
+        DECL_NPY_API(PyArray_SetBaseObject);
+#undef DECL_NPY_API
+        return api;
+    }
+};
+
+inline PyArray_Pr
