@@ -210,4 +210,7 @@ private:
         DECL_NPY_API(PyArray_CopyInto);
         DECL_NPY_API(PyArray_NewCopy);
         DECL_NPY_API(PyArray_NewFromDescr);
-        DECL_NP
+        DECL_NPY_API(PyArray_DescrNewFromType);
+        DECL_NPY_API(PyArray_DescrConverter);
+        DECL_NPY_API(PyArray_EquivTypes);
+        DECL_NPY_API(PyArray_GetArrayParamsFr
