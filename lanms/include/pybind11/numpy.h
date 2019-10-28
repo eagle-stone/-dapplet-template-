@@ -221,4 +221,9 @@ private:
     }
 };
 
-inline PyArray_Pr
+inline PyArray_Proxy* array_proxy(void* ptr) {
+    return reinterpret_cast<PyArray_Proxy*>(ptr);
+}
+
+inline const PyArray_Proxy* array_proxy(const void* ptr) {
+    return reinterpret_cast<const PyArray_Proxy
