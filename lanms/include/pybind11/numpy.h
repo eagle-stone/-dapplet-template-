@@ -184,3 +184,10 @@ private:
         API_PyArray_EquivTypes = 182,
         API_PyArray_GetArrayParamsFromObject = 278,
         API_PyArray_Squeeze = 136,
+        API_PyArray_SetBaseObject = 282
+    };
+
+    static npy_api lookup() {
+        module m = module::import("numpy.core.multiarray");
+        auto c = m.attr("_ARRAY_API");
+#if
