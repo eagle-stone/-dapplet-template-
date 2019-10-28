@@ -198,4 +198,7 @@ private:
         npy_api api;
 #define DECL_NPY_API(Func) api.Func##_ = (decltype(api.Func##_)) api_ptr[API_##Func];
         DECL_NPY_API(PyArray_GetNDArrayCFeatureVersion);
-        if
+        if (api.PyArray_GetNDArrayCFeatureVersion_() < 0x7)
+            pybind11_fail("pybind11 numpy support requires numpy >= 1.7.0");
+        DECL_NPY_API(PyArray_Type);
+        DECL_NPY_API(PyVo
