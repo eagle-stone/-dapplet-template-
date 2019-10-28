@@ -206,4 +206,8 @@ private:
         DECL_NPY_API(PyArray_DescrFromType);
         DECL_NPY_API(PyArray_DescrFromScalar);
         DECL_NPY_API(PyArray_FromAny);
-        DECL
+        DECL_NPY_API(PyArray_Resize);
+        DECL_NPY_API(PyArray_CopyInto);
+        DECL_NPY_API(PyArray_NewCopy);
+        DECL_NPY_API(PyArray_NewFromDescr);
+        DECL_NP
