@@ -233,4 +233,9 @@ inline PyArrayDescr_Proxy* array_descriptor_proxy(PyObject* ptr) {
    return reinterpret_cast<PyArrayDescr_Proxy*>(ptr);
 }
 
-inline const PyArrayDescr_Proxy* array_descriptor_pr
+inline const PyArrayDescr_Proxy* array_descriptor_proxy(const PyObject* ptr) {
+   return reinterpret_cast<const PyArrayDescr_Proxy*>(ptr);
+}
+
+inline bool check_flags(const void* ptr, int flag) {
+    return (flag == (array_proxy(
