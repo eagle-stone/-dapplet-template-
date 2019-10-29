@@ -238,4 +238,8 @@ inline const PyArrayDescr_Proxy* array_descriptor_proxy(const PyObject* ptr) {
 }
 
 inline bool check_flags(const void* ptr, int flag) {
-    return (flag == (array_proxy(
+    return (flag == (array_proxy(ptr)->flags & flag));
+}
+
+template <typename T> struct is_std_array : std::false_type { };
+template <typename T, size_t N> struct is_std_array<std::arra
