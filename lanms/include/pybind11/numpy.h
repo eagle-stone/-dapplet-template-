@@ -242,4 +242,8 @@ inline bool check_flags(const void* ptr, int flag) {
 }
 
 template <typename T> struct is_std_array : std::false_type { };
-template <typename T, size_t N> struct is_std_array<std::arra
+template <typename T, size_t N> struct is_std_array<std::array<T, N>> : std::true_type { };
+template <typename T> struct is_complex : std::false_type { };
+template <typename T> struct is_complex<std::complex<T>> : std::true_type { };
+
+template <typename
