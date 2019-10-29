@@ -246,4 +246,8 @@ template <typename T, size_t N> struct is_std_array<std::array<T, N>> : std::tru
 template <typename T> struct is_complex : std::false_type { };
 template <typename T> struct is_complex<std::complex<T>> : std::true_type { };
 
-template <typename
+template <typename T> struct array_info_scalar {
+    typedef T type;
+    static constexpr bool is_array = false;
+    static constexpr bool is_empty = false;
+    static PYBIND11_DESCR extents() { return _(
