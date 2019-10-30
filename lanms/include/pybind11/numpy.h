@@ -250,4 +250,8 @@ template <typename T> struct array_info_scalar {
     typedef T type;
     static constexpr bool is_array = false;
     static constexpr bool is_empty = false;
-    static PYBIND11_DESCR extents() { return _(
+    static PYBIND11_DESCR extents() { return _(""); }
+    static void append_extents(list& /* shape */) { }
+};
+// Computes underlying type and a comma-separated list of extents for array
+//
