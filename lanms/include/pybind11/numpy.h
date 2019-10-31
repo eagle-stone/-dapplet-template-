@@ -254,4 +254,6 @@ template <typename T> struct array_info_scalar {
     static void append_extents(list& /* shape */) { }
 };
 // Computes underlying type and a comma-separated list of extents for array
-//
+// types (any mix of std::array and built-in arrays). An array of char is
+// treated as scalar because it gets special handling.
+template <typename T> struct array_info : arra
