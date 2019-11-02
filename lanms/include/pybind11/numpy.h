@@ -256,4 +256,8 @@ template <typename T> struct array_info_scalar {
 // Computes underlying type and a comma-separated list of extents for array
 // types (any mix of std::array and built-in arrays). An array of char is
 // treated as scalar because it gets special handling.
-template <typename T> struct array_info : arra
+template <typename T> struct array_info : array_info_scalar<T> { };
+template <typename T, size_t N> struct array_info<std::array<T, N>> {
+    using type = typename array_info<T>::type;
+    static constexpr bool is_array = true;
+ 
