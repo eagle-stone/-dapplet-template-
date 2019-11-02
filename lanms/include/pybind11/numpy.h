@@ -264,4 +264,9 @@ template <typename T, size_t N> struct array_info<std::array<T, N>> {
     static constexpr size_t extent = N;
 
     // appends the extents to shape
-    stat
+    static void append_extents(list& shape) {
+        shape.append(N);
+        array_info<T>::append_extents(shape);
+    }
+
+    template<typename T2 = T, enable_if_t<!array
