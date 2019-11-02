@@ -269,4 +269,9 @@ template <typename T, size_t N> struct array_info<std::array<T, N>> {
         array_info<T>::append_extents(shape);
     }
 
-    template<typename T2 = T, enable_if_t<!array
+    template<typename T2 = T, enable_if_t<!array_info<T2>::is_array, int> = 0>
+    static PYBIND11_DESCR extents() {
+        return _<N>();
+    }
+
+    template<typename T2 = T, enable_if_t<array_info<T2>::is_array
