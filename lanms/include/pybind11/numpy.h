@@ -282,4 +282,5 @@ template <typename T, size_t N> struct array_info<std::array<T, N>> {
 // For numpy we have special handling for arrays of characters, so we don't include
 // the size in the array extents.
 template <size_t N> struct array_info<char[N]> : array_info_scalar<char[N]> { };
-template <size_t N> struct ar
+template <size_t N> struct array_info<std::array<char, N>> : array_info_scalar<std::array<char, N>> { };
+template <typename T, size_t N> struct array_info<T[N]> : array_info<std::array<T, N>>
