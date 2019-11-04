@@ -283,4 +283,8 @@ template <typename T, size_t N> struct array_info<std::array<T, N>> {
 // the size in the array extents.
 template <size_t N> struct array_info<char[N]> : array_info_scalar<char[N]> { };
 template <size_t N> struct array_info<std::array<char, N>> : array_info_scalar<std::array<char, N>> { };
-template <typename T, size_t N> struct array_info<T[N]> : array_info<std::array<T, N>>
+template <typename T, size_t N> struct array_info<T[N]> : array_info<std::array<T, N>> { };
+template <typename T> using remove_all_extents_t = typename array_info<T>::type;
+
+template <typename T> using is_pod_struct = all_of<
+    std::is_standard_layout<T>,     // since we're
