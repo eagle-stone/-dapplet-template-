@@ -291,4 +291,7 @@ template <typename T> using is_pod_struct = all_of<
 #if !defined(__GNUG__) || defined(__clang__) || __GNUC__ >= 5
     std::is_trivially_copyable<T>,
 #else
-    // GCC 4 doesn't implement 
+    // GCC 4 doesn't implement is_trivially_copyable, so approximate it
+    std::is_trivially_destructible<T>,
+    satisfies_any_of<T, std::has_trivial_copy_constructor, std::has_trivial_copy_assign>,
+#endif
