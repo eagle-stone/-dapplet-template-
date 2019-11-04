@@ -287,4 +287,8 @@ template <typename T, size_t N> struct array_info<T[N]> : array_info<std::array<
 template <typename T> using remove_all_extents_t = typename array_info<T>::type;
 
 template <typename T> using is_pod_struct = all_of<
-    std::is_standard_layout<T>,     // since we're
+    std::is_standard_layout<T>,     // since we're accessing directly in memory we need a standard layout type
+#if !defined(__GNUG__) || defined(__clang__) || __GNUC__ >= 5
+    std::is_trivially_copyable<T>,
+#else
+    // GCC 4 doesn't implement 
