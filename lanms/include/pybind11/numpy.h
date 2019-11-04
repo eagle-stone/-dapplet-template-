@@ -295,3 +295,7 @@ template <typename T> using is_pod_struct = all_of<
     std::is_trivially_destructible<T>,
     satisfies_any_of<T, std::has_trivial_copy_constructor, std::has_trivial_copy_assign>,
 #endif
+    satisfies_none_of<T, std::is_reference, std::is_array, is_std_array, std::is_arithmetic, is_complex, std::is_enum>
+>;
+
+template <ssize_t Dim = 0, typename Strides> ssize_t byte_o
