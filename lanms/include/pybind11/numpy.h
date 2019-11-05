@@ -321,4 +321,7 @@ protected:
     const ssize_t dims_;
 
     friend class pybind11::array;
-    // Constructor for compile-time dimen
+    // Constructor for compile-time dimensions:
+    template <bool Dyn = Dynamic>
+    unchecked_reference(const void *data, const ssize_t *shape, const ssize_t *strides, enable_if_t<!Dyn, ssize_t>)
+    : data_{rei
