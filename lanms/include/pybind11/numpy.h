@@ -316,4 +316,9 @@ protected:
     const unsigned char *data_;
     // Storing the shape & strides in local variables (i.e. these arrays) allows the compiler to
     // make large performance gains on big, nested loops, but requires compile-time dimensions
-    conditional_t<Dynamic, const
+    conditional_t<Dynamic, const ssize_t *, std::array<ssize_t, (size_t) Dims>>
+            shape_, strides_;
+    const ssize_t dims_;
+
+    friend class pybind11::array;
+    // Constructor for compile-time dimen
