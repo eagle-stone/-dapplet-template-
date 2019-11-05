@@ -327,4 +327,9 @@ protected:
     : data_{reinterpret_cast<const unsigned char *>(data)}, dims_{Dims} {
         for (size_t i = 0; i < (size_t) dims_; i++) {
             shape_[i] = shape[i];
-            strides_[i
+            strides_[i] = strides[i];
+        }
+    }
+    // Constructor for runtime dimensions:
+    template <bool Dyn = Dynamic>
+    unchecked_reference(const void *data, co
