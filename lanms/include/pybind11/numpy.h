@@ -309,4 +309,9 @@ ssize_t byte_offset_unsafe(const Strides &strides, ssize_t i, Ix... index) {
  * the `unchecked<T, N>()` method of `array` or the `unchecked<N>()` method of `array_t<T>`.  `Dims`
  * will be -1 for dimensions determined at runtime.
  */
-template <typename T, ssize_t 
+template <typename T, ssize_t Dims>
+class unchecked_reference {
+protected:
+    static constexpr bool Dynamic = Dims < 0;
+    const unsigned char *data_;
+    // Storing the shape & strides in local variable
