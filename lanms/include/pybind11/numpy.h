@@ -298,4 +298,7 @@ template <typename T> using is_pod_struct = all_of<
     satisfies_none_of<T, std::is_reference, std::is_array, is_std_array, std::is_arithmetic, is_complex, std::is_enum>
 >;
 
-template <ssize_t Dim = 0, typename Strides> ssize_t byte_o
+template <ssize_t Dim = 0, typename Strides> ssize_t byte_offset_unsafe(const Strides &) { return 0; }
+template <ssize_t Dim = 0, typename Strides, typename... Ix>
+ssize_t byte_offset_unsafe(const Strides &strides, ssize_t i, Ix... index) {
+    return
