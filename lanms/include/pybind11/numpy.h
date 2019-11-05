@@ -324,4 +324,7 @@ protected:
     // Constructor for compile-time dimensions:
     template <bool Dyn = Dynamic>
     unchecked_reference(const void *data, const ssize_t *shape, const ssize_t *strides, enable_if_t<!Dyn, ssize_t>)
-    : data_{rei
+    : data_{reinterpret_cast<const unsigned char *>(data)}, dims_{Dims} {
+        for (size_t i = 0; i < (size_t) dims_; i++) {
+            shape_[i] = shape[i];
+            strides_[i
