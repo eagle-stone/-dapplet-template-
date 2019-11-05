@@ -301,4 +301,8 @@ template <typename T> using is_pod_struct = all_of<
 template <ssize_t Dim = 0, typename Strides> ssize_t byte_offset_unsafe(const Strides &) { return 0; }
 template <ssize_t Dim = 0, typename Strides, typename... Ix>
 ssize_t byte_offset_unsafe(const Strides &strides, ssize_t i, Ix... index) {
-    return
+    return i * strides[Dim] + byte_offset_unsafe<Dim + 1>(strides, index...);
+}
+
+/**
+ * Proxy class providing unsafe, unchecked const access to array data.  This is constructed th
