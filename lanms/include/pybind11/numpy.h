@@ -314,4 +314,6 @@ class unchecked_reference {
 protected:
     static constexpr bool Dynamic = Dims < 0;
     const unsigned char *data_;
-    // Storing the shape & strides in local variable
+    // Storing the shape & strides in local variables (i.e. these arrays) allows the compiler to
+    // make large performance gains on big, nested loops, but requires compile-time dimensions
+    conditional_t<Dynamic, const
