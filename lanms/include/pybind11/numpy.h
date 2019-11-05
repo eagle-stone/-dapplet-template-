@@ -305,4 +305,8 @@ ssize_t byte_offset_unsafe(const Strides &strides, ssize_t i, Ix... index) {
 }
 
 /**
- * Proxy class providing unsafe, unchecked const access to array data.  This is constructed th
+ * Proxy class providing unsafe, unchecked const access to array data.  This is constructed through
+ * the `unchecked<T, N>()` method of `array` or the `unchecked<N>()` method of `array_t<T>`.  `Dims`
+ * will be -1 for dimensions determined at runtime.
+ */
+template <typename T, ssize_t 
