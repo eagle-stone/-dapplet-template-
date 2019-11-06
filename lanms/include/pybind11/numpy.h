@@ -338,4 +338,8 @@ protected:
 public:
     /**
      * Unchecked const reference access to data at the given indices.  For a compile-time known
-     * number of dimensions, this requires the correct number 
+     * number of dimensions, this requires the correct number of arguments; for run-time
+     * dimensionality, this is not checked (and so is up to the caller to use safely).
+     */
+    template <typename... Ix> const T &operator()(Ix... index) const {
+        static_asse
