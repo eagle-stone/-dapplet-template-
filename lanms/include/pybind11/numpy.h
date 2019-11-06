@@ -334,3 +334,8 @@ protected:
     template <bool Dyn = Dynamic>
     unchecked_reference(const void *data, const ssize_t *shape, const ssize_t *strides, enable_if_t<Dyn, ssize_t> dims)
     : data_{reinterpret_cast<const unsigned char *>(data)}, shape_{shape}, strides_{strides}, dims_{dims} {}
+
+public:
+    /**
+     * Unchecked const reference access to data at the given indices.  For a compile-time known
+     * number of dimensions, this requires the correct number 
