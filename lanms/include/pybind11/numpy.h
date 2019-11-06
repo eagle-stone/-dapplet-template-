@@ -332,4 +332,5 @@ protected:
     }
     // Constructor for runtime dimensions:
     template <bool Dyn = Dynamic>
-    unchecked_reference(const void *data, co
+    unchecked_reference(const void *data, const ssize_t *shape, const ssize_t *strides, enable_if_t<Dyn, ssize_t> dims)
+    : data_{reinterpret_cast<const unsigned char *>(data)}, shape_{shape}, strides_{strides}, dims_{dims} {}
