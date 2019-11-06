@@ -342,4 +342,6 @@ public:
      * dimensionality, this is not checked (and so is up to the caller to use safely).
      */
     template <typename... Ix> const T &operator()(Ix... index) const {
-        static_asse
+        static_assert(sizeof...(Ix) == Dims || Dynamic,
+                "Invalid number of indices for unchecked array reference");
+        return *reinterpret_cast<const T *>(data_ + byte_offset_unsafe(stri
