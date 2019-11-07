@@ -348,4 +348,7 @@ public:
     }
     /**
      * Unchecked const reference access to data; this operator only participates if the reference
-     * is to a 1-dimensiona
+     * is to a 1-dimensional array.  When present, this is exactly equivalent to `obj(index)`.
+     */
+    template <ssize_t D = Dims, typename = enable_if_t<D == 1 || Dynamic>>
+    const T &operato
