@@ -378,4 +378,10 @@ public:
     /// Returns the total number of bytes used by the referenced data.  Note that the actual span in
     /// memory may be larger if the referenced array has non-contiguous strides (e.g. for a slice).
     ssize_t nbytes() const {
-        retu
+        return size() * itemsize();
+    }
+};
+
+template <typename T, ssize_t Dims>
+class unchecked_mutable_reference : public unchecked_reference<T, Dims> {
+    friend class pybind11:
