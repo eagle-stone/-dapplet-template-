@@ -363,4 +363,8 @@ public:
     ssize_t shape(ssize_t dim) const { return shape_[(size_t) dim]; }
 
     /// Returns the number of dimensions of the array
-    ssiz
+    ssize_t ndim() const { return dims_; }
+
+    /// Returns the total number of elements in the referenced array, i.e. the product of the shapes
+    template <bool Dyn = Dynamic>
+    enable_if_t<!Dyn, ssize_t>
