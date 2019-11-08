@@ -384,4 +384,10 @@ public:
 
 template <typename T, ssize_t Dims>
 class unchecked_mutable_reference : public unchecked_reference<T, Dims> {
-    friend class pybind11:
+    friend class pybind11::array;
+    using ConstBase = unchecked_reference<T, Dims>;
+    using ConstBase::ConstBase;
+    using ConstBase::Dynamic;
+public:
+    /// Mutable, unchecked access to data at the given indices.
+ 
