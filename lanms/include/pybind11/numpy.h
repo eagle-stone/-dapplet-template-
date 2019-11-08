@@ -371,4 +371,8 @@ public:
         return std::accumulate(shape_.begin(), shape_.end(), (ssize_t) 1, std::multiplies<ssize_t>());
     }
     template <bool Dyn = Dynamic>
-    enable_if_t<Dyn,
+    enable_if_t<Dyn, ssize_t> size() const {
+        return std::accumulate(shape_, shape_ + ndim(), (ssize_t) 1, std::multiplies<ssize_t>());
+    }
+
+    /// Returns the total number of bytes used b
