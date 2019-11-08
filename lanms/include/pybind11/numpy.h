@@ -367,4 +367,8 @@ public:
 
     /// Returns the total number of elements in the referenced array, i.e. the product of the shapes
     template <bool Dyn = Dynamic>
-    enable_if_t<!Dyn, ssize_t>
+    enable_if_t<!Dyn, ssize_t> size() const {
+        return std::accumulate(shape_.begin(), shape_.end(), (ssize_t) 1, std::multiplies<ssize_t>());
+    }
+    template <bool Dyn = Dynamic>
+    enable_if_t<Dyn,
