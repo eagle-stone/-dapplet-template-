@@ -354,4 +354,9 @@ public:
     const T &operator[](ssize_t index) const { return operator()(index); }
 
     /// Pointer access to the data at the given indices.
-    template <typename... Ix> const T *data(Ix... ix) const { 
+    template <typename... Ix> const T *data(Ix... ix) const { return &operator()(ssize_t(ix)...); }
+
+    /// Returns the item size, i.e. sizeof(T)
+    constexpr static ssize_t itemsize() { return sizeof(T); }
+
+    /// Returns the shap
