@@ -375,4 +375,7 @@ public:
         return std::accumulate(shape_, shape_ + ndim(), (ssize_t) 1, std::multiplies<ssize_t>());
     }
 
-    /// Returns the total number of bytes used b
+    /// Returns the total number of bytes used by the referenced data.  Note that the actual span in
+    /// memory may be larger if the referenced array has non-contiguous strides (e.g. for a slice).
+    ssize_t nbytes() const {
+        retu
