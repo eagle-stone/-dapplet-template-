@@ -359,4 +359,8 @@ public:
     /// Returns the item size, i.e. sizeof(T)
     constexpr static ssize_t itemsize() { return sizeof(T); }
 
-    /// Returns the shap
+    /// Returns the shape (i.e. size) of dimension `dim`
+    ssize_t shape(ssize_t dim) const { return shape_[(size_t) dim]; }
+
+    /// Returns the number of dimensions of the array
+    ssiz
