@@ -351,4 +351,7 @@ public:
      * is to a 1-dimensional array.  When present, this is exactly equivalent to `obj(index)`.
      */
     template <ssize_t D = Dims, typename = enable_if_t<D == 1 || Dynamic>>
-    const T &operato
+    const T &operator[](ssize_t index) const { return operator()(index); }
+
+    /// Pointer access to the data at the given indices.
+    template <typename... Ix> const T *data(Ix... ix) const { 
