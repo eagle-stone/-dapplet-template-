@@ -390,4 +390,6 @@ class unchecked_mutable_reference : public unchecked_reference<T, Dims> {
     using ConstBase::Dynamic;
 public:
     /// Mutable, unchecked access to data at the given indices.
- 
+    template <typename... Ix> T& operator()(Ix... index) {
+        static_assert(sizeof...(Ix) == Dims || Dynamic,
+                "Invalid number of indices for unchecked arr
