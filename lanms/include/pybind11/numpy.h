@@ -400,4 +400,7 @@ public:
      * reference is to a 1-dimensional array (or has runtime dimensions).  When present, this is
      * exactly equivalent to `obj(index)`.
      */
-    template <ssize_t D = D
+    template <ssize_t D = Dims, typename = enable_if_t<D == 1 || Dynamic>>
+    T &operator[](ssize_t index) { return operator()(index); }
+
+    /// Mutable pointer access to the data at the giv
