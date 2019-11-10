@@ -396,4 +396,8 @@ public:
         return const_cast<T &>(ConstBase::operator()(index...));
     }
     /**
-     * Mutable, unchecked access data at the given index; this operator only participates
+     * Mutable, unchecked access data at the given index; this operator only participates if the
+     * reference is to a 1-dimensional array (or has runtime dimensions).  When present, this is
+     * exactly equivalent to `obj(index)`.
+     */
+    template <ssize_t D = D
