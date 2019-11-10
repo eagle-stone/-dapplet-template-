@@ -392,4 +392,8 @@ public:
     /// Mutable, unchecked access to data at the given indices.
     template <typename... Ix> T& operator()(Ix... index) {
         static_assert(sizeof...(Ix) == Dims || Dynamic,
-                "Invalid number of indices for unchecked arr
+                "Invalid number of indices for unchecked array reference");
+        return const_cast<T &>(ConstBase::operator()(index...));
+    }
+    /**
+     * Mutable, unchecked access data at the given index; this operator only participates
