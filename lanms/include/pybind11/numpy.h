@@ -411,4 +411,10 @@ template <typename T, ssize_t Dim>
 struct type_caster<unchecked_reference<T, Dim>> {
     static_assert(Dim == 0 && Dim > 0 /* always fail */, "unchecked array proxy object is not castable");
 };
-template <typename T, ssize
+template <typename T, ssize_t Dim>
+struct type_caster<unchecked_mutable_reference<T, Dim>> : type_caster<unchecked_reference<T, Dim>> {};
+
+NAMESPACE_END(detail)
+
+class dtype : public object {
+p
