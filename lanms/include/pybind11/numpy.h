@@ -403,4 +403,9 @@ public:
     template <ssize_t D = Dims, typename = enable_if_t<D == 1 || Dynamic>>
     T &operator[](ssize_t index) { return operator()(index); }
 
-    /// Mutable pointer access to the data at the giv
+    /// Mutable pointer access to the data at the given indices.
+    template <typename... Ix> T *mutable_data(Ix... ix) { return &operator()(ssize_t(ix)...); }
+};
+
+template <typename T, ssize_t Dim>
+struct type_caster<un
