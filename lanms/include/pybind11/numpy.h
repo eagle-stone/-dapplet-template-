@@ -421,4 +421,6 @@ public:
     PYBIND11_OBJECT_DEFAULT(dtype, object, detail::npy_api::get().PyArrayDescr_Check_);
 
     explicit dtype(const buffer_info &info) {
-        dtype des
+        dtype descr(_dtype_from_pep3118()(PYBIND11_STR_TYPE(info.format)));
+        // If info.itemsize == 0, use the value calculated from the format string
+        m_ptr = descr.strip_pa
