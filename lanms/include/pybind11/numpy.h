@@ -417,4 +417,8 @@ struct type_caster<unchecked_mutable_reference<T, Dim>> : type_caster<unchecked_
 NAMESPACE_END(detail)
 
 class dtype : public object {
-p
+public:
+    PYBIND11_OBJECT_DEFAULT(dtype, object, detail::npy_api::get().PyArrayDescr_Check_);
+
+    explicit dtype(const buffer_info &info) {
+        dtype des
