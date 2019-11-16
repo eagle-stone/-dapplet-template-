@@ -427,4 +427,10 @@ public:
     }
 
     explicit dtype(const std::string &format) {
-        m_ptr = from_args(pybind11
+        m_ptr = from_args(pybind11::str(format)).release().ptr();
+    }
+
+    dtype(const char *format) : dtype(std::string(format)) { }
+
+    dtype(list names, list formats, list offsets, ssize_t itemsize) {
+     
