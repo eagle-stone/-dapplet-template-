@@ -438,4 +438,8 @@ public:
         args["formats"] = formats;
         args["offsets"] = offsets;
         args["itemsize"] = pybind11::int_(itemsize);
-    
+        m_ptr = from_args(args).release().ptr();
+    }
+
+    /// This is essentially the same as calling numpy.dtype(args) in Python.
+    static dtype from_args(object args) {
