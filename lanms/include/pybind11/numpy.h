@@ -433,4 +433,9 @@ public:
     dtype(const char *format) : dtype(std::string(format)) { }
 
     dtype(list names, list formats, list offsets, ssize_t itemsize) {
-     
+        dict args;
+        args["names"] = names;
+        args["formats"] = formats;
+        args["offsets"] = offsets;
+        args["itemsize"] = pybind11::int_(itemsize);
+    
