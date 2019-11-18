@@ -446,4 +446,9 @@ public:
         PyObject *ptr = nullptr;
         if (!detail::npy_api::get().PyArray_DescrConverter_(args.release().ptr(), &ptr) || !ptr)
             throw error_already_set();
-        return reinte
+        return reinterpret_steal<dtype>(ptr);
+    }
+
+    /// Return dtype associated with a C++ type.
+    template <typename T> static dtype of() {
+        return detail::npy_format_descriptor<typename st
