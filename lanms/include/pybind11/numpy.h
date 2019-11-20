@@ -451,4 +451,9 @@ public:
 
     /// Return dtype associated with a C++ type.
     template <typename T> static dtype of() {
-        return detail::npy_format_descriptor<typename st
+        return detail::npy_format_descriptor<typename std::remove_cv<T>::type>::dtype();
+    }
+
+    /// Size of the data type in bytes.
+    ssize_t itemsize() const {
+        return detail::array_descriptor_proxy(m_ptr)->elsize
