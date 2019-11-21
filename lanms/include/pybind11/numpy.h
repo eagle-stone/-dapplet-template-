@@ -464,4 +464,11 @@ public:
         return detail::array_descriptor_proxy(m_ptr)->names != nullptr;
     }
 
-    /
+    /// Single-character type code.
+    char kind() const {
+        return detail::array_descriptor_proxy(m_ptr)->kind;
+    }
+
+private:
+    static object _dtype_from_pep3118() {
+        stati
