@@ -456,4 +456,12 @@ public:
 
     /// Size of the data type in bytes.
     ssize_t itemsize() const {
-        return detail::array_descriptor_proxy(m_ptr)->elsize
+        return detail::array_descriptor_proxy(m_ptr)->elsize;
+    }
+
+    /// Returns true for structured data types.
+    bool has_fields() const {
+        return detail::array_descriptor_proxy(m_ptr)->names != nullptr;
+    }
+
+    /
