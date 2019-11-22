@@ -471,4 +471,9 @@ public:
 
 private:
     static object _dtype_from_pep3118() {
-        stati
+        static PyObject *obj = module::import("numpy.core._internal")
+            .attr("_dtype_from_pep3118").cast<object>().release().ptr();
+        return reinterpret_borrow<object>(obj);
+    }
+
+    dtyp
