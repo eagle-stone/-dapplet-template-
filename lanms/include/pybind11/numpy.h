@@ -479,4 +479,9 @@ private:
     dtype strip_padding(ssize_t itemsize) {
         // Recursively strip all void fields with empty names that are generated for
         // padding fields (as of NumPy v1.11).
-        if (!has_f
+        if (!has_fields())
+            return *this;
+
+        struct field_descr { PYBIND11_STR_TYPE name; object format; pybind11::int_ offset; };
+        std::vector<field_descr> field_descriptors;
+
