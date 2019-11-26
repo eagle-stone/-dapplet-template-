@@ -485,3 +485,7 @@ private:
         struct field_descr { PYBIND11_STR_TYPE name; object format; pybind11::int_ offset; };
         std::vector<field_descr> field_descriptors;
 
+        for (auto field : attr("fields").attr("items")()) {
+            auto spec = field.cast<tuple>();
+            auto name = spec[0].cast<pybind11::str>();
+            auto format
