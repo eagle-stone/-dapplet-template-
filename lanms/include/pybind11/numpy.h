@@ -495,4 +495,7 @@ private:
             field_descriptors.push_back({(PYBIND11_STR_TYPE) name, format.strip_padding(format.itemsize()), offset});
         }
 
-        std::sort(field_descriptors.
+        std::sort(field_descriptors.begin(), field_descriptors.end(),
+                  [](const field_descr& a, const field_descr& b) {
+                      return a.offset.cast<int>() < b.offset.cast<int>();
+    
