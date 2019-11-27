@@ -498,4 +498,9 @@ private:
         std::sort(field_descriptors.begin(), field_descriptors.end(),
                   [](const field_descr& a, const field_descr& b) {
                       return a.offset.cast<int>() < b.offset.cast<int>();
-    
+                  });
+
+        list names, formats, offsets;
+        for (auto& descr : field_descriptors) {
+            names.append(descr.name);
+            formats.append(descr.format);
