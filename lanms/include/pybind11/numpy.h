@@ -504,3 +504,12 @@ private:
         for (auto& descr : field_descriptors) {
             names.append(descr.name);
             formats.append(descr.format);
+            offsets.append(descr.offset);
+        }
+        return dtype(names, formats, offsets, itemsize);
+    }
+};
+
+class array : public buffer {
+public:
+    PYBIND11_OBJECT_CVT(
