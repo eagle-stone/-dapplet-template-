@@ -512,4 +512,8 @@ private:
 
 class array : public buffer {
 public:
-    PYBIND11_OBJECT_CVT(
+    PYBIND11_OBJECT_CVT(array, buffer, detail::npy_api::get().PyArray_Check_, raw_array)
+
+    enum {
+        c_style = detail::npy_api::NPY_ARRAY_C_CONTIGUOUS_,
+        f_style = detail::npy_api::NPY_ARRAY
