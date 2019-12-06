@@ -530,4 +530,8 @@ public:
           const void *ptr = nullptr, handle base = handle()) {
 
         if (strides->empty())
-        
+            *strides = c_strides(*shape, dt.itemsize());
+
+        auto ndim = shape->size();
+        if (ndim != strides->size())
+            pybind11_fail("NumPy: shape ndim doesn'
