@@ -516,4 +516,10 @@ public:
 
     enum {
         c_style = detail::npy_api::NPY_ARRAY_C_CONTIGUOUS_,
-        f_style = detail::npy_api::NPY_ARRAY
+        f_style = detail::npy_api::NPY_ARRAY_F_CONTIGUOUS_,
+        forcecast = detail::npy_api::NPY_ARRAY_FORCECAST_
+    };
+
+    array() : array({{0}}, static_cast<const double *>(nullptr)) {}
+
+    using ShapeContainer
