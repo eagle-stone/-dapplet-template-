@@ -526,4 +526,8 @@ public:
     using StridesContainer = detail::any_container<ssize_t>;
 
     // Constructs an array taking shape/strides from arbitrary container types
-    array(con
+    array(const pybind11::dtype &dt, ShapeContainer shape, StridesContainer strides,
+          const void *ptr = nullptr, handle base = handle()) {
+
+        if (strides->empty())
+        
