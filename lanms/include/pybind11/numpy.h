@@ -522,4 +522,8 @@ public:
 
     array() : array({{0}}, static_cast<const double *>(nullptr)) {}
 
-    using ShapeContainer
+    using ShapeContainer = detail::any_container<ssize_t>;
+    using StridesContainer = detail::any_container<ssize_t>;
+
+    // Constructs an array taking shape/strides from arbitrary container types
+    array(con
