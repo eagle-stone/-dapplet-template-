@@ -534,4 +534,10 @@ public:
 
         auto ndim = shape->size();
         if (ndim != strides->size())
-            pybind11_fail("NumPy: shape ndim doesn'
+            pybind11_fail("NumPy: shape ndim doesn't match strides ndim");
+        auto descr = dt;
+
+        int flags = 0;
+        if (base && ptr) {
+            if (isinstance<array>(base))
+                /* Copy flag
