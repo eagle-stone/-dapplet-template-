@@ -540,4 +540,7 @@ public:
         int flags = 0;
         if (base && ptr) {
             if (isinstance<array>(base))
-                /* Copy flag
+                /* Copy flags from base (except ownership bit) */
+                flags = reinterpret_borrow<array>(base).flags() & ~detail::npy_api::NPY_ARRAY_OWNDATA_;
+            else
+                /* Writa
