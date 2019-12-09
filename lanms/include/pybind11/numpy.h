@@ -548,4 +548,6 @@ public:
         }
 
         auto &api = detail::npy_api::get();
-        
+        auto tmp = reinterpret_steal<object>(api.PyArray_NewFromDescr_(
+            api.PyArray_Type_, descr.release().ptr(), (int) ndim, shape->data(), strides->data(),
+            cons
