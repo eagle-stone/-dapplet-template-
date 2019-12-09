@@ -555,4 +555,9 @@ public:
             throw error_already_set();
         if (ptr) {
             if (base) {
-                api.PyArray_SetBaseObject_(tmp.
+                api.PyArray_SetBaseObject_(tmp.ptr(), base.inc_ref().ptr());
+            } else {
+                tmp = reinterpret_steal<object>(api.PyArray_NewCopy_(tmp.ptr(), -1 /* any order */));
+            }
+        }
+ 
