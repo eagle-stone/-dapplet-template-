@@ -550,4 +550,9 @@ public:
         auto &api = detail::npy_api::get();
         auto tmp = reinterpret_steal<object>(api.PyArray_NewFromDescr_(
             api.PyArray_Type_, descr.release().ptr(), (int) ndim, shape->data(), strides->data(),
-            cons
+            const_cast<void *>(ptr), flags, nullptr));
+        if (!tmp)
+            throw error_already_set();
+        if (ptr) {
+            if (base) {
+                api.PyArray_SetBaseObject_(tmp.
