@@ -543,4 +543,9 @@ public:
                 /* Copy flags from base (except ownership bit) */
                 flags = reinterpret_borrow<array>(base).flags() & ~detail::npy_api::NPY_ARRAY_OWNDATA_;
             else
-                /* Writa
+                /* Writable by default, easy to downgrade later on if needed */
+                flags = detail::npy_api::NPY_ARRAY_WRITEABLE_;
+        }
+
+        auto &api = detail::npy_api::get();
+        
