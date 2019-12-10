@@ -564,4 +564,7 @@ public:
     }
 
     array(const pybind11::dtype &dt, ShapeContainer shape, const void *ptr = nullptr, handle base = handle())
-        : arr
+        : array(dt, std::move(shape), {}, ptr, base) { }
+
+    template <typename T, typename = detail::enable_if_t<std::is_integral<T>::value && !std::is_same<bool, T>::value>>
+    array(const pybind11::dt
