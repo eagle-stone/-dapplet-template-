@@ -571,4 +571,5 @@ public:
         : array(dt, {{count}}, ptr, base) { }
 
     template <typename T>
-    array(ShapeCo
+    array(ShapeContainer shape, StridesContainer strides, const T *ptr, handle base = handle())
+        : array(pybind11::dtype::of<T>(), std::move(shape), std::move(strides), ptr, base)
