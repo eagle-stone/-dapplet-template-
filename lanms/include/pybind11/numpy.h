@@ -560,4 +560,8 @@ public:
                 tmp = reinterpret_steal<object>(api.PyArray_NewCopy_(tmp.ptr(), -1 /* any order */));
             }
         }
- 
+        m_ptr = tmp.release().ptr();
+    }
+
+    array(const pybind11::dtype &dt, ShapeContainer shape, const void *ptr = nullptr, handle base = handle())
+        : arr
