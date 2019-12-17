@@ -572,4 +572,10 @@ public:
 
     template <typename T>
     array(ShapeContainer shape, StridesContainer strides, const T *ptr, handle base = handle())
-        : array(pybind11::dtype::of<T>(), std::move(shape), std::move(strides), ptr, base)
+        : array(pybind11::dtype::of<T>(), std::move(shape), std::move(strides), ptr, base) { }
+
+    template <typename T>
+    array(ShapeContainer shape, const T *ptr, handle base = handle())
+        : array(std::move(shape), {}, ptr, base) { }
+
+    template <typename T
