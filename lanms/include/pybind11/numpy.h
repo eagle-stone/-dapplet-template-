@@ -586,4 +586,9 @@ public:
 
     /// Array descriptor (dtype)
     pybind11::dtype dtype() const {
-        return reinterpret_bo
+        return reinterpret_borrow<pybind11::dtype>(detail::array_proxy(m_ptr)->descr);
+    }
+
+    /// Total number of elements
+    ssize_t size() const {
+        return std::accumulate(shape(), s
