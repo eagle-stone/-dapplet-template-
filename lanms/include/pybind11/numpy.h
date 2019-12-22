@@ -591,4 +591,9 @@ public:
 
     /// Total number of elements
     ssize_t size() const {
-        return std::accumulate(shape(), s
+        return std::accumulate(shape(), shape() + ndim(), (ssize_t) 1, std::multiplies<ssize_t>());
+    }
+
+    /// Byte size of a single element
+    ssize_t itemsize() const {
+        return detail::array_descrip
