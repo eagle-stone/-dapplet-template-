@@ -582,4 +582,8 @@ public:
     explicit array(ssize_t count, const T *ptr, handle base = handle()) : array({count}, {}, ptr, base) { }
 
     explicit array(const buffer_info &info)
-    : array(
+    : array(pybind11::dtype(info), info.shape, info.strides, info.ptr) { }
+
+    /// Array descriptor (dtype)
+    pybind11::dtype dtype() const {
+        return reinterpret_bo
