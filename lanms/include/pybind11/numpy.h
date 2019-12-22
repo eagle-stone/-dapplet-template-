@@ -578,4 +578,8 @@ public:
     array(ShapeContainer shape, const T *ptr, handle base = handle())
         : array(std::move(shape), {}, ptr, base) { }
 
-    template <typename T
+    template <typename T>
+    explicit array(ssize_t count, const T *ptr, handle base = handle()) : array({count}, {}, ptr, base) { }
+
+    explicit array(const buffer_info &info)
+    : array(
