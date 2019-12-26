@@ -611,4 +611,9 @@ public:
 
     /// Base object
     object base() const {
-        return reinterp
+        return reinterpret_borrow<object>(detail::array_proxy(m_ptr)->base);
+    }
+
+    /// Dimensions of the array
+    const ssize_t* shape() const {
+        return detail::array_proxy(m_
