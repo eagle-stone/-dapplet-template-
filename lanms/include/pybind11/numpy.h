@@ -604,4 +604,11 @@ public:
         return size() * itemsize();
     }
 
-    ///
+    /// Number of dimensions
+    ssize_t ndim() const {
+        return detail::array_proxy(m_ptr)->nd;
+    }
+
+    /// Base object
+    object base() const {
+        return reinterp
