@@ -596,4 +596,12 @@ public:
 
     /// Byte size of a single element
     ssize_t itemsize() const {
-        return detail::array_descrip
+        return detail::array_descriptor_proxy(detail::array_proxy(m_ptr)->descr)->elsize;
+    }
+
+    /// Total number of bytes
+    ssize_t nbytes() const {
+        return size() * itemsize();
+    }
+
+    ///
