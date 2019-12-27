@@ -616,4 +616,11 @@ public:
 
     /// Dimensions of the array
     const ssize_t* shape() const {
-        return detail::array_proxy(m_
+        return detail::array_proxy(m_ptr)->dimensions;
+    }
+
+    /// Dimension along a given axis
+    ssize_t shape(ssize_t dim) const {
+        if (dim >= ndim())
+            fail_dim_check(dim, "invalid axis");
+        retur
