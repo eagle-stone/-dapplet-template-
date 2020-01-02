@@ -623,4 +623,13 @@ public:
     ssize_t shape(ssize_t dim) const {
         if (dim >= ndim())
             fail_dim_check(dim, "invalid axis");
-        retur
+        return shape()[dim];
+    }
+
+    /// Strides of the array
+    const ssize_t* strides() const {
+        return detail::array_proxy(m_ptr)->strides;
+    }
+
+    /// Stride along a given axis
+    
