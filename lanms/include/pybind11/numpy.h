@@ -638,4 +638,10 @@ public:
         return strides()[dim];
     }
 
-    /// Return the NumPy
+    /// Return the NumPy array flags
+    int flags() const {
+        return detail::array_proxy(m_ptr)->flags;
+    }
+
+    /// If set, the array is writeable (otherwise the buffer is read-only)
+    bool writeable(
