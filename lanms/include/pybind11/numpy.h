@@ -644,4 +644,8 @@ public:
     }
 
     /// If set, the array is writeable (otherwise the buffer is read-only)
-    bool writeable(
+    bool writeable() const {
+        return detail::check_flags(m_ptr, detail::npy_api::NPY_ARRAY_WRITEABLE_);
+    }
+
+    /// If set, the array owns the data (will be freed when t
