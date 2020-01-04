@@ -632,4 +632,10 @@ public:
     }
 
     /// Stride along a given axis
-    
+    ssize_t strides(ssize_t dim) const {
+        if (dim >= ndim())
+            fail_dim_check(dim, "invalid axis");
+        return strides()[dim];
+    }
+
+    /// Return the NumPy
