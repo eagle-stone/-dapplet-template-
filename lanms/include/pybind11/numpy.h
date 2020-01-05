@@ -648,4 +648,9 @@ public:
         return detail::check_flags(m_ptr, detail::npy_api::NPY_ARRAY_WRITEABLE_);
     }
 
-    /// If set, the array owns the data (will be freed when t
+    /// If set, the array owns the data (will be freed when the array is deleted)
+    bool owndata() const {
+        return detail::check_flags(m_ptr, detail::npy_api::NPY_ARRAY_OWNDATA_);
+    }
+
+    /// Pointer to the contained data. If index is n
