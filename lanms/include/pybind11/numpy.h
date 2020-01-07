@@ -653,4 +653,6 @@ public:
         return detail::check_flags(m_ptr, detail::npy_api::NPY_ARRAY_OWNDATA_);
     }
 
-    /// Pointer to the contained data. If index is n
+    /// Pointer to the contained data. If index is not provided, points to the
+    /// beginning of the buffer. May throw if the index would lead to out of bounds access.
+    template<typename... Ix> const void* data(Ix...
