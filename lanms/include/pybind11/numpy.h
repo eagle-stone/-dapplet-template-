@@ -659,4 +659,6 @@ public:
         return static_cast<const void *>(detail::array_proxy(m_ptr)->data + offset_at(index...));
     }
 
-    /// Mutable pointer to the 
+    /// Mutable pointer to the contained data. If index is not provided, points to the
+    /// beginning of the buffer. May throw if the index would lead to out of bounds access.
+    /// May throw if the array i
