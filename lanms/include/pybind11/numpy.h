@@ -655,4 +655,8 @@ public:
 
     /// Pointer to the contained data. If index is not provided, points to the
     /// beginning of the buffer. May throw if the index would lead to out of bounds access.
-    template<typename... Ix> const void* data(Ix...
+    template<typename... Ix> const void* data(Ix... index) const {
+        return static_cast<const void *>(detail::array_proxy(m_ptr)->data + offset_at(index...));
+    }
+
+    /// Mutable pointer to the 
