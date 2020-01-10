@@ -664,4 +664,8 @@ public:
     /// May throw if the array is not writeable.
     template<typename... Ix> void* mutable_data(Ix... index) {
         check_writeable();
-        return static_cast<void *>(detail::array_proxy(m_ptr)->data + offset_a
+        return static_cast<void *>(detail::array_proxy(m_ptr)->data + offset_at(index...));
+    }
+
+    /// Byte offset from beginning of the array to a given index (full or partial).
+    /// May throw if the index would lead to out of bounds acces
