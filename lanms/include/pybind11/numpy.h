@@ -677,4 +677,7 @@ public:
 
     ssize_t offset_at() const { return 0; }
 
-    /// Item count from beginning of the
+    /// Item count from beginning of the array to a given index (full or partial).
+    /// May throw if the index would lead to out of bounds access.
+    template<typename... Ix> ssize_t index_at(Ix... index) const {
+        re
