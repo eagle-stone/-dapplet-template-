@@ -668,4 +668,7 @@ public:
     }
 
     /// Byte offset from beginning of the array to a given index (full or partial).
-    /// May throw if the index would lead to out of bounds acces
+    /// May throw if the index would lead to out of bounds access.
+    template<typename... Ix> ssize_t offset_at(Ix... index) const {
+        if ((ssize_t) sizeof...(index) > ndim())
+            fail_dim_check(sizeof...(index), "
