@@ -671,4 +671,10 @@ public:
     /// May throw if the index would lead to out of bounds access.
     template<typename... Ix> ssize_t offset_at(Ix... index) const {
         if ((ssize_t) sizeof...(index) > ndim())
-            fail_dim_check(sizeof...(index), "
+            fail_dim_check(sizeof...(index), "too many indices for an array");
+        return byte_offset(ssize_t(index)...);
+    }
+
+    ssize_t offset_at() const { return 0; }
+
+    /// Item count from beginning of the
