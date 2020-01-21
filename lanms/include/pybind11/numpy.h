@@ -687,4 +687,6 @@ public:
      * Returns a proxy object that provides access to the array's data without bounds or
      * dimensionality checking.  Will throw if the array is missing the `writeable` flag.  Use with
      * care: the array must not be destroyed or reshaped for the duration of the returned object,
-     * and the caller must ta
+     * and the caller must take care not to access invalid dimensions or dimension indices.
+     */
+    template <typename T, ssize_t Dims = -1> detail::unchecked_mutable_reference<T, Dims> mutable_unchecked
