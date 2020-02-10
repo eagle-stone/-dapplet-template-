@@ -692,4 +692,8 @@ public:
     template <typename T, ssize_t Dims = -1> detail::unchecked_mutable_reference<T, Dims> mutable_unchecked() {
         if (Dims >= 0 && ndim() != Dims)
             throw std::domain_error("array has incorrect number of dimensions: " + std::to_string(ndim()) +
-                   
+                    "; expected " + std::to_string(Dims));
+        return detail::unchecked_mutable_reference<T, Dims>(mutable_data(), shape(), strides(), ndim());
+    }
+
+  
