@@ -696,4 +696,6 @@ public:
         return detail::unchecked_mutable_reference<T, Dims>(mutable_data(), shape(), strides(), ndim());
     }
 
-  
+    /**
+     * Returns a proxy object that provides const access to the array's data without bounds or
+     * dimensionality checking.  Unlike `mutable_unchecked()`
