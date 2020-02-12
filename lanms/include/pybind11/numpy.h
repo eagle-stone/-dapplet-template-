@@ -703,4 +703,6 @@ public:
      * reshaped for the duration of the returned object, and the caller must take care not to access
      * invalid dimensions or dimension indices.
      */
-    template <typename T, ssize_t Dims = -1>
+    template <typename T, ssize_t Dims = -1> detail::unchecked_reference<T, Dims> unchecked() const {
+        if (Dims >= 0 && ndim() != Dims)
+            throw std::domain_error("array has incorrect number of dimens
