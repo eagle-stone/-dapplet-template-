@@ -707,4 +707,10 @@ public:
         if (Dims >= 0 && ndim() != Dims)
             throw std::domain_error("array has incorrect number of dimensions: " + std::to_string(ndim()) +
                     "; expected " + std::to_string(Dims));
-        return detail::unchecked_reference<T, Dims>(data(), shape(), s
+        return detail::unchecked_reference<T, Dims>(data(), shape(), strides(), ndim());
+    }
+
+    /// Return a new view with all of the dimensions of length 1 removed
+    array squeeze() {
+        auto& api = detail::npy_api::get();
+        return reinterpret_st
