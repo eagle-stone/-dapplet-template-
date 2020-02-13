@@ -713,4 +713,9 @@ public:
     /// Return a new view with all of the dimensions of length 1 removed
     array squeeze() {
         auto& api = detail::npy_api::get();
-        return reinterpret_st
+        return reinterpret_steal<array>(api.PyArray_Squeeze_(m_ptr));
+    }
+
+    /// Resize array to given shape
+    /// If refcheck is true and more that one reference exist to this array
+    //
