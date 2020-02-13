@@ -718,4 +718,6 @@ public:
 
     /// Resize array to given shape
     /// If refcheck is true and more that one reference exist to this array
-    //
+    /// then resize will succeed only if it makes a reshape, i.e. original size doesn't change
+    void resize(ShapeContainer new_shape, bool refcheck = true) {
+  
