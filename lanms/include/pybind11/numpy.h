@@ -720,4 +720,7 @@ public:
     /// If refcheck is true and more that one reference exist to this array
     /// then resize will succeed only if it makes a reshape, i.e. original size doesn't change
     void resize(ShapeContainer new_shape, bool refcheck = true) {
-  
+        detail::npy_api::PyArray_Dims d = {
+            new_shape->data(), int(new_shape->size())
+        };
+        // try to resize, set ordering param to -1
