@@ -727,4 +727,9 @@ public:
         object new_array = reinterpret_steal<object>(
             detail::npy_api::get().PyArray_Resize_(m_ptr, &d, int(refcheck), -1)
         );
-     
+        if (!new_array) throw error_already_set();
+        if (isinstance<array>(new_array)) { *this = std::move(new_array); }
+    }
+
+    /// Ensure that the argument is a NumPy array
+    /// In
