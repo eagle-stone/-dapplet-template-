@@ -732,4 +732,6 @@ public:
     }
 
     /// Ensure that the argument is a NumPy array
-    /// In
+    /// In case of an error, nullptr is returned and the Python error is cleared.
+    static array ensure(handle h, int ExtraFlags = 0) {
+        auto result = reinterpret_steal
