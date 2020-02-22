@@ -734,4 +734,11 @@ public:
     /// Ensure that the argument is a NumPy array
     /// In case of an error, nullptr is returned and the Python error is cleared.
     static array ensure(handle h, int ExtraFlags = 0) {
-        auto result = reinterpret_steal
+        auto result = reinterpret_steal<array>(raw_array(h.ptr(), ExtraFlags));
+        if (!result)
+            PyErr_Clear();
+        return result;
+    }
+
+protected:
+    template<typename, typename> fri
