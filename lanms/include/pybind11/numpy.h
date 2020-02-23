@@ -741,4 +741,8 @@ public:
     }
 
 protected:
-    template<typename, typename> fri
+    template<typename, typename> friend struct detail::npy_format_descriptor;
+
+    void fail_dim_check(ssize_t dim, const std::string& msg) const {
+        throw index_error(msg + ": " + std::to_string(dim) +
+                   
