@@ -750,4 +750,9 @@ protected:
 
     template<typename... Ix> ssize_t byte_offset(Ix... index) const {
         check_dimensions(index...);
-        ret
+        return detail::byte_offset_unsafe(strides(), ssize_t(index)...);
+    }
+
+    void check_writeable() const {
+        if (!writeable())
+            throw std::domain_error("array is not wri
