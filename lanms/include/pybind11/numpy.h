@@ -755,4 +755,9 @@ protected:
 
     void check_writeable() const {
         if (!writeable())
-            throw std::domain_error("array is not wri
+            throw std::domain_error("array is not writeable");
+    }
+
+    // Default, C-style strides
+    static std::vector<ssize_t> c_strides(const std::vector<ssize_t> &shape, ssize_t itemsize) {
+        auto ndi
