@@ -767,3 +767,5 @@ protected:
         return strides;
     }
 
+    // F-style strides; default when constructing an array_t with `ExtraFlags & f_style`
+    static std::vector<ssize_t> f_strides(const std::vector<ssize_t> &shape, ssize_
