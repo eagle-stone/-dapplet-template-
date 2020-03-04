@@ -768,4 +768,8 @@ protected:
     }
 
     // F-style strides; default when constructing an array_t with `ExtraFlags & f_style`
-    static std::vector<ssize_t> f_strides(const std::vector<ssize_t> &shape, ssize_
+    static std::vector<ssize_t> f_strides(const std::vector<ssize_t> &shape, ssize_t itemsize) {
+        auto ndim = shape.size();
+        std::vector<ssize_t> strides(ndim, itemsize);
+        for (size_t i = 1; i < ndim; ++i)
+            strides[i] = strides[i - 1] 
