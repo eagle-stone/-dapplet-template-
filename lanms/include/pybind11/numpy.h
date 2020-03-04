@@ -772,4 +772,10 @@ protected:
         auto ndim = shape.size();
         std::vector<ssize_t> strides(ndim, itemsize);
         for (size_t i = 1; i < ndim; ++i)
-            strides[i] = strides[i - 1] 
+            strides[i] = strides[i - 1] * shape[i - 1];
+        return strides;
+    }
+
+    template<typename... Ix> void check_dimensions(Ix... index) const {
+        check_dimensions_impl(ssize_t(0), shape(), ssize_t(index)...);
+    
