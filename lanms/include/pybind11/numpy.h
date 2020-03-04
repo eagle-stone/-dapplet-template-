@@ -778,4 +778,8 @@ protected:
 
     template<typename... Ix> void check_dimensions(Ix... index) const {
         check_dimensions_impl(ssize_t(0), shape(), ssize_t(index)...);
-    
+    }
+
+    void check_dimensions_impl(ssize_t, const ssize_t*) const { }
+
+    template<typename... Ix> void check_dimensions_impl(ssize_t axis, const ssize_t* shape, ssize_t i, Ix... inde
