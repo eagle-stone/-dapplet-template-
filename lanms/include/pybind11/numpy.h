@@ -789,4 +789,8 @@ protected:
                               " with size " + std::to_string(*shape));
         }
         check_dimensions_impl(axis + 1, shape + 1, index...);
-  
+    }
+
+    /// Create array from any object -- always returns a new reference
+    static PyObject *raw_array(PyObject *ptr, int ExtraFlags = 0) {
+        if (ptr == nullptr) {
