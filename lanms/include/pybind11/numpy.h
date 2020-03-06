@@ -785,4 +785,8 @@ protected:
     template<typename... Ix> void check_dimensions_impl(ssize_t axis, const ssize_t* shape, ssize_t i, Ix... index) const {
         if (i >= *shape) {
             throw index_error(std::string("index ") + std::to_string(i) +
-                              " is out of bounds for axis " 
+                              " is out of bounds for axis " + std::to_string(axis) +
+                              " with size " + std::to_string(*shape));
+        }
+        check_dimensions_impl(axis + 1, shape + 1, index...);
+  
