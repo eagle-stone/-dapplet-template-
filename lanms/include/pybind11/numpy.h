@@ -797,4 +797,9 @@ protected:
             PyErr_SetString(PyExc_ValueError, "cannot create a pybind11::array from a nullptr");
             return nullptr;
         }
-        return detail::npy_api:
+        return detail::npy_api::get().PyArray_FromAny_(
+            ptr, nullptr, 0, 0, detail::npy_api::NPY_ARRAY_ENSUREARRAY_ | ExtraFlags, nullptr);
+    }
+};
+
+template <typename T, int ExtraFlags 
