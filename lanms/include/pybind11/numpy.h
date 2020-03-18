@@ -802,4 +802,8 @@ protected:
     }
 };
 
-template <typename T, int ExtraFlags 
+template <typename T, int ExtraFlags = array::forcecast> class array_t : public array {
+private:
+    struct private_ctor {};
+    // Delegating constructor needed when both moving and accessing in the same constructor
+  
