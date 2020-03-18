@@ -809,4 +809,8 @@ private:
     array_t(private_ctor, ShapeContainer &&shape, StridesContainer &&strides, const T *ptr, handle base)
         : array(std::move(shape), std::move(strides), ptr, base) {}
 public:
-    st
+    static_assert(!detail::array_info<T>::is_array, "Array types cannot be used with array_t");
+
+    using value_type = T;
+
+    array_t() : array(0, static_cast<const
