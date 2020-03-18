@@ -806,4 +806,7 @@ template <typename T, int ExtraFlags = array::forcecast> class array_t : public 
 private:
     struct private_ctor {};
     // Delegating constructor needed when both moving and accessing in the same constructor
-  
+    array_t(private_ctor, ShapeContainer &&shape, StridesContainer &&strides, const T *ptr, handle base)
+        : array(std::move(shape), std::move(strides), ptr, base) {}
+public:
+    st
