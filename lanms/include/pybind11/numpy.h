@@ -827,4 +827,7 @@ public:
         if (!m_ptr) throw error_already_set();
     }
 
-    explicit array_t(const buffe
+    explicit array_t(const buffer_info& info) : array(info) { }
+
+    array_t(ShapeContainer shape, StridesContainer strides, const T *ptr = nullptr, handle base = handle())
+        : array(std:
