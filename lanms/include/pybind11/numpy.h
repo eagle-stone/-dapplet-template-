@@ -817,4 +817,7 @@ public:
     array_t(handle h, borrowed_t) : array(h, borrowed_t{}) { }
     array_t(handle h, stolen_t) : array(h, stolen_t{}) { }
 
-    PYBIND11_DEPRECATED("Use array_t<T>::ensure()
+    PYBIND11_DEPRECATED("Use array_t<T>::ensure() instead")
+    array_t(handle h, bool is_borrowed) : array(raw_array_t(h.ptr()), stolen_t{}) {
+        if (!m_ptr) PyErr_Clear();
+        if (!is_borrowed) Py_XDECREF(h
