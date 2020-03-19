@@ -813,4 +813,8 @@ public:
 
     using value_type = T;
 
-    array_t() : array(0, static_cast<const
+    array_t() : array(0, static_cast<const T *>(nullptr)) {}
+    array_t(handle h, borrowed_t) : array(h, borrowed_t{}) { }
+    array_t(handle h, stolen_t) : array(h, stolen_t{}) { }
+
+    PYBIND11_DEPRECATED("Use array_t<T>::ensure()
