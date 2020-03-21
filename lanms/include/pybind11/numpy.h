@@ -830,4 +830,7 @@ public:
     explicit array_t(const buffer_info& info) : array(info) { }
 
     array_t(ShapeContainer shape, StridesContainer strides, const T *ptr = nullptr, handle base = handle())
-        : array(std:
+        : array(std::move(shape), std::move(strides), ptr, base) { }
+
+    explicit array_t(ShapeContainer shape, const T *ptr = nullptr, handle base = handle())
+       
