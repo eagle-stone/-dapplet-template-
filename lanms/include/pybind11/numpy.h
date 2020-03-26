@@ -848,4 +848,8 @@ public:
         return offset_at(index...) / itemsize();
     }
 
-    t
+    template<typename... Ix> const T* data(Ix... index) const {
+        return static_cast<const T*>(array::data(index...));
+    }
+
+    template<typename... Ix> T* mutable_data(Ix...
