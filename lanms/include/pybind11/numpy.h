@@ -852,4 +852,9 @@ public:
         return static_cast<const T*>(array::data(index...));
     }
 
-    template<typename... Ix> T* mutable_data(Ix...
+    template<typename... Ix> T* mutable_data(Ix... index) {
+        return static_cast<T*>(array::mutable_data(index...));
+    }
+
+    // Reference to element at a given index
+    template<typename... Ix> const T& at(Ix
