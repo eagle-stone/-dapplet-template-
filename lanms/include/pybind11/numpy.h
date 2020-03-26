@@ -840,4 +840,12 @@ public:
     explicit array_t(size_t count, const T *ptr = nullptr, handle base = handle())
         : array({count}, {}, ptr, base) { }
 
-    constexpr ssize_t itemsize() cons
+    constexpr ssize_t itemsize() const {
+        return sizeof(T);
+    }
+
+    template<typename... Ix> ssize_t index_at(Ix... index) const {
+        return offset_at(index...) / itemsize();
+    }
+
+    t
