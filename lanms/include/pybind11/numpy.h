@@ -860,4 +860,8 @@ public:
     template<typename... Ix> const T& at(Ix... index) const {
         if (sizeof...(index) != ndim())
             fail_dim_check(sizeof...(index), "index dimension mismatch");
-        return *(static_cast<const T*>(arra
+        return *(static_cast<const T*>(array::data()) + byte_offset(ssize_t(index)...) / itemsize());
+    }
+
+    // Mutable reference to element at a given index
+    template<typename... Ix> T& mutable_at(I
