@@ -864,4 +864,7 @@ public:
     }
 
     // Mutable reference to element at a given index
-    template<typename... Ix> T& mutable_at(I
+    template<typename... Ix> T& mutable_at(Ix... index) {
+        if (sizeof...(index) != ndim())
+            fail_dim_check(sizeof...(index), "index dimension mismatch");
+        return *(static_cast<T*>(array::mutable_data()) + byte_o
