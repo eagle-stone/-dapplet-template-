@@ -872,4 +872,6 @@ public:
 
     /**
      * Returns a proxy object that provides access to the array's data without bounds or
-     * dimensionality checking.  Will throw if the 
+     * dimensionality checking.  Will throw if the array is missing the `writeable` flag.  Use with
+     * care: the array must not be destroyed or reshaped for the duration of the returned object,
+     * and the caller mus
