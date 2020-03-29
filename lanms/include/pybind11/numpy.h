@@ -867,4 +867,9 @@ public:
     template<typename... Ix> T& mutable_at(Ix... index) {
         if (sizeof...(index) != ndim())
             fail_dim_check(sizeof...(index), "index dimension mismatch");
-        return *(static_cast<T*>(array::mutable_data()) + byte_o
+        return *(static_cast<T*>(array::mutable_data()) + byte_offset(ssize_t(index)...) / itemsize());
+    }
+
+    /**
+     * Returns a proxy object that provides access to the array's data without bounds or
+     * dimensionality checking.  Will throw if the 
