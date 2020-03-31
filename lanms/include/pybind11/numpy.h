@@ -877,4 +877,9 @@ public:
      * and the caller must take care not to access invalid dimensions or dimension indices.
      */
     template <ssize_t Dims = -1> detail::unchecked_mutable_reference<T, Dims> mutable_unchecked() {
-        return 
+        return array::mutable_unchecked<T, Dims>();
+    }
+
+    /**
+     * Returns a proxy object that provides const access to the array's data without bounds or
+     * dimensionality 
