@@ -882,4 +882,6 @@ public:
 
     /**
      * Returns a proxy object that provides const access to the array's data without bounds or
-     * dimensionality 
+     * dimensionality checking.  Unlike `unchecked()`, this does not require that the underlying
+     * array have the `writable` flag.  Use with care: the array must not be destroyed or reshaped
+    
