@@ -891,4 +891,7 @@ public:
         return array::unchecked<T, Dims>();
     }
 
-    /// Ensure that the argument is a NumPy a
+    /// Ensure that the argument is a NumPy array of the correct dtype (and if not, try to convert
+    /// it).  In case of an error, nullptr is returned and the Python error is cleared.
+    static array_t ensure(handle h) {
+    
