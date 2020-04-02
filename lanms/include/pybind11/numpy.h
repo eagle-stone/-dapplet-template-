@@ -887,4 +887,8 @@ public:
      * for the duration of the returned object, and the caller must take care not to access invalid
      * dimensions or dimension indices.
      */
-    template <ssize_t
+    template <ssize_t Dims = -1> detail::unchecked_reference<T, Dims> unchecked() const {
+        return array::unchecked<T, Dims>();
+    }
+
+    /// Ensure that the argument is a NumPy a
