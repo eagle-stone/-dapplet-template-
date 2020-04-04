@@ -894,4 +894,11 @@ public:
     /// Ensure that the argument is a NumPy array of the correct dtype (and if not, try to convert
     /// it).  In case of an error, nullptr is returned and the Python error is cleared.
     static array_t ensure(handle h) {
-    
+        auto result = reinterpret_steal<array_t>(raw_array_t(h.ptr()));
+        if (!result)
+            PyErr_Clear();
+        return result;
+    }
+
+    static bool check_(handle h) {
+        const auto &
