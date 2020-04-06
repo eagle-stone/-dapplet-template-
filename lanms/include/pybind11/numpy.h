@@ -901,4 +901,6 @@ public:
     }
 
     static bool check_(handle h) {
-        const auto &
+        const auto &api = detail::npy_api::get();
+        return api.PyArray_Check_(h.ptr())
+               && api.PyArray_EquivTypes_(detail::array_proxy(h.ptr())->descr, dtype::of
