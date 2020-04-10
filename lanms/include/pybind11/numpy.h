@@ -909,4 +909,8 @@ public:
 protected:
     /// Create array from any object -- always returns a new reference
     static PyObject *raw_array_t(PyObject *ptr) {
-        if (ptr 
+        if (ptr == nullptr) {
+            PyErr_SetString(PyExc_ValueError, "cannot create a pybind11::array_t from a nullptr");
+            return nullptr;
+        }
+        return deta
