@@ -919,4 +919,7 @@ protected:
     }
 };
 
-tem
+template <typename T>
+struct format_descriptor<T, detail::enable_if_t<detail::is_pod_struct<T>::value>> {
+    static std::string format() {
+        return detail::npy_format_de
