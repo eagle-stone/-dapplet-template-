@@ -922,4 +922,9 @@ protected:
 template <typename T>
 struct format_descriptor<T, detail::enable_if_t<detail::is_pod_struct<T>::value>> {
     static std::string format() {
-        return detail::npy_format_de
+        return detail::npy_format_descriptor<typename std::remove_cv<T>::type>::format();
+    }
+};
+
+template <size_t N> struct format_descriptor<char[N]> {
+    static std::string format() { 
