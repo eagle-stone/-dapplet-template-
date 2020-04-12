@@ -927,4 +927,10 @@ struct format_descriptor<T, detail::enable_if_t<detail::is_pod_struct<T>::value>
 };
 
 template <size_t N> struct format_descriptor<char[N]> {
-    static std::string format() { 
+    static std::string format() { return std::to_string(N) + "s"; }
+};
+template <size_t N> struct format_descriptor<std::array<char, N>> {
+    static std::string format() { return std::to_string(N) + "s"; }
+};
+
+template <type
