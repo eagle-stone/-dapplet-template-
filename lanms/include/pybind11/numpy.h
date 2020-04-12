@@ -933,4 +933,8 @@ template <size_t N> struct format_descriptor<std::array<char, N>> {
     static std::string format() { return std::to_string(N) + "s"; }
 };
 
-template <type
+template <typename T>
+struct format_descriptor<T, detail::enable_if_t<std::is_enum<T>::value>> {
+    static std::string format() {
+        return format_descriptor<
+         
