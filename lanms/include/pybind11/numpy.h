@@ -937,4 +937,9 @@ template <typename T>
 struct format_descriptor<T, detail::enable_if_t<std::is_enum<T>::value>> {
     static std::string format() {
         return format_descriptor<
-         
+            typename std::remove_cv<typename std::underlying_type<T>::type>::type>::format();
+    }
+};
+
+template <typename T>
+struct format_descriptor<T, detail::enable_if_t<detail::array_info<T>::is
