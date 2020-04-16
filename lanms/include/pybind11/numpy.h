@@ -942,4 +942,8 @@ struct format_descriptor<T, detail::enable_if_t<std::is_enum<T>::value>> {
 };
 
 template <typename T>
-struct format_descriptor<T, detail::enable_if_t<detail::array_info<T>::is
+struct format_descriptor<T, detail::enable_if_t<detail::array_info<T>::is_array>> {
+    static std::string format() {
+        using detail::_;
+        PYBIND11_DESCR extents = _("(") + detail::array_info<T>::extents() + _(")");
+        return
