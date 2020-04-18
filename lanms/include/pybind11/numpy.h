@@ -946,4 +946,10 @@ struct format_descriptor<T, detail::enable_if_t<detail::array_info<T>::is_array>
     static std::string format() {
         using detail::_;
         PYBIND11_DESCR extents = _("(") + detail::array_info<T>::extents() + _(")");
-        return
+        return extents.text() + format_descriptor<detail::remove_all_extents_t<T>>::format();
+    }
+};
+
+NAMESPACE_BEGIN(detail)
+template <typename T, int ExtraFlags>
+struct pyobject_caster<arra
