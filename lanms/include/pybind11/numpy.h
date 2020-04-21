@@ -957,4 +957,9 @@ struct pyobject_caster<array_t<T, ExtraFlags>> {
 
     bool load(handle src, bool convert) {
         if (!convert && !type::check_(src))
-            return fals
+            return false;
+        value = type::ensure(src);
+        return static_cast<bool>(value);
+    }
+
+    static handle cast(const handle &src, return_value_policy /* policy */, hand
