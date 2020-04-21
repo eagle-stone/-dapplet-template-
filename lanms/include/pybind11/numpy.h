@@ -962,4 +962,11 @@ struct pyobject_caster<array_t<T, ExtraFlags>> {
         return static_cast<bool>(value);
     }
 
-    static handle cast(const handle &src, return_value_policy /* policy */, hand
+    static handle cast(const handle &src, return_value_policy /* policy */, handle /* parent */) {
+        return src.inc_ref();
+    }
+    PYBIND11_TYPE_CASTER(type, handle_type_name<type>::name());
+};
+
+template <typename T>
+struct compare_buffer_info<T, detail::enable_
