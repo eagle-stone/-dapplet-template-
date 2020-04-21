@@ -969,4 +969,7 @@ struct pyobject_caster<array_t<T, ExtraFlags>> {
 };
 
 template <typename T>
-struct compare_buffer_info<T, detail::enable_
+struct compare_buffer_info<T, detail::enable_if_t<detail::is_pod_struct<T>::value>> {
+    static bool compare(const buffer_info& b) {
+        return npy_api::get().PyArray_EquivTypes_(dtype::of<T>().ptr(), dtype(b).ptr());
+ 
