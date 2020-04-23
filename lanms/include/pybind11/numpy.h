@@ -980,4 +980,6 @@ private:
     // NB: the order here must match the one in common.h
     constexpr static const int values[15] = {
         npy_api::NPY_BOOL_,
-        npy_api::NPY_BYTE_,   npy_api::NPY_UBYTE_,   npy_
+        npy_api::NPY_BYTE_,   npy_api::NPY_UBYTE_,   npy_api::NPY_SHORT_,    npy_api::NPY_USHORT_,
+        npy_api::NPY_INT_,    npy_api::NPY_UINT_,    npy_api::NPY_LONGLONG_, npy_api::NPY_ULONGLONG_,
+        npy_api::NPY_FLOAT_,  npy_a
