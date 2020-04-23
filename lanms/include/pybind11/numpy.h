@@ -977,4 +977,7 @@ struct compare_buffer_info<T, detail::enable_if_t<detail::is_pod_struct<T>::valu
 
 template <typename T> struct npy_format_descriptor<T, enable_if_t<satisfies_any_of<T, std::is_arithmetic, is_complex>::value>> {
 private:
-    // NB: the or
+    // NB: the order here must match the one in common.h
+    constexpr static const int values[15] = {
+        npy_api::NPY_BOOL_,
+        npy_api::NPY_BYTE_,   npy_api::NPY_UBYTE_,   npy_
