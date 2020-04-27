@@ -991,4 +991,8 @@ public:
 
     static pybind11::dtype dtype() {
         if (auto ptr = npy_api::get().PyArray_DescrFromType_(value))
-            return reinterpret_borrow<pybind11::dtype>(pt
+            return reinterpret_borrow<pybind11::dtype>(ptr);
+        pybind11_fail("Unsupported buffer format!");
+    }
+    template <typename T2 = T, enable_if_t<std::is_integral<T2>::value, int> = 0>
+    static PYBIND
