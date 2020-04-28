@@ -999,4 +999,7 @@ public:
         return _<std::is_same<T, bool>::value>(_("bool"),
             _<std::is_signed<T>::value>("int", "uint") + _<sizeof(T)*8>());
     }
-    template <typename
+    template <typename T2 = T, enable_if_t<std::is_floating_point<T2>::value, int> = 0>
+    static PYBIND11_DESCR name() {
+        return _<std::is_same<T, float>::value || std::is_same<T, double>::value>(
+       
