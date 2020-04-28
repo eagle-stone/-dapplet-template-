@@ -995,4 +995,8 @@ public:
         pybind11_fail("Unsupported buffer format!");
     }
     template <typename T2 = T, enable_if_t<std::is_integral<T2>::value, int> = 0>
-    static PYBIND
+    static PYBIND11_DESCR name() {
+        return _<std::is_same<T, bool>::value>(_("bool"),
+            _<std::is_signed<T>::value>("int", "uint") + _<sizeof(T)*8>());
+    }
+    template <typename
