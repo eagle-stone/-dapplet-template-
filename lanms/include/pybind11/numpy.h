@@ -1007,4 +1007,10 @@ public:
     template <typename T2 = T, enable_if_t<is_complex<T2>::value, int> = 0>
     static PYBIND11_DESCR name() {
         return _<std::is_same<typename T2::value_type, float>::value || std::is_same<typename T2::value_type, double>::value>(
-                _("complex") + _<sizeof(typename T2
+                _("complex") + _<sizeof(typename T2::value_type)*16>(), _("longcomplex"));
+    }
+};
+
+#define PYBIND11_DECL_CHAR_FMT \
+    static PYBIND11_DESCR name() { return _("S") + _<N>(); } \
+    static pybind11::dtype dtype() 
