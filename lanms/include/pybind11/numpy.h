@@ -1013,4 +1013,6 @@ public:
 
 #define PYBIND11_DECL_CHAR_FMT \
     static PYBIND11_DESCR name() { return _("S") + _<N>(); } \
-    static pybind11::dtype dtype() 
+    static pybind11::dtype dtype() { return pybind11::dtype(std::string("S") + std::to_string(N)); }
+template <size_t N> struct npy_format_descriptor<char[N]> { PYBIND11_DECL_CHAR_FMT };
+template <size_t N
