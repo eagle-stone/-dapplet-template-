@@ -1018,4 +1018,8 @@ template <size_t N> struct npy_format_descriptor<char[N]> { PYBIND11_DECL_CHAR_F
 template <size_t N> struct npy_format_descriptor<std::array<char, N>> { PYBIND11_DECL_CHAR_FMT };
 #undef PYBIND11_DECL_CHAR_FMT
 
-template<typename T> struct npy_format_descriptor<T, enable_if_t<array_i
+template<typename T> struct npy_format_descriptor<T, enable_if_t<array_info<T>::is_array>> {
+private:
+    using base_descr = npy_format_descriptor<typename array_info<T>::type>;
+public:
+    static_assert(!array_info<T>::is_empty, "Zero-sized arrays are not sup
