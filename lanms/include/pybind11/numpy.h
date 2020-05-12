@@ -1022,4 +1022,9 @@ template<typename T> struct npy_format_descriptor<T, enable_if_t<array_info<T>::
 private:
     using base_descr = npy_format_descriptor<typename array_info<T>::type>;
 public:
-    static_assert(!array_info<T>::is_empty, "Zero-sized arrays are not sup
+    static_assert(!array_info<T>::is_empty, "Zero-sized arrays are not supported");
+
+    static PYBIND11_DESCR name() { return _("(") + array_info<T>::extents() + _(")") + base_descr::name(); }
+    static pybind11::dtype dtype() {
+        list shape;
+       
