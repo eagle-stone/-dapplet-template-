@@ -1027,4 +1027,9 @@ public:
     static PYBIND11_DESCR name() { return _("(") + array_info<T>::extents() + _(")") + base_descr::name(); }
     static pybind11::dtype dtype() {
         list shape;
-       
+        array_info<T>::append_extents(shape);
+        return pybind11::dtype::from_args(pybind11::make_tuple(base_descr::dtype(), shape));
+    }
+};
+
+template<typename T> struct npy_
