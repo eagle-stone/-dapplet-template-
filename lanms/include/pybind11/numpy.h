@@ -1036,4 +1036,9 @@ template<typename T> struct npy_format_descriptor<T, enable_if_t<std::is_enum<T>
 private:
     using base_descr = npy_format_descriptor<typename std::underlying_type<T>::type>;
 public:
-    static PYBI
+    static PYBIND11_DESCR name() { return base_descr::name(); }
+    static pybind11::dtype dtype() { return base_descr::dtype(); }
+};
+
+struct field_descriptor {
+    const char *nam
