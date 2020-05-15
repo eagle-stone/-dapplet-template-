@@ -1032,4 +1032,8 @@ public:
     }
 };
 
-template<typename T> struct npy_
+template<typename T> struct npy_format_descriptor<T, enable_if_t<std::is_enum<T>::value>> {
+private:
+    using base_descr = npy_format_descriptor<typename std::underlying_type<T>::type>;
+public:
+    static PYBI
