@@ -1053,4 +1053,9 @@ inline PYBIND11_NOINLINE void register_structured_dtype(
     const std::type_info& tinfo, ssize_t itemsize,
     bool (*direct_converter)(PyObject *, void *&)) {
 
-    auto& numpy_internals = get_nump
+    auto& numpy_internals = get_numpy_internals();
+    if (numpy_internals.get_type_info(tinfo, false))
+        pybind11_fail("NumPy: dtype is already registered");
+
+    list names, formats, offsets;
+    for (auto field :
