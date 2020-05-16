@@ -1049,4 +1049,8 @@ struct field_descriptor {
 };
 
 inline PYBIND11_NOINLINE void register_structured_dtype(
-    const std::ini
+    const std::initializer_list<field_descriptor>& fields,
+    const std::type_info& tinfo, ssize_t itemsize,
+    bool (*direct_converter)(PyObject *, void *&)) {
+
+    auto& numpy_internals = get_nump
