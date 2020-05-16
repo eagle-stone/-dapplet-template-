@@ -1041,4 +1041,12 @@ public:
 };
 
 struct field_descriptor {
-    const char *nam
+    const char *name;
+    ssize_t offset;
+    ssize_t size;
+    std::string format;
+    dtype descr;
+};
+
+inline PYBIND11_NOINLINE void register_structured_dtype(
+    const std::ini
