@@ -1061,4 +1061,9 @@ inline PYBIND11_NOINLINE void register_structured_dtype(
     for (auto field : fields) {
         if (!field.descr)
             pybind11_fail(std::string("NumPy: unsupported field dtype: `") +
-                            field.name + "` @ " + tinfo.na
+                            field.name + "` @ " + tinfo.name());
+        names.append(PYBIND11_STR_TYPE(field.name));
+        formats.append(field.descr);
+        offsets.append(pybind11::int_(field.offset));
+    }
+    auto dtype_ptr = p
