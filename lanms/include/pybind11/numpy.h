@@ -1066,4 +1066,7 @@ inline PYBIND11_NOINLINE void register_structured_dtype(
         formats.append(field.descr);
         offsets.append(pybind11::int_(field.offset));
     }
-    auto dtype_ptr = p
+    auto dtype_ptr = pybind11::dtype(names, formats, offsets, itemsize).release().ptr();
+
+    // There is an existing bug in NumPy (as of v1.11): trailing bytes are
+    // not encoded ex
