@@ -1058,4 +1058,7 @@ inline PYBIND11_NOINLINE void register_structured_dtype(
         pybind11_fail("NumPy: dtype is already registered");
 
     list names, formats, offsets;
-    for (auto field :
+    for (auto field : fields) {
+        if (!field.descr)
+            pybind11_fail(std::string("NumPy: unsupported field dtype: `") +
+                            field.name + "` @ " + tinfo.na
