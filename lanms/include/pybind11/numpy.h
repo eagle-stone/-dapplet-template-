@@ -1069,4 +1069,7 @@ inline PYBIND11_NOINLINE void register_structured_dtype(
     auto dtype_ptr = pybind11::dtype(names, formats, offsets, itemsize).release().ptr();
 
     // There is an existing bug in NumPy (as of v1.11): trailing bytes are
-    // not encoded ex
+    // not encoded explicitly into the format string. This will supposedly
+    // get fixed in v1.12; for further details, see these:
+    // - https://github.com/numpy/numpy/issues/7797
+    // - https://git
