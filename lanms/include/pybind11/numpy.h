@@ -1072,4 +1072,7 @@ inline PYBIND11_NOINLINE void register_structured_dtype(
     // not encoded explicitly into the format string. This will supposedly
     // get fixed in v1.12; for further details, see these:
     // - https://github.com/numpy/numpy/issues/7797
-    // - https://git
+    // - https://github.com/numpy/numpy/pull/7798
+    // Because of this, we won't use numpy's logic to generate buffer format
+    // strings and will just do it ourselves.
+    std::vector<field_descriptor>
