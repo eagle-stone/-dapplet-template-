@@ -1081,4 +1081,6 @@ inline PYBIND11_NOINLINE void register_structured_dtype(
     ssize_t offset = 0;
     std::ostringstream oss;
     // mark the structure as unaligned with '^', because numpy and C++ don't
-    // always agree about alignment (particularly f
+    // always agree about alignment (particularly for complex), and we're
+    // explicitly listing all our padding. This depends on none of the fields
+    // overriding the endianness. Putting the ^ in front 
