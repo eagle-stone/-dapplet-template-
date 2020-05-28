@@ -1077,4 +1077,8 @@ inline PYBIND11_NOINLINE void register_structured_dtype(
     // strings and will just do it ourselves.
     std::vector<field_descriptor> ordered_fields(fields);
     std::sort(ordered_fields.begin(), ordered_fields.end(),
-        [](const field_descriptor &a, const field_descriptor &b) { return a.offset 
+        [](const field_descriptor &a, const field_descriptor &b) { return a.offset < b.offset; });
+    ssize_t offset = 0;
+    std::ostringstream oss;
+    // mark the structure as unaligned with '^', because numpy and C++ don't
+    // always agree about alignment (particularly f
