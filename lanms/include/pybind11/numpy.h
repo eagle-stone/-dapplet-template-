@@ -1087,4 +1087,7 @@ inline PYBIND11_NOINLINE void register_structured_dtype(
     // isn't guaranteed to work due to https://github.com/numpy/numpy/issues/9049
     oss << "^T{";
     for (auto& field : ordered_fields) {
-        if (field.offset >
+        if (field.offset > offset)
+            oss << (field.offset - offset) << 'x';
+        oss << field.format << ':' << field.name << ':';
+        offset = field.offset + field
