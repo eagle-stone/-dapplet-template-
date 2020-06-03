@@ -1083,4 +1083,8 @@ inline PYBIND11_NOINLINE void register_structured_dtype(
     // mark the structure as unaligned with '^', because numpy and C++ don't
     // always agree about alignment (particularly for complex), and we're
     // explicitly listing all our padding. This depends on none of the fields
-    // overriding the endianness. Putting the ^ in front 
+    // overriding the endianness. Putting the ^ in front of individual fields
+    // isn't guaranteed to work due to https://github.com/numpy/numpy/issues/9049
+    oss << "^T{";
+    for (auto& field : ordered_fields) {
+        if (field.offset >
