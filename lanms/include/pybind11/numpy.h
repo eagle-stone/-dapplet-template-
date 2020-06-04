@@ -1090,4 +1090,11 @@ inline PYBIND11_NOINLINE void register_structured_dtype(
         if (field.offset > offset)
             oss << (field.offset - offset) << 'x';
         oss << field.format << ':' << field.name << ':';
-        offset = field.offset + field
+        offset = field.offset + field.size;
+    }
+    if (itemsize > offset)
+        oss << (itemsize - offset) << 'x';
+    oss << '}';
+    auto format_str = oss.str();
+
+    // Sanity check: verify that NumPy properly parses our buff
