@@ -1100,4 +1100,13 @@ inline PYBIND11_NOINLINE void register_structured_dtype(
     // Sanity check: verify that NumPy properly parses our buffer format string
     auto& api = npy_api::get();
     auto arr =  array(buffer_info(nullptr, itemsize, format_str, 1));
-    if (!api.PyArray_EquivTypes_(dtype_ptr, arr.dtype().ptr()
+    if (!api.PyArray_EquivTypes_(dtype_ptr, arr.dtype().ptr()))
+        pybind11_fail("NumPy: invalid buffer descriptor!");
+
+    auto tindex = std::type_index(tinfo);
+    numpy_internals.registered_dtypes[tindex] = { dtype_ptr, format_str };
+    get_internals().direct_conversions[tindex].push_back(direct_converter);
+}
+
+template <typename T, typename SFINAE> struct npy_format_descriptor {
+    static_assert(is_pod_struct<T
