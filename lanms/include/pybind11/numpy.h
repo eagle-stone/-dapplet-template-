@@ -1113,4 +1113,9 @@ template <typename T, typename SFINAE> struct npy_format_descriptor {
 
     static PYBIND11_DESCR name() { return make_caster<T>::name(); }
 
-    static pybind11:
+    static pybind11::dtype dtype() {
+        return reinterpret_borrow<pybind11::dtype>(dtype_ptr());
+    }
+
+    static std::string format() {
+        static auto format_str = get_numpy_internal
