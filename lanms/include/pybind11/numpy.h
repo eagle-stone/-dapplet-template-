@@ -1123,4 +1123,9 @@ template <typename T, typename SFINAE> struct npy_format_descriptor {
     }
 
     static void register_dtype(const std::initializer_list<field_descriptor>& fields) {
-        register_str
+        register_structured_dtype(fields, typeid(typename std::remove_cv<T>::type),
+                                  sizeof(T), &direct_converter);
+    }
+
+private:
+    static PyObjec
