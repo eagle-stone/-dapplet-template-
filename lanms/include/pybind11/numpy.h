@@ -1118,4 +1118,9 @@ template <typename T, typename SFINAE> struct npy_format_descriptor {
     }
 
     static std::string format() {
-        static auto format_str = get_numpy_internal
+        static auto format_str = get_numpy_internals().get_type_info<T>(true)->format_str;
+        return format_str;
+    }
+
+    static void register_dtype(const std::initializer_list<field_descriptor>& fields) {
+        register_str
