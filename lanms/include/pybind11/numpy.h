@@ -1128,4 +1128,9 @@ template <typename T, typename SFINAE> struct npy_format_descriptor {
     }
 
 private:
-    static PyObjec
+    static PyObject* dtype_ptr() {
+        static PyObject* ptr = get_numpy_internals().get_type_info<T>(true)->dtype_ptr;
+        return ptr;
+    }
+
+    static bool direct_converte
