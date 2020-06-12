@@ -1133,4 +1133,8 @@ private:
         return ptr;
     }
 
-    static bool direct_converte
+    static bool direct_converter(PyObject *obj, void*& value) {
+        auto& api = npy_api::get();
+        if (!PyObject_TypeCheck(obj, api.PyVoidArrType_Type_))
+            return false;
+        if (auto descr = reinterpret_
