@@ -1152,4 +1152,6 @@ private:
 # define PYBIND11_NUMPY_DTYPE_EX(Type, ...) ((void)0)
 #else
 
-#define PYBIND11_FIELD_DESCRIPTOR_EX(T, Field, 
+#define PYBIND11_FIELD_DESCRIPTOR_EX(T, Field, Name)                                          \
+    ::pybind11::detail::field_descriptor {                                                    \
+        Name, offsetof(T, Field), sizeof(declt
