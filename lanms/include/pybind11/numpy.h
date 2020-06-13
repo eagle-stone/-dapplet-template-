@@ -1139,4 +1139,12 @@ private:
             return false;
         if (auto descr = reinterpret_steal<object>(api.PyArray_DescrFromScalar_(obj))) {
             if (api.PyArray_EquivTypes_(dtype_ptr(), descr.ptr())) {
-                value = ((PyVoidScalarObject_Proxy 
+                value = ((PyVoidScalarObject_Proxy *) obj)->obval;
+                return true;
+            }
+        }
+        return false;
+    }
+};
+
+#ifdef __CLION_IDE__ // replace heavy macro with dummy code for the IDE (doesn't affec
