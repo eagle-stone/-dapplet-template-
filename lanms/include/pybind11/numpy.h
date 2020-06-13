@@ -1137,4 +1137,6 @@ private:
         auto& api = npy_api::get();
         if (!PyObject_TypeCheck(obj, api.PyVoidArrType_Type_))
             return false;
-        if (auto descr = reinterpret_
+        if (auto descr = reinterpret_steal<object>(api.PyArray_DescrFromScalar_(obj))) {
+            if (api.PyArray_EquivTypes_(dtype_ptr(), descr.ptr())) {
+                value = ((PyVoidScalarObject_Proxy 
