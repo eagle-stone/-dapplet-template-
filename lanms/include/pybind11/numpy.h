@@ -1156,4 +1156,8 @@ private:
     ::pybind11::detail::field_descriptor {                                                    \
         Name, offsetof(T, Field), sizeof(decltype(std::declval<T>().Field)),                  \
         ::pybind11::format_descriptor<decltype(std::declval<T>().Field)>::format(),           \
-        ::pybind
+        ::pybind11::detail::npy_format_descriptor<decltype(std::declval<T>().Field)>::dtype() \
+    }
+
+// Extract name, offset and format descriptor for a struct field
+#define PYBIND11_FIELD_DESC
