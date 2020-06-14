@@ -1154,4 +1154,6 @@ private:
 
 #define PYBIND11_FIELD_DESCRIPTOR_EX(T, Field, Name)                                          \
     ::pybind11::detail::field_descriptor {                                                    \
-        Name, offsetof(T, Field), sizeof(declt
+        Name, offsetof(T, Field), sizeof(decltype(std::declval<T>().Field)),                  \
+        ::pybind11::format_descriptor<decltype(std::declval<T>().Field)>::format(),           \
+        ::pybind
