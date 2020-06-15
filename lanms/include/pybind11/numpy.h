@@ -1163,4 +1163,7 @@ private:
 #define PYBIND11_FIELD_DESCRIPTOR(T, Field) PYBIND11_FIELD_DESCRIPTOR_EX(T, Field, #Field)
 
 // The main idea of this macro is borrowed from https://github.com/swansontec/map-macro
-// (C) William Swanso
+// (C) William Swanson, Paul Fultz
+#define PYBIND11_EVAL0(...) __VA_ARGS__
+#define PYBIND11_EVAL1(...) PYBIND11_EVAL0 (PYBIND11_EVAL0 (PYBIND11_EVAL0 (__VA_ARGS__)))
+#define PYBIND11_EVAL2(...) PYB
