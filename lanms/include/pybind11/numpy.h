@@ -1174,4 +1174,6 @@ private:
 #define PYBIND11_MAP_OUT
 #define PYBIND11_MAP_COMMA ,
 #define PYBIND11_MAP_GET_END() 0, PYBIND11_MAP_END
-#define PYBIND11_MAP_NEXT0(test, next, .
+#define PYBIND11_MAP_NEXT0(test, next, ...) next PYBIND11_MAP_OUT
+#define PYBIND11_MAP_NEXT1(test, next) PYBIND11_MAP_NEXT0 (test, next, 0)
+#define PYBIND11_MAP_NEXT(test, next)  PYBIND11_MAP_NEXT1 (PYBIN
