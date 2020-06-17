@@ -1176,4 +1176,7 @@ private:
 #define PYBIND11_MAP_GET_END() 0, PYBIND11_MAP_END
 #define PYBIND11_MAP_NEXT0(test, next, ...) next PYBIND11_MAP_OUT
 #define PYBIND11_MAP_NEXT1(test, next) PYBIND11_MAP_NEXT0 (test, next, 0)
-#define PYBIND11_MAP_NEXT(test, next)  PYBIND11_MAP_NEXT1 (PYBIN
+#define PYBIND11_MAP_NEXT(test, next)  PYBIND11_MAP_NEXT1 (PYBIND11_MAP_GET_END test, next)
+#ifdef _MSC_VER // MSVC is not as eager to expand macros, hence this workaround
+#define PYBIND11_MAP_LIST_NEXT1(test, next) \
+    PYBIND11
