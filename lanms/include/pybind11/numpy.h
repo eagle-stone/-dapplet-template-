@@ -1183,3 +1183,7 @@ private:
 #else
 #define PYBIND11_MAP_LIST_NEXT1(test, next) \
     PYBIND11_MAP_NEXT0 (test, PYBIND11_MAP_COMMA next, 0)
+#endif
+#define PYBIND11_MAP_LIST_NEXT(test, next) \
+    PYBIND11_MAP_LIST_NEXT1 (PYBIND11_MAP_GET_END test, next)
+#define PYBIND11_MAP_LIST0(f, t, x, peek, ...)
