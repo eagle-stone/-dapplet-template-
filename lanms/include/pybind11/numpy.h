@@ -1186,4 +1186,7 @@ private:
 #endif
 #define PYBIND11_MAP_LIST_NEXT(test, next) \
     PYBIND11_MAP_LIST_NEXT1 (PYBIND11_MAP_GET_END test, next)
-#define PYBIND11_MAP_LIST0(f, t, x, peek, ...)
+#define PYBIND11_MAP_LIST0(f, t, x, peek, ...) \
+    f(t, x) PYBIND11_MAP_LIST_NEXT (peek, PYBIND11_MAP_LIST1) (f, t, peek, __VA_ARGS__)
+#define PYBIND11_MAP_LIST1(f, t, x, peek, ...) \
+    f(t, x) PYBIND11_
