@@ -1179,4 +1179,7 @@ private:
 #define PYBIND11_MAP_NEXT(test, next)  PYBIND11_MAP_NEXT1 (PYBIND11_MAP_GET_END test, next)
 #ifdef _MSC_VER // MSVC is not as eager to expand macros, hence this workaround
 #define PYBIND11_MAP_LIST_NEXT1(test, next) \
-    PYBIND11
+    PYBIND11_EVAL0 (PYBIND11_MAP_NEXT0 (test, PYBIND11_MAP_COMMA next, 0))
+#else
+#define PYBIND11_MAP_LIST_NEXT1(test, next) \
+    PYBIND11_MAP_NEXT0 (test, PYBIND11_MAP_COMMA next, 0)
