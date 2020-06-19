@@ -1189,4 +1189,6 @@ private:
 #define PYBIND11_MAP_LIST0(f, t, x, peek, ...) \
     f(t, x) PYBIND11_MAP_LIST_NEXT (peek, PYBIND11_MAP_LIST1) (f, t, peek, __VA_ARGS__)
 #define PYBIND11_MAP_LIST1(f, t, x, peek, ...) \
-    f(t, x) PYBIND11_
+    f(t, x) PYBIND11_MAP_LIST_NEXT (peek, PYBIND11_MAP_LIST0) (f, t, peek, __VA_ARGS__)
+// PYBIND11_MAP_LIST(f, t, a1, a2, ...) expands to f(t, a1), f(t, a2), ...
+#define PYBIND11_MAP_LIST(f, 
