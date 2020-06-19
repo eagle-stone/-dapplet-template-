@@ -1199,4 +1199,8 @@ private:
         ({PYBIND11_MAP_LIST (PYBIND11_FIELD_DESCRIPTOR, Type, __VA_ARGS__)})
 
 #ifdef _MSC_VER
-#define PYBIND11_MAP2_LIST_NEXT1(test, next
+#define PYBIND11_MAP2_LIST_NEXT1(test, next) \
+    PYBIND11_EVAL0 (PYBIND11_MAP_NEXT0 (test, PYBIND11_MAP_COMMA next, 0))
+#else
+#define PYBIND11_MAP2_LIST_NEXT1(test, next) \
+    PYBIND11_MAP_NEXT0 (test, PYBIND11_MA
