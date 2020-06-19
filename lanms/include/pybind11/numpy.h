@@ -1195,4 +1195,8 @@ private:
     PYBIND11_EVAL (PYBIND11_MAP_LIST1 (f, t, __VA_ARGS__, (), 0))
 
 #define PYBIND11_NUMPY_DTYPE(Type, ...) \
-    ::pybind11::detail::npy_format_descriptor<Type>::reg
+    ::pybind11::detail::npy_format_descriptor<Type>::register_dtype \
+        ({PYBIND11_MAP_LIST (PYBIND11_FIELD_DESCRIPTOR, Type, __VA_ARGS__)})
+
+#ifdef _MSC_VER
+#define PYBIND11_MAP2_LIST_NEXT1(test, next
