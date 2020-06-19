@@ -1191,4 +1191,8 @@ private:
 #define PYBIND11_MAP_LIST1(f, t, x, peek, ...) \
     f(t, x) PYBIND11_MAP_LIST_NEXT (peek, PYBIND11_MAP_LIST0) (f, t, peek, __VA_ARGS__)
 // PYBIND11_MAP_LIST(f, t, a1, a2, ...) expands to f(t, a1), f(t, a2), ...
-#define PYBIND11_MAP_LIST(f, 
+#define PYBIND11_MAP_LIST(f, t, ...) \
+    PYBIND11_EVAL (PYBIND11_MAP_LIST1 (f, t, __VA_ARGS__, (), 0))
+
+#define PYBIND11_NUMPY_DTYPE(Type, ...) \
+    ::pybind11::detail::npy_format_descriptor<Type>::reg
