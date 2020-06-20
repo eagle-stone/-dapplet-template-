@@ -1211,4 +1211,8 @@ private:
     f(t, x1, x2) PYBIND11_MAP2_LIST_NEXT (peek, PYBIND11_MAP2_LIST1) (f, t, peek, __VA_ARGS__)
 #define PYBIND11_MAP2_LIST1(f, t, x1, x2, peek, ...) \
     f(t, x1, x2) PYBIND11_MAP2_LIST_NEXT (peek, PYBIND11_MAP2_LIST0) (f, t, peek, __VA_ARGS__)
-// PYBIND11_MAP2_LIST(f, t, a1, a2, ...) expands to f(t, a
+// PYBIND11_MAP2_LIST(f, t, a1, a2, ...) expands to f(t, a1, a2), f(t, a3, a4), ...
+#define PYBIND11_MAP2_LIST(f, t, ...) \
+    PYBIND11_EVAL (PYBIND11_MAP2_LIST1 (f, t, __VA_ARGS__, (), 0))
+
+#define PYBIND11_NUMPY_DTYPE_EX(Ty
