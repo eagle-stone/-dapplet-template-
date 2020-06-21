@@ -1226,4 +1226,9 @@ using array_iterator = typename std::add_pointer<T>::type;
 
 template <class T>
 array_iterator<T> array_begin(const buffer_info& buffer) {
-    return arra
+    return array_iterator<T>(reinterpret_cast<T*>(buffer.ptr));
+}
+
+template <class T>
+array_iterator<T> array_end(const buffer_info& buffer) {
+    return array_iterator<T>(reinterpret_ca
