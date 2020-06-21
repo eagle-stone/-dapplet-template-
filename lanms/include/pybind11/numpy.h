@@ -1215,4 +1215,10 @@ private:
 #define PYBIND11_MAP2_LIST(f, t, ...) \
     PYBIND11_EVAL (PYBIND11_MAP2_LIST1 (f, t, __VA_ARGS__, (), 0))
 
-#define PYBIND11_NUMPY_DTYPE_EX(Ty
+#define PYBIND11_NUMPY_DTYPE_EX(Type, ...) \
+    ::pybind11::detail::npy_format_descriptor<Type>::register_dtype \
+        ({PYBIND11_MAP2_LIST (PYBIND11_FIELD_DESCRIPTOR_EX, Type, __VA_ARGS__)})
+
+#endif // __CLION_IDE__
+
+te
