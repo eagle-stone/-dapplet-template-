@@ -1231,4 +1231,11 @@ array_iterator<T> array_begin(const buffer_info& buffer) {
 
 template <class T>
 array_iterator<T> array_end(const buffer_info& buffer) {
-    return array_iterator<T>(reinterpret_ca
+    return array_iterator<T>(reinterpret_cast<T*>(buffer.ptr) + buffer.size);
+}
+
+class common_iterator {
+public:
+    using container_type = std::vector<ssize_t>;
+    using value_type = container_type::value_type;
+    using 
