@@ -1221,4 +1221,9 @@ private:
 
 #endif // __CLION_IDE__
 
-te
+template  <class T>
+using array_iterator = typename std::add_pointer<T>::type;
+
+template <class T>
+array_iterator<T> array_begin(const buffer_info& buffer) {
+    return arra
