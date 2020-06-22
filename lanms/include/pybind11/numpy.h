@@ -1243,4 +1243,6 @@ public:
     common_iterator() : p_ptr(0), m_strides() {}
 
     common_iterator(void* ptr, const container_type& strides, const container_type& shape)
-        : p_p
+        : p_ptr(reinterpret_cast<char*>(ptr)), m_strides(strides.size()) {
+        m_strides.back() = static_cast<value_type>(strides.back());
+        for (size_type i =
