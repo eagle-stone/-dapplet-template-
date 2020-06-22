@@ -1248,4 +1248,14 @@ public:
         for (size_type i = m_strides.size() - 1; i != 0; --i) {
             size_type j = i - 1;
             value_type s = static_cast<value_type>(shape[i]);
-            m_strides[j] = strides[j] + m_strides[i] - str
+            m_strides[j] = strides[j] + m_strides[i] - strides[i] * s;
+        }
+    }
+
+    void increment(size_type dim) {
+        p_ptr += m_strides[dim];
+    }
+
+    void* data() const {
+        return p_ptr;
+    }
