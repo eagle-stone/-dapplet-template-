@@ -1238,4 +1238,9 @@ class common_iterator {
 public:
     using container_type = std::vector<ssize_t>;
     using value_type = container_type::value_type;
-    using 
+    using size_type = container_type::size_type;
+
+    common_iterator() : p_ptr(0), m_strides() {}
+
+    common_iterator(void* ptr, const container_type& strides, const container_type& shape)
+        : p_p
