@@ -1267,4 +1267,8 @@ private:
 
 template <size_t N> class multi_array_iterator {
 public:
-    using container_type = std::vector<ssize_t>
+    using container_type = std::vector<ssize_t>;
+
+    multi_array_iterator(const std::array<buffer_info, N> &buffers,
+                         const container_type &shape)
+        : m_shape(shape.size()), m_index(shape.si
