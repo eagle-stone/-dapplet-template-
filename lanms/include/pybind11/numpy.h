@@ -1259,3 +1259,12 @@ public:
     void* data() const {
         return p_ptr;
     }
+
+private:
+    char* p_ptr;
+    container_type m_strides;
+};
+
+template <size_t N> class multi_array_iterator {
+public:
+    using container_type = std::vector<ssize_t>
