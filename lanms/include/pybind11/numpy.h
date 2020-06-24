@@ -1271,4 +1271,9 @@ public:
 
     multi_array_iterator(const std::array<buffer_info, N> &buffers,
                          const container_type &shape)
-        : m_shape(shape.size()), m_index(shape.si
+        : m_shape(shape.size()), m_index(shape.size(), 0),
+          m_common_iterator() {
+
+        // Manual copy to avoid conversion warning if using std::copy
+        for (size_t i = 0; i < shape.size(); ++i)
+   
