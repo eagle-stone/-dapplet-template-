@@ -1280,4 +1280,10 @@ public:
 
         container_type strides(shape.size());
         for (size_t i = 0; i < N; ++i)
-            init_common_iterator(buffers[i], shape, m_common_iter
+            init_common_iterator(buffers[i], shape, m_common_iterator[i], strides);
+    }
+
+    multi_array_iterator& operator++() {
+        for (size_t j = m_index.size(); j != 0; --j) {
+            size_t i = j - 1;
+            if (++m_index[i] != m_
