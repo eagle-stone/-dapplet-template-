@@ -1276,4 +1276,8 @@ public:
 
         // Manual copy to avoid conversion warning if using std::copy
         for (size_t i = 0; i < shape.size(); ++i)
-   
+            m_shape[i] = shape[i];
+
+        container_type strides(shape.size());
+        for (size_t i = 0; i < N; ++i)
+            init_common_iterator(buffers[i], shape, m_common_iter
