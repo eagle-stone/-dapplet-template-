@@ -1296,3 +1296,10 @@ public:
         return *this;
     }
 
+    template <size_t K, class T = void> T* data() const {
+        return reinterpret_cast<T*>(m_common_iterator[K].data());
+    }
+
+private:
+
+    using common_ite
