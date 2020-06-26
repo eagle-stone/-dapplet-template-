@@ -1286,4 +1286,13 @@ public:
     multi_array_iterator& operator++() {
         for (size_t j = m_index.size(); j != 0; --j) {
             size_t i = j - 1;
-            if (++m_index[i] != m_
+            if (++m_index[i] != m_shape[i]) {
+                increment_common_iterator(i);
+                break;
+            } else {
+                m_index[i] = 0;
+            }
+        }
+        return *this;
+    }
+
