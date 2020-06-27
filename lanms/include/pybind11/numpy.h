@@ -1306,4 +1306,7 @@ private:
 
     void init_common_iterator(const buffer_info &buffer,
                               const container_type &shape,
-                              common_iter
+                              common_iter &iterator,
+                              container_type &strides) {
+        auto buffer_shape_iter = buffer.shape.rbegin();
+        auto buffer_strides_iter = 
