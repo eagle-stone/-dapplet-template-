@@ -1309,4 +1309,9 @@ private:
                               common_iter &iterator,
                               container_type &strides) {
         auto buffer_shape_iter = buffer.shape.rbegin();
-        auto buffer_strides_iter = 
+        auto buffer_strides_iter = buffer.strides.rbegin();
+        auto shape_iter = shape.rbegin();
+        auto strides_iter = strides.rbegin();
+
+        while (buffer_shape_iter != buffer.shape.rend()) {
+         
