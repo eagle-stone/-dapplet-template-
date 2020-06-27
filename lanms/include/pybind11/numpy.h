@@ -1302,4 +1302,8 @@ public:
 
 private:
 
-    using common_ite
+    using common_iter = common_iterator;
+
+    void init_common_iterator(const buffer_info &buffer,
+                              const container_type &shape,
+                              common_iter
