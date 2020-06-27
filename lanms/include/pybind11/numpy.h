@@ -1314,4 +1314,9 @@ private:
         auto strides_iter = strides.rbegin();
 
         while (buffer_shape_iter != buffer.shape.rend()) {
-         
+            if (*shape_iter == *buffer_shape_iter)
+                *strides_iter = *buffer_strides_iter;
+            else
+                *strides_iter = 0;
+
+            ++buffer_s
