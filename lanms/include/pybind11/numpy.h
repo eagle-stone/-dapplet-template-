@@ -1319,4 +1319,11 @@ private:
             else
                 *strides_iter = 0;
 
-            ++buffer_s
+            ++buffer_shape_iter;
+            ++buffer_strides_iter;
+            ++shape_iter;
+            ++strides_iter;
+        }
+
+        std::fill(strides_iter, strides.rend(), 0);
+        iterator = common_iter(buffer.ptr, stri
