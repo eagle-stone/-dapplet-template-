@@ -1326,4 +1326,12 @@ private:
         }
 
         std::fill(strides_iter, strides.rend(), 0);
-        iterator = common_iter(buffer.ptr, stri
+        iterator = common_iter(buffer.ptr, strides, shape);
+    }
+
+    void increment_common_iterator(size_t dim) {
+        for (auto &iter : m_common_iterator)
+            iter.increment(dim);
+    }
+
+    container_type m_shap
