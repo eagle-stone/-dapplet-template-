@@ -1334,4 +1334,11 @@ private:
             iter.increment(dim);
     }
 
-    container_type m_shap
+    container_type m_shape;
+    container_type m_index;
+    std::array<common_iter, N> m_common_iterator;
+};
+
+enum class broadcast_trivial { non_trivial, c_trivial, f_trivial };
+
+// Populates the shape an
