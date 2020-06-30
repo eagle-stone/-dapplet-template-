@@ -1343,4 +1343,7 @@ enum class broadcast_trivial { non_trivial, c_trivial, f_trivial };
 
 // Populates the shape and number of dimensions for the set of buffers.  Returns a broadcast_trivial
 // enum value indicating whether the broadcast is "trivial"--that is, has each buffer being either a
-// si
+// singleton or a full-size, C-contiguous (`c_trivial`) or Fortran-contiguous (`f_trivial`) storage
+// buffer; returns `non_trivial` otherwise.
+template <size_t N>
+broadcast_trivial br
