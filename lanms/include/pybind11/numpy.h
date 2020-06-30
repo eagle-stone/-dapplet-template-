@@ -1341,4 +1341,6 @@ private:
 
 enum class broadcast_trivial { non_trivial, c_trivial, f_trivial };
 
-// Populates the shape an
+// Populates the shape and number of dimensions for the set of buffers.  Returns a broadcast_trivial
+// enum value indicating whether the broadcast is "trivial"--that is, has each buffer being either a
+// si
