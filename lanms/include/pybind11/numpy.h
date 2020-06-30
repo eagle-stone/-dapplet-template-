@@ -1346,4 +1346,5 @@ enum class broadcast_trivial { non_trivial, c_trivial, f_trivial };
 // singleton or a full-size, C-contiguous (`c_trivial`) or Fortran-contiguous (`f_trivial`) storage
 // buffer; returns `non_trivial` otherwise.
 template <size_t N>
-broadcast_trivial br
+broadcast_trivial broadcast(const std::array<buffer_info, N> &buffers, ssize_t &ndim, std::vector<ssize_t> &shape) {
+    ndim = std::accumulate(buffers.begin(), buffers.end(), ssize_t(0), [](ssize
