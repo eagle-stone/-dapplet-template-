@@ -1358,4 +1358,6 @@ broadcast_trivial broadcast(const std::array<buffer_info, N> &buffers, ssize_t &
     // the full size).
     for (size_t i = 0; i < N; ++i) {
         auto res_iter = shape.rbegin();
-        auto end 
+        auto end = buffers[i].shape.rend();
+        for (auto shape_iter = buffers[i].shape.rbegin(); shape_iter != end; ++shape_iter, ++res_iter) {
+            const auto &dim_size_in = *shape_iter
