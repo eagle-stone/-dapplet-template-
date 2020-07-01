@@ -1354,4 +1354,8 @@ broadcast_trivial broadcast(const std::array<buffer_info, N> &buffers, ssize_t &
     shape.clear();
     shape.resize((size_t) ndim, 1);
 
-    // Figure out the output size, and mak
+    // Figure out the output size, and make sure all input arrays conform (i.e. are either size 1 or
+    // the full size).
+    for (size_t i = 0; i < N; ++i) {
+        auto res_iter = shape.rbegin();
+        auto end 
