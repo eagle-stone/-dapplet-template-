@@ -1360,4 +1360,9 @@ broadcast_trivial broadcast(const std::array<buffer_info, N> &buffers, ssize_t &
         auto res_iter = shape.rbegin();
         auto end = buffers[i].shape.rend();
         for (auto shape_iter = buffers[i].shape.rbegin(); shape_iter != end; ++shape_iter, ++res_iter) {
-            const auto &dim_size_in = *shape_iter
+            const auto &dim_size_in = *shape_iter;
+            auto &dim_size_out = *res_iter;
+
+            // Each input dimension can either be 1 or `n`, but `n` values must match across buffers
+            if (dim_size_out == 1)
+    
