@@ -1373,4 +1373,10 @@ broadcast_trivial broadcast(const std::array<buffer_info, N> &buffers, ssize_t &
 
     bool trivial_broadcast_c = true;
     bool trivial_broadcast_f = true;
-    for (size_t i = 0; i < N && (trivial_broadcast_c || trivial_br
+    for (size_t i = 0; i < N && (trivial_broadcast_c || trivial_broadcast_f); ++i) {
+        if (buffers[i].size == 1)
+            continue;
+
+        // Require the same number of dimensions:
+        if (buffers[i].ndim != ndim)
+            return broadcast_trivial::
