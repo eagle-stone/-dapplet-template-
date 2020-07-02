@@ -1383,4 +1383,7 @@ broadcast_trivial broadcast(const std::array<buffer_info, N> &buffers, ssize_t &
 
         // Require all dimensions be full-size:
         if (!std::equal(buffers[i].shape.cbegin(), buffers[i].shape.cend(), shape.cbegin()))
-      
+            return broadcast_trivial::non_trivial;
+
+        // Check for C contiguity (but only if previous inputs were also C contiguous)
+        if (trivial_broadc
