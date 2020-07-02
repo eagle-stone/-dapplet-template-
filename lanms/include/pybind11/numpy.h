@@ -1379,4 +1379,8 @@ broadcast_trivial broadcast(const std::array<buffer_info, N> &buffers, ssize_t &
 
         // Require the same number of dimensions:
         if (buffers[i].ndim != ndim)
-            return broadcast_trivial::
+            return broadcast_trivial::non_trivial;
+
+        // Require all dimensions be full-size:
+        if (!std::equal(buffers[i].shape.cbegin(), buffers[i].shape.cend(), shape.cbegin()))
+      
