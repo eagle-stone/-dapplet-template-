@@ -1367,4 +1367,10 @@ broadcast_trivial broadcast(const std::array<buffer_info, N> &buffers, ssize_t &
             if (dim_size_out == 1)
                 dim_size_out = dim_size_in;
             else if (dim_size_in != 1 && dim_size_in != dim_size_out)
-                pybind11_fail("pybind11::vectorize: incompatible size/dimension of inpu
+                pybind11_fail("pybind11::vectorize: incompatible size/dimension of inputs!");
+        }
+    }
+
+    bool trivial_broadcast_c = true;
+    bool trivial_broadcast_f = true;
+    for (size_t i = 0; i < N && (trivial_broadcast_c || trivial_br
