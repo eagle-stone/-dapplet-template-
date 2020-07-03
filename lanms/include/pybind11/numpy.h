@@ -1386,4 +1386,7 @@ broadcast_trivial broadcast(const std::array<buffer_info, N> &buffers, ssize_t &
             return broadcast_trivial::non_trivial;
 
         // Check for C contiguity (but only if previous inputs were also C contiguous)
-        if (trivial_broadc
+        if (trivial_broadcast_c) {
+            ssize_t expect_stride = buffers[i].itemsize;
+            auto end = buffers[i].shape.crend();
+            for (auto shape_iter = buffers[i].shape.crbegin(), stride_it
