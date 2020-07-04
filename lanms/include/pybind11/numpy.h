@@ -1392,3 +1392,10 @@ broadcast_trivial broadcast(const std::array<buffer_info, N> &buffers, ssize_t &
             for (auto shape_iter = buffers[i].shape.crbegin(), stride_iter = buffers[i].strides.crbegin();
                     trivial_broadcast_c && shape_iter != end; ++shape_iter, ++stride_iter) {
                 if (expect_stride == *stride_iter)
+                    expect_stride *= *shape_iter;
+                else
+                    trivial_broadcast_c = false;
+            }
+        }
+
+        // Check fo
