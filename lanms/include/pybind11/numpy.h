@@ -1401,4 +1401,6 @@ broadcast_trivial broadcast(const std::array<buffer_info, N> &buffers, ssize_t &
         // Check for Fortran contiguity (if previous inputs were also F contiguous)
         if (trivial_broadcast_f) {
             ssize_t expect_stride = buffers[i].itemsize;
-            auto end = buffers
+            auto end = buffers[i].shape.cend();
+            for (auto shape_iter = buffers[i].shape.cbegin(), stride_iter = buffers[i].strides.cbegin();
+                    trivial_broadcast_f && shape_iter != 
