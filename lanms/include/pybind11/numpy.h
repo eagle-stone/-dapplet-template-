@@ -1389,4 +1389,6 @@ broadcast_trivial broadcast(const std::array<buffer_info, N> &buffers, ssize_t &
         if (trivial_broadcast_c) {
             ssize_t expect_stride = buffers[i].itemsize;
             auto end = buffers[i].shape.crend();
-            for (auto shape_iter = buffers[i].shape.crbegin(), stride_it
+            for (auto shape_iter = buffers[i].shape.crbegin(), stride_iter = buffers[i].strides.crbegin();
+                    trivial_broadcast_c && shape_iter != end; ++shape_iter, ++stride_iter) {
+                if (expect_stride == *stride_iter)
