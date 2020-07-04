@@ -1398,4 +1398,7 @@ broadcast_trivial broadcast(const std::array<buffer_info, N> &buffers, ssize_t &
             }
         }
 
-        // Check fo
+        // Check for Fortran contiguity (if previous inputs were also F contiguous)
+        if (trivial_broadcast_f) {
+            ssize_t expect_stride = buffers[i].itemsize;
+            auto end = buffers
