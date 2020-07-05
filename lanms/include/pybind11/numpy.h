@@ -1415,4 +1415,9 @@ broadcast_trivial broadcast(const std::array<buffer_info, N> &buffers, ssize_t &
     return
         trivial_broadcast_c ? broadcast_trivial::c_trivial :
         trivial_broadcast_f ? broadcast_trivial::f_trivial :
-        br
+        broadcast_trivial::non_trivial;
+}
+
+template <typename T>
+struct vectorize_arg {
+    static_assert(!std::is_rvalue_reference<T>::value, "Functions with rvalue reference arguments cannot be vecto
