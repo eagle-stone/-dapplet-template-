@@ -1407,4 +1407,12 @@ broadcast_trivial broadcast(const std::array<buffer_info, N> &buffers, ssize_t &
                 if (expect_stride == *stride_iter)
                     expect_stride *= *shape_iter;
                 else
-                    trivial_broadcast
+                    trivial_broadcast_f = false;
+            }
+        }
+    }
+
+    return
+        trivial_broadcast_c ? broadcast_trivial::c_trivial :
+        trivial_broadcast_f ? broadcast_trivial::f_trivial :
+        br
