@@ -1420,4 +1420,9 @@ broadcast_trivial broadcast(const std::array<buffer_info, N> &buffers, ssize_t &
 
 template <typename T>
 struct vectorize_arg {
-    static_assert(!std::is_rvalue_reference<T>::value, "Functions with rvalue reference arguments cannot be vecto
+    static_assert(!std::is_rvalue_reference<T>::value, "Functions with rvalue reference arguments cannot be vectorized");
+    // The wrapped function gets called with this type:
+    using call_type = remove_reference_t<T>;
+    // Is this a vectorized argument?
+    static constexpr bool vectorize =
+  
