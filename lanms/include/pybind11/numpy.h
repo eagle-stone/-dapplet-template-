@@ -1429,4 +1429,8 @@ struct vectorize_arg {
         satisfies_none_of<call_type, std::is_pointer, std::is_array, is_std_array, std::is_enum>::value &&
         (!std::is_reference<T>::value ||
          (std::is_lvalue_reference<T>::value && std::is_const<call_type>::value));
-    // Accept this type: an array 
+    // Accept this type: an array for vectorized types, otherwise the type as-is:
+    using type = conditional_t<vectorize, array_t<remove_cv_t<call_type>, array::forcecast>, T>;
+};
+
+template <typename Func, typename Retu
