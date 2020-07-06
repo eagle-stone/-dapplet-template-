@@ -1425,4 +1425,5 @@ struct vectorize_arg {
     using call_type = remove_reference_t<T>;
     // Is this a vectorized argument?
     static constexpr bool vectorize =
-  
+        satisfies_any_of<call_type, std::is_arithmetic, is_complex, std::is_pod>::value &&
+        satisfies_none_of<call_type, std::is_pointer, std::is_array, is_std_array, std::is_enum>::valu
