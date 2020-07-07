@@ -1437,4 +1437,6 @@ template <typename Func, typename Return, typename... Args>
 struct vectorize_helper {
 private:
     static constexpr size_t N = sizeof...(Args);
-    static constexpr size_t NVectorized = constexpr_sum(vectorize_arg<Args>:
+    static constexpr size_t NVectorized = constexpr_sum(vectorize_arg<Args>::vectorize...);
+    static_assert(NVectorized >= 1,
+            "pybind11::vectorize(...) requires a function with at least one vectorizable ar
