@@ -1433,4 +1433,8 @@ struct vectorize_arg {
     using type = conditional_t<vectorize, array_t<remove_cv_t<call_type>, array::forcecast>, T>;
 };
 
-template <typename Func, typename Retu
+template <typename Func, typename Return, typename... Args>
+struct vectorize_helper {
+private:
+    static constexpr size_t N = sizeof...(Args);
+    static constexpr size_t NVectorized = constexpr_sum(vectorize_arg<Args>:
