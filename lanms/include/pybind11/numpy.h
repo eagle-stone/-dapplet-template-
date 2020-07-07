@@ -1439,4 +1439,10 @@ private:
     static constexpr size_t N = sizeof...(Args);
     static constexpr size_t NVectorized = constexpr_sum(vectorize_arg<Args>::vectorize...);
     static_assert(NVectorized >= 1,
-            "pybind11::vectorize(...) requires a function with at least one vectorizable ar
+            "pybind11::vectorize(...) requires a function with at least one vectorizable argument");
+
+public:
+    template <typename T>
+    explicit vectorize_helper(T &&f) : f(std::forward<T>(f)) { }
+
+    object operator()(typename vectorize_arg<Ar
