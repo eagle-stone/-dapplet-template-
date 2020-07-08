@@ -1445,4 +1445,8 @@ public:
     template <typename T>
     explicit vectorize_helper(T &&f) : f(std::forward<T>(f)) { }
 
-    object operator()(typename vectorize_arg<Ar
+    object operator()(typename vectorize_arg<Args>::type... args) {
+        return run(args...,
+                   make_index_sequence<N>(),
+                   select_indices<vectorize_arg<Args>::vectorize...>(),
+       
