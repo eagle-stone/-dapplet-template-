@@ -1460,4 +1460,6 @@ private:
     // Runs a vectorized function given arguments tuple and three index sequences:
     //     - Index is the full set of 0 ... (N-1) argument indices;
     //     - VIndex is the subset of argument indices with vectorized parameters, letting us access
-    //       vectorized arguments (anything not in this sequence is 
+    //       vectorized arguments (anything not in this sequence is passed through)
+    //     - BIndex is a incremental sequence (beginning at 0) of the same size as VIndex, so that
+    //       we can store vectorized buffer_in
