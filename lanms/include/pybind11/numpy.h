@@ -1449,4 +1449,10 @@ public:
         return run(args...,
                    make_index_sequence<N>(),
                    select_indices<vectorize_arg<Args>::vectorize...>(),
-       
+                   make_index_sequence<NVectorized>());
+    }
+
+private:
+    remove_reference_t<Func> f;
+
+    template <size_t Index> using param_n_t = typename pack_element<Index, typename vect
