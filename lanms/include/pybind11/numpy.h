@@ -1458,4 +1458,6 @@ private:
     template <size_t Index> using param_n_t = typename pack_element<Index, typename vectorize_arg<Args>::call_type...>::type;
 
     // Runs a vectorized function given arguments tuple and three index sequences:
-    //     - Index is the full set of 0 ... (N-1) argument i
+    //     - Index is the full set of 0 ... (N-1) argument indices;
+    //     - VIndex is the subset of argument indices with vectorized parameters, letting us access
+    //       vectorized arguments (anything not in this sequence is 
