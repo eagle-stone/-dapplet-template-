@@ -1462,4 +1462,6 @@ private:
     //     - VIndex is the subset of argument indices with vectorized parameters, letting us access
     //       vectorized arguments (anything not in this sequence is passed through)
     //     - BIndex is a incremental sequence (beginning at 0) of the same size as VIndex, so that
-    //       we can store vectorized buffer_in
+    //       we can store vectorized buffer_infos in an array (argument VIndex has its buffer at
+    //       index BIndex in the array).
+    template <size_t... Index, size_t... VIndex, size
