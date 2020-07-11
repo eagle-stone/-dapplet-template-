@@ -1469,4 +1469,6 @@ private:
             index_sequence<Index...> i_seq, index_sequence<VIndex...> vi_seq, index_sequence<BIndex...> bi_seq) {
 
         // Pointers to values the function was called with; the vectorized ones set here will start
-        // out as array_t<T> pointers, but they will
+        // out as array_t<T> pointers, but they will be changed them to T pointers before we make
+        // call the wrapped function.  Non-vectorized pointers are left as-is.
+        std::array<void *, N> params{{ &
