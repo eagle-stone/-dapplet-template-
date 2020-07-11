@@ -1464,4 +1464,6 @@ private:
     //     - BIndex is a incremental sequence (beginning at 0) of the same size as VIndex, so that
     //       we can store vectorized buffer_infos in an array (argument VIndex has its buffer at
     //       index BIndex in the array).
-    template <size_t... Index, size_t... VIndex, size
+    template <size_t... Index, size_t... VIndex, size_t... BIndex> object run(
+            typename vectorize_arg<Args>::type &...args,
+            index_sequence<Index...> i_seq, index_sequence<VIndex...> vi_seq, index_sequence<
