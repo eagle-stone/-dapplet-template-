@@ -1471,4 +1471,7 @@ private:
         // Pointers to values the function was called with; the vectorized ones set here will start
         // out as array_t<T> pointers, but they will be changed them to T pointers before we make
         // call the wrapped function.  Non-vectorized pointers are left as-is.
-        std::array<void *, N> params{{ &
+        std::array<void *, N> params{{ &args... }};
+
+        // The array of `buffer_info`s of vectorized arguments:
+        std::array<buffer_info, NVectorized> buffers{{ reinterpret_cast<array *>(params[
