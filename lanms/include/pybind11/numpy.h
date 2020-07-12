@@ -1474,4 +1474,9 @@ private:
         std::array<void *, N> params{{ &args... }};
 
         // The array of `buffer_info`s of vectorized arguments:
-        std::array<buffer_info, NVectorized> buffers{{ reinterpret_cast<array *>(params[
+        std::array<buffer_info, NVectorized> buffers{{ reinterpret_cast<array *>(params[VIndex])->request()... }};
+
+        /* Determine dimensions parameters of output array */
+        ssize_t nd = 0;
+        std::vector<ssize_t> shape(0);
+        auto trivial = broadcast(b
