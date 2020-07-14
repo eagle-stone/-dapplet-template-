@@ -1482,4 +1482,9 @@ private:
         auto trivial = broadcast(buffers, nd, shape);
         size_t ndim = (size_t) nd;
 
-        size_t size = std::accumulate(shape.begin(), shape.end(), (size_t) 1, std::multiplies<size_t>())
+        size_t size = std::accumulate(shape.begin(), shape.end(), (size_t) 1, std::multiplies<size_t>());
+
+        // If all arguments are 0-dimension arrays (i.e. single values) return a plain value (i.e.
+        // not wrapped in an array).
+        if (size == 1 && ndim == 0) {
+     
