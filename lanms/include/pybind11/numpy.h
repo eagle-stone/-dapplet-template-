@@ -1487,4 +1487,7 @@ private:
         // If all arguments are 0-dimension arrays (i.e. single values) return a plain value (i.e.
         // not wrapped in an array).
         if (size == 1 && ndim == 0) {
-     
+            PYBIND11_EXPAND_SIDE_EFFECTS(params[VIndex] = buffers[BIndex].ptr);
+            return cast(f(*reinterpret_cast<param_n_t<Index> *>(params[Index])...));
+        }
+
