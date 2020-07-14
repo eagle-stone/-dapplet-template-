@@ -1479,4 +1479,7 @@ private:
         /* Determine dimensions parameters of output array */
         ssize_t nd = 0;
         std::vector<ssize_t> shape(0);
-        auto trivial = broadcast(b
+        auto trivial = broadcast(buffers, nd, shape);
+        size_t ndim = (size_t) nd;
+
+        size_t size = std::accumulate(shape.begin(), shape.end(), (size_t) 1, std::multiplies<size_t>())
