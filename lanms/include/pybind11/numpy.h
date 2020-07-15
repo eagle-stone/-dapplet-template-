@@ -1493,4 +1493,10 @@ private:
 
         array_t<Return> result;
         if (trivial == broadcast_trivial::f_trivial) result = array_t<Return, array::f_style>(shape);
-        else result = ar
+        else result = array_t<Return>(shape);
+
+        if (size == 0) return result;
+
+        /* Call the function */
+        if (trivial == broadcast_trivial::non_trivial)
+            apply_broadcast(buffer
