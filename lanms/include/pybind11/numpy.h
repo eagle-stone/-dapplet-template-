@@ -1491,3 +1491,6 @@ private:
             return cast(f(*reinterpret_cast<param_n_t<Index> *>(params[Index])...));
         }
 
+        array_t<Return> result;
+        if (trivial == broadcast_trivial::f_trivial) result = array_t<Return, array::f_style>(shape);
+        else result = ar
