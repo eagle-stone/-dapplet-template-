@@ -1508,4 +1508,9 @@ private:
 
     template <size_t... Index, size_t... VIndex, size_t... BIndex>
     void apply_trivial(std::array<buffer_info, NVectorized> &buffers,
-                       std::array<void *, N> &p
+                       std::array<void *, N> &params,
+                       Return *out,
+                       size_t size,
+                       index_sequence<Index...>, index_sequence<VIndex...>, index_sequence<BIndex...>) {
+
+        
