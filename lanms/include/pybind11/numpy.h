@@ -1506,4 +1506,6 @@ private:
         return result;
     }
 
-    templa
+    template <size_t... Index, size_t... VIndex, size_t... BIndex>
+    void apply_trivial(std::array<buffer_info, NVectorized> &buffers,
+                       std::array<void *, N> &p
