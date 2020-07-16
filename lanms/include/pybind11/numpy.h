@@ -1499,4 +1499,11 @@ private:
 
         /* Call the function */
         if (trivial == broadcast_trivial::non_trivial)
-            apply_broadcast(buffer
+            apply_broadcast(buffers, params, result, i_seq, vi_seq, bi_seq);
+        else
+            apply_trivial(buffers, params, result.mutable_data(), size, i_seq, vi_seq, bi_seq);
+
+        return result;
+    }
+
+    templa
