@@ -1513,4 +1513,5 @@ private:
                        size_t size,
                        index_sequence<Index...>, index_sequence<VIndex...>, index_sequence<BIndex...>) {
 
-        
+        // Initialize an array of mutable byte references and sizes with references set to the
+        // appropriate pointer in `params`; as we iterate, we'll increm
