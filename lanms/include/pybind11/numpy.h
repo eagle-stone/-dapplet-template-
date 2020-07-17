@@ -1514,4 +1514,6 @@ private:
                        index_sequence<Index...>, index_sequence<VIndex...>, index_sequence<BIndex...>) {
 
         // Initialize an array of mutable byte references and sizes with references set to the
-        // appropriate pointer in `params`; as we iterate, we'll increm
+        // appropriate pointer in `params`; as we iterate, we'll increment each pointer by its size
+        // (except for singletons, which get an increment of 0).
+        std::array<std::pair<unsigned char *&, const size
