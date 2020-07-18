@@ -1516,4 +1516,6 @@ private:
         // Initialize an array of mutable byte references and sizes with references set to the
         // appropriate pointer in `params`; as we iterate, we'll increment each pointer by its size
         // (except for singletons, which get an increment of 0).
-        std::array<std::pair<unsigned char *&, const size
+        std::array<std::pair<unsigned char *&, const size_t>, NVectorized> vecparams{{
+            std::pair<unsigned char *&, const size_t>(
+                    reinterpret_cast<unsigned char *&>(params[VIndex] = buffer
