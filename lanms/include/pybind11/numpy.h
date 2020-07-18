@@ -1518,4 +1518,10 @@ private:
         // (except for singletons, which get an increment of 0).
         std::array<std::pair<unsigned char *&, const size_t>, NVectorized> vecparams{{
             std::pair<unsigned char *&, const size_t>(
-                    reinterpret_cast<unsigned char *&>(params[VIndex] = buffer
+                    reinterpret_cast<unsigned char *&>(params[VIndex] = buffers[BIndex].ptr),
+                    buffers[BIndex].size == 1 ? 0 : sizeof(param_n_t<VIndex>)
+            )...
+        }};
+
+        for (size_t i = 0; i < size; ++i) {
+ 
