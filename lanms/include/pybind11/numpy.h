@@ -1524,4 +1524,9 @@ private:
         }};
 
         for (size_t i = 0; i < size; ++i) {
- 
+            out[i] = f(*reinterpret_cast<param_n_t<Index> *>(params[Index])...);
+            for (auto &x : vecparams) x.first += x.second;
+        }
+    }
+
+    template <size_
