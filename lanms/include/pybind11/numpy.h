@@ -1532,4 +1532,7 @@ private:
     template <size_t... Index, size_t... VIndex, size_t... BIndex>
     void apply_broadcast(std::array<buffer_info, NVectorized> &buffers,
                          std::array<void *, N> &params,
-  
+                         array_t<Return> &output_array,
+                         index_sequence<Index...>, index_sequence<VIndex...>, index_sequence<BIndex...>) {
+
+        bu
