@@ -1542,4 +1542,9 @@ private:
              iter != end;
              ++iter, ++input_iter) {
             PYBIND11_EXPAND_SIDE_EFFECTS((
-         
+                params[VIndex] = input_iter.template data<BIndex>()
+            ));
+            *iter = f(*reinterpret_cast<param_n_t<Index> *>(std::get<Index>(params))...);
+        }
+    }
+};
