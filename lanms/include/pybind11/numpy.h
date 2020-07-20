@@ -1538,4 +1538,8 @@ private:
         buffer_info output = output_array.request();
         multi_array_iterator<NVectorized> input_iter(buffers, output.shape);
 
-        for (array_iterator<Return> iter = array_begin<Return>(
+        for (array_iterator<Return> iter = array_begin<Return>(output), end = array_end<Return>(output);
+             iter != end;
+             ++iter, ++input_iter) {
+            PYBIND11_EXPAND_SIDE_EFFECTS((
+         
