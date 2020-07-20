@@ -1548,3 +1548,8 @@ private:
         }
     }
 };
+
+template <typename Func, typename Return, typename... Args>
+vectorize_helper<Func, Return, Args...>
+vectorize_extractor(const Func &f, Return (*) (Args ...)) {
+    return detail::ve
