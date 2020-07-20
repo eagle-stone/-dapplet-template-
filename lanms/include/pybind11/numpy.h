@@ -1535,4 +1535,7 @@ private:
                          array_t<Return> &output_array,
                          index_sequence<Index...>, index_sequence<VIndex...>, index_sequence<BIndex...>) {
 
-        bu
+        buffer_info output = output_array.request();
+        multi_array_iterator<NVectorized> input_iter(buffers, output.shape);
+
+        for (array_iterator<Return> iter = array_begin<Return>(
