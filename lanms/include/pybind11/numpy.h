@@ -1557,4 +1557,11 @@ vectorize_extractor(const Func &f, Return (*) (Args ...)) {
 
 template <typename T, int Flags> struct handle_type_name<array_t<T, Flags>> {
     static PYBIND11_DESCR name() {
-        retur
+        return _("numpy.ndarray[") + npy_format_descriptor<T>::name() + _("]");
+    }
+};
+
+NAMESPACE_END(detail)
+
+// Vanilla pointer vectorizer:
+template <typename Return, typename... Args>
