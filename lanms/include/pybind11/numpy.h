@@ -1565,3 +1565,6 @@ NAMESPACE_END(detail)
 
 // Vanilla pointer vectorizer:
 template <typename Return, typename... Args>
+detail::vectorize_helper<Return (*)(Args...), Return, Args...>
+vectorize(Return (*f) (Args ...)) {
+    return detail::vectorize_helper<Return (*)(Args...), R
