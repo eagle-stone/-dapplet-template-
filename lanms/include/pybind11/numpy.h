@@ -1552,4 +1552,9 @@ private:
 template <typename Func, typename Return, typename... Args>
 vectorize_helper<Func, Return, Args...>
 vectorize_extractor(const Func &f, Return (*) (Args ...)) {
-    return detail::ve
+    return detail::vectorize_helper<Func, Return, Args...>(f);
+}
+
+template <typename T, int Flags> struct handle_type_name<array_t<T, Flags>> {
+    static PYBIND11_DESCR name() {
+        retur
