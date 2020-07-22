@@ -1567,4 +1567,8 @@ NAMESPACE_END(detail)
 template <typename Return, typename... Args>
 detail::vectorize_helper<Return (*)(Args...), Return, Args...>
 vectorize(Return (*f) (Args ...)) {
-    return detail::vectorize_helper<Return (*)(Args...), R
+    return detail::vectorize_helper<Return (*)(Args...), Return, Args...>(f);
+}
+
+// lambda vectorizer:
+template <typename Func, typename FuncType = typename detail::remove_class<decltype(&detail::remove_referenc
