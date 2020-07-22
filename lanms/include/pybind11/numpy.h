@@ -1578,4 +1578,6 @@ auto vectorize(Func &&f) -> decltype(
 }
 
 // Vectorize a class method (non-const):
-template <typename Return, ty
+template <typename Return, typename Class, typename... Args,
+          typename Helper = detail::vectorize_helper<decltype(std::mem_fn(std::declval<Return (Class::*)(Args...)>())), Return, Class *, Args...>>
+Helpe
