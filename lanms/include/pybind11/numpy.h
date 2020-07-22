@@ -1574,4 +1574,8 @@ vectorize(Return (*f) (Args ...)) {
 template <typename Func, typename FuncType = typename detail::remove_class<decltype(&detail::remove_reference_t<Func>::operator())>::type>
 auto vectorize(Func &&f) -> decltype(
         detail::vectorize_extractor(std::forward<Func>(f), (FuncType *) nullptr)) {
-    return 
+    return detail::vectorize_extractor(std::forward<Func>(f), (FuncType *) nullptr);
+}
+
+// Vectorize a class method (non-const):
+template <typename Return, ty
