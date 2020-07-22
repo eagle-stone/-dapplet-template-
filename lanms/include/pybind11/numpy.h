@@ -1571,4 +1571,7 @@ vectorize(Return (*f) (Args ...)) {
 }
 
 // lambda vectorizer:
-template <typename Func, typename FuncType = typename detail::remove_class<decltype(&detail::remove_referenc
+template <typename Func, typename FuncType = typename detail::remove_class<decltype(&detail::remove_reference_t<Func>::operator())>::type>
+auto vectorize(Func &&f) -> decltype(
+        detail::vectorize_extractor(std::forward<Func>(f), (FuncType *) nullptr)) {
+    return 
