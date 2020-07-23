@@ -1585,4 +1585,6 @@ Helper vectorize(Return (Class::*f)(Args...)) {
 }
 
 // Vectorize a class method (non-const):
-template <typename Return, typename Class, typename..
+template <typename Return, typename Class, typename... Args,
+          typename Helper = detail::vectorize_helper<decltype(std::mem_fn(std::declval<Return (Class::*)(Args...) const>())), Return, const Class *, Args...>>
+Helper vecto
