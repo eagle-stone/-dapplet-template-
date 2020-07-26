@@ -23,4 +23,6 @@ NAMESPACE_BEGIN(detail)
 
 /// Enumeration with all supported operator types
 enum op_id : int {
-    o
+    op_add, op_sub, op_mul, op_div, op_mod, op_divmod, op_pow, op_lshift,
+    op_rshift, op_and, op_xor, op_or, op_neg, op_pos, op_abs, op_invert,
+    op_int, op_long, op_float, op_str, op_cm
