@@ -15,4 +15,12 @@
 #  pragma clang diagnostic ignored "-Wunsequenced" // multiple unsequenced modifications to 'self' (when using def(py::self OP Type()))
 #elif defined(_MSC_VER)
 #  pragma warning(push)
-#  pragma warning(disable: 4127) // wa
+#  pragma warning(disable: 4127) // warning C4127: Conditional expression is constant
+#endif
+
+NAMESPACE_BEGIN(pybind11)
+NAMESPACE_BEGIN(detail)
+
+/// Enumeration with all supported operator types
+enum op_id : int {
+    o
