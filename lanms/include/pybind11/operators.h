@@ -27,4 +27,11 @@ enum op_id : int {
     op_rshift, op_and, op_xor, op_or, op_neg, op_pos, op_abs, op_invert,
     op_int, op_long, op_float, op_str, op_cmp, op_gt, op_ge, op_lt, op_le,
     op_eq, op_ne, op_iadd, op_isub, op_imul, op_idiv, op_imod, op_ilshift,
-    op_irshift, op_iand, op_ixor, op_ior, op_complex, op_bool, op
+    op_irshift, op_iand, op_ixor, op_ior, op_complex, op_bool, op_nonzero,
+    op_repr, op_truediv, op_itruediv
+};
+
+enum op_type : int {
+    op_l, /* base type on left */
+    op_r, /* base type on right */
+    op_u  /* unary operator
