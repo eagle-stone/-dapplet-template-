@@ -34,4 +34,13 @@ enum op_id : int {
 enum op_type : int {
     op_l, /* base type on left */
     op_r, /* base type on right */
-    op_u  /* unary operator
+    op_u  /* unary operator */
+};
+
+struct self_t { };
+static const self_t self = self_t();
+
+/// Type for an unused type slot
+struct undefined_t { };
+
+/// Don't warn about an unused var
