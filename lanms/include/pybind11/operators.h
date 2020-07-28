@@ -53,4 +53,7 @@ template <op_id, op_type, typename B, typename L, typename R> struct op_impl { }
 template <op_id id, op_type ot, typename L, typename R> struct op_ {
     template <typename Class, typename... Extra> void execute(Class &cl, const Extra&... extra) const {
         using Base = typename Class::type;
-        using L_type = conditional_t<std::is_same<L, self_t>::value, Ba
+        using L_type = conditional_t<std::is_same<L, self_t>::value, Base, L>;
+        using R_type = conditional_t<std::is_same<R, self_t>::value, Base, R>;
+        using op = op_impl<id, ot, Base, L_type, R_type>;
+        cl.def(op::name(), &op::execute, is_op
