@@ -47,4 +47,8 @@ struct undefined_t { };
 inline self_t __self() { return self; }
 
 /// base template of operator implementations
-template <op_id, op_type, typename B, typename L, typename R> s
+template <op_id, op_type, typename B, typename L, typename R> struct op_impl { };
+
+/// Operator implementation generator
+template <op_id id, op_type ot, typename L, typename R> struct op_ {
+    template <typename Class, t
