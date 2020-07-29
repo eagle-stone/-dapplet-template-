@@ -56,4 +56,7 @@ template <op_id id, op_type ot, typename L, typename R> struct op_ {
         using L_type = conditional_t<std::is_same<L, self_t>::value, Base, L>;
         using R_type = conditional_t<std::is_same<R, self_t>::value, Base, R>;
         using op = op_impl<id, ot, Base, L_type, R_type>;
-        cl.def(op::name(), &op::execute, is_op
+        cl.def(op::name(), &op::execute, is_operator(), extra...);
+        #if PY_MAJOR_VERSION < 3
+        if (id == op_truediv || id == op_itruediv)
+            cl.def(id == op_itruediv ? "__idiv__" : ot == op_l ? "__div
