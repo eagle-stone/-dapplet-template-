@@ -63,4 +63,7 @@ template <op_id id, op_type ot, typename L, typename R> struct op_ {
                     &op::execute, is_operator(), extra...);
         #endif
     }
-    template <typename Class, typename... Extra> void execute_cast(C
+    template <typename Class, typename... Extra> void execute_cast(Class &cl, const Extra&... extra) const {
+        using Base = typename Class::type;
+        using L_type = conditional_t<std::is_same<L, self_t>::value, Base, L>;
+        using R
