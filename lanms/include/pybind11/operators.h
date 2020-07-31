@@ -77,4 +77,6 @@ template <op_id id, op_type ot, typename L, typename R> struct op_ {
     }
 };
 
-#define PYBIND11_BINARY_OPERATOR(id, rid, op, e
+#define PYBIND11_BINARY_OPERATOR(id, rid, op, expr)                                    \
+template <typename B, typename L, typename R> struct op_impl<op_##id, op_l, B, L, R> { \
+    static char const* name() { return "__" #id "__"
