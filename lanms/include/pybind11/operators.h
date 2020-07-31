@@ -71,4 +71,10 @@ template <op_id id, op_type ot, typename L, typename R> struct op_ {
         cl.def(op::name(), &op::execute_cast, is_operator(), extra...);
         #if PY_MAJOR_VERSION < 3
         if (id == op_truediv || id == op_itruediv)
-            cl.def(id == op_itruediv ? "__idiv__
+            cl.def(id == op_itruediv ? "__idiv__" : ot == op_l ? "__div__" : "__rdiv__",
+                    &op::execute, is_operator(), extra...);
+        #endif
+    }
+};
+
+#define PYBIND11_BINARY_OPERATOR(id, rid, op, e
