@@ -83,4 +83,6 @@ template <typename B, typename L, typename R> struct op_impl<op_##id, op_l, B, L
     static auto execute(const L &l, const R &r) -> decltype(expr) { return (expr); }   \
     static B execute_cast(const L &l, const R &r) { return B(expr); }                  \
 };                                                                                     \
-template <typename B, typename L, t
+template <typename B, typename L, typename R> struct op_impl<op_##id, op_r, B, L, R> { \
+    static char const* name() { return "__" #rid "__"; }                               \
+    static auto execute(const R &
