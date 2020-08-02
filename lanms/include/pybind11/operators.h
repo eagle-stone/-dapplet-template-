@@ -89,4 +89,6 @@ template <typename B, typename L, typename R> struct op_impl<op_##id, op_r, B, L
     static B execute_cast(const R &r, const L &l) { return B(expr); }                  \
 };                                                                                     \
 inline op_<op_##id, op_l, self_t, self_t> op(const self_t &, const self_t &) {         \
-    return op_<op_##id, op_l, self_t, sel
+    return op_<op_##id, op_l, self_t, self_t>();                                       \
+}                                                                                      \
+template <typename T> op_<op_##id, op_l, self_t, T> op
