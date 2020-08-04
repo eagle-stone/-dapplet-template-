@@ -99,4 +99,6 @@ template <typename T> op_<op_##id, op_r, T, self_t> op(const T &, const self_t &
 }
 
 #define PYBIND11_INPLACE_OPERATOR(id, op, expr)                                        \
-template <typename B, typename L, typename R
+template <typename B, typename L, typename R> struct op_impl<op_##id, op_l, B, L, R> { \
+    static char const* name() { return "__" #id "__"; }                                \
+    static auto execute(L &l, const R &r) -> decltype(expr) { return expr; }     
