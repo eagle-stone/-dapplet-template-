@@ -91,4 +91,6 @@ template <typename B, typename L, typename R> struct op_impl<op_##id, op_r, B, L
 inline op_<op_##id, op_l, self_t, self_t> op(const self_t &, const self_t &) {         \
     return op_<op_##id, op_l, self_t, self_t>();                                       \
 }                                                                                      \
-template <typename T> op_<op_##id, op_l, self_t, T> op
+template <typename T> op_<op_##id, op_l, self_t, T> op(const self_t &, const T &) {    \
+    return op_<op_##id, op_l, self_t, T>();                                            \
+}                                                        
