@@ -93,4 +93,6 @@ inline op_<op_##id, op_l, self_t, self_t> op(const self_t &, const self_t &) {  
 }                                                                                      \
 template <typename T> op_<op_##id, op_l, self_t, T> op(const self_t &, const T &) {    \
     return op_<op_##id, op_l, self_t, T>();                                            \
-}                                                        
+}                                                                                      \
+template <typename T> op_<op_##id, op_r, T, self_t> op(const T &, const self_t &) {    \
+    return op_<op_##id, op_r, T, self_t>();            
