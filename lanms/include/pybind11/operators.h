@@ -95,4 +95,8 @@ template <typename T> op_<op_##id, op_l, self_t, T> op(const self_t &, const T &
     return op_<op_##id, op_l, self_t, T>();                                            \
 }                                                                                      \
 template <typename T> op_<op_##id, op_r, T, self_t> op(const T &, const self_t &) {    \
-    return op_<op_##id, op_r, T, self_t>();            
+    return op_<op_##id, op_r, T, self_t>();                                            \
+}
+
+#define PYBIND11_INPLACE_OPERATOR(id, op, expr)                                        \
+template <typename B, typename L, typename R
