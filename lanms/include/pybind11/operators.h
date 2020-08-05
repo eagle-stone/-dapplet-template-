@@ -105,4 +105,8 @@ template <typename B, typename L, typename R> struct op_impl<op_##id, op_l, B, L
     static B execute_cast(L &l, const R &r) { return B(expr); }                        \
 };                                                                                     \
 template <typename T> op_<op_##id, op_l, self_t, T> op(const self_t &, const T &) {    \
-    return op_<op_##id, op_l, self_t, T>();  
+    return op_<op_##id, op_l, self_t, T>();                                            \
+}
+
+#define PYBIND11_UNARY_OPERATOR(id, op, expr)                                          \
+template <typename B, typename L> stru
