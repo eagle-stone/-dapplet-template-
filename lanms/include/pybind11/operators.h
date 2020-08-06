@@ -115,4 +115,9 @@ template <typename B, typename L> struct op_impl<op_##id, op_u, B, L, undefined_
     static B execute_cast(const L &l) { return B(expr); }                              \
 };                                                                                     \
 inline op_<op_##id, op_u, self_t, undefined_t> op(const self_t &) {                    \
-    return op_<op_##id, op_u, self_t, undefined_t>();         
+    return op_<op_##id, op_u, self_t, undefined_t>();                                  \
+}
+
+PYBIND11_BINARY_OPERATOR(sub,       rsub,         operator-,    l - r)
+PYBIND11_BINARY_OPERATOR(add,       radd,         operator+,    l + r)
+PYBIN
