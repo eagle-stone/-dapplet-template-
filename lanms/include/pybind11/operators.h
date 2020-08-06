@@ -120,4 +120,6 @@ inline op_<op_##id, op_u, self_t, undefined_t> op(const self_t &) {             
 
 PYBIND11_BINARY_OPERATOR(sub,       rsub,         operator-,    l - r)
 PYBIND11_BINARY_OPERATOR(add,       radd,         operator+,    l + r)
-PYBIN
+PYBIND11_BINARY_OPERATOR(mul,       rmul,         operator*,    l * r)
+PYBIND11_BINARY_OPERATOR(truediv,   rtruediv,     operator/,    l / r)
+PYBIND11_BINARY_OPERATOR(mo
