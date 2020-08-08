@@ -124,4 +124,7 @@ PYBIND11_BINARY_OPERATOR(mul,       rmul,         operator*,    l * r)
 PYBIND11_BINARY_OPERATOR(truediv,   rtruediv,     operator/,    l / r)
 PYBIND11_BINARY_OPERATOR(mod,       rmod,         operator%,    l % r)
 PYBIND11_BINARY_OPERATOR(lshift,    rlshift,      operator<<,   l << r)
-PYBIND11_BINARY_OPERATOR(rshift,    rrshift,      operator>>,   l
+PYBIND11_BINARY_OPERATOR(rshift,    rrshift,      operator>>,   l >> r)
+PYBIND11_BINARY_OPERATOR(and,       rand,         operator&,    l & r)
+PYBIND11_BINARY_OPERATOR(xor,       rxor,         operator^,    l ^ r)
+PYBIND11_BINARY_OPERATOR(eq,      
