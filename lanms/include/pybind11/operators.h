@@ -127,4 +127,7 @@ PYBIND11_BINARY_OPERATOR(lshift,    rlshift,      operator<<,   l << r)
 PYBIND11_BINARY_OPERATOR(rshift,    rrshift,      operator>>,   l >> r)
 PYBIND11_BINARY_OPERATOR(and,       rand,         operator&,    l & r)
 PYBIND11_BINARY_OPERATOR(xor,       rxor,         operator^,    l ^ r)
-PYBIND11_BINARY_OPERATOR(eq,      
+PYBIND11_BINARY_OPERATOR(eq,        eq,           operator==,   l == r)
+PYBIND11_BINARY_OPERATOR(ne,        ne,           operator!=,   l != r)
+PYBIND11_BINARY_OPERATOR(or,        ror,          operator|,    l | r)
+PYBIN
