@@ -134,4 +134,7 @@ PYBIND11_BINARY_OPERATOR(gt,        lt,           operator>,    l > r)
 PYBIND11_BINARY_OPERATOR(ge,        le,           operator>=,   l >= r)
 PYBIND11_BINARY_OPERATOR(lt,        gt,           operator<,    l < r)
 PYBIND11_BINARY_OPERATOR(le,        ge,           operator<=,   l <= r)
-//PYBIND11_BINARY_OPERATOR(pow,       rpow,         pow,        
+//PYBIND11_BINARY_OPERATOR(pow,       rpow,         pow,          std::pow(l,  r))
+PYBIND11_INPLACE_OPERATOR(iadd,     operator+=,   l += r)
+PYBIND11_INPLACE_OPERATOR(isub,     operator-=,   l -= r)
+PYBIND11_INPLACE_OPE
