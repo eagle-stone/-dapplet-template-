@@ -137,4 +137,7 @@ PYBIND11_BINARY_OPERATOR(le,        ge,           operator<=,   l <= r)
 //PYBIND11_BINARY_OPERATOR(pow,       rpow,         pow,          std::pow(l,  r))
 PYBIND11_INPLACE_OPERATOR(iadd,     operator+=,   l += r)
 PYBIND11_INPLACE_OPERATOR(isub,     operator-=,   l -= r)
-PYBIND11_INPLACE_OPE
+PYBIND11_INPLACE_OPERATOR(imul,     operator*=,   l *= r)
+PYBIND11_INPLACE_OPERATOR(itruediv, operator/=,   l /= r)
+PYBIND11_INPLACE_OPERATOR(imod,     operator%=,   l %= r)
+PYBIND11_INPLACE_
