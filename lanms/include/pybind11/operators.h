@@ -140,4 +140,7 @@ PYBIND11_INPLACE_OPERATOR(isub,     operator-=,   l -= r)
 PYBIND11_INPLACE_OPERATOR(imul,     operator*=,   l *= r)
 PYBIND11_INPLACE_OPERATOR(itruediv, operator/=,   l /= r)
 PYBIND11_INPLACE_OPERATOR(imod,     operator%=,   l %= r)
-PYBIND11_INPLACE_
+PYBIND11_INPLACE_OPERATOR(ilshift,  operator<<=,  l <<= r)
+PYBIND11_INPLACE_OPERATOR(irshift,  operator>>=,  l >>= r)
+PYBIND11_INPLACE_OPERATOR(iand,     operator&=,   l &= r)
+PYBIND1
