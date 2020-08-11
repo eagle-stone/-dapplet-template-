@@ -163,4 +163,5 @@ using detail::self;
 NAMESPACE_END(pybind11)
 
 #if defined(_MSC_VER)
-#  pragma war
+#  pragma warning(pop)
+#endif
