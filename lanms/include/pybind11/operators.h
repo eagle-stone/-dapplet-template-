@@ -146,4 +146,6 @@ PYBIND11_INPLACE_OPERATOR(iand,     operator&=,   l &= r)
 PYBIND11_INPLACE_OPERATOR(ixor,     operator^=,   l ^= r)
 PYBIND11_INPLACE_OPERATOR(ior,      operator|=,   l |= r)
 PYBIND11_UNARY_OPERATOR(neg,        operator-,    -l)
-PYBI
+PYBIND11_UNARY_OPERATOR(pos,        operator+,    +l)
+PYBIND11_UNARY_OPERATOR(abs,        abs,          std::abs(l))
+PYBIND11_UNARY_OPERATOR(invert,     operator~,    
