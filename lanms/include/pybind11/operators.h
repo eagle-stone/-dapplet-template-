@@ -152,3 +152,15 @@ PYBIND11_UNARY_OPERATOR(invert,     operator~,    (~l))
 PYBIND11_UNARY_OPERATOR(bool,       operator!,    !!l)
 PYBIND11_UNARY_OPERATOR(int,        int_,         (int) l)
 PYBIND11_UNARY_OPERATOR(float,      float_,       (double) l)
+
+#undef PYBIND11_BINARY_OPERATOR
+#undef PYBIND11_INPLACE_OPERATOR
+#undef PYBIND11_UNARY_OPERATOR
+NAMESPACE_END(detail)
+
+using detail::self;
+
+NAMESPACE_END(pybind11)
+
+#if defined(_MSC_VER)
+#  pragma war
