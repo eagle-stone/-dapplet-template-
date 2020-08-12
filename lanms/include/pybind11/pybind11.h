@@ -13,4 +13,6 @@
 #if defined(_MSC_VER)
 #  pragma warning(push)
 #  pragma warning(disable: 4100) // warning C4100: Unreferenced formal parameter
-#  pragma warning(disable: 4127) // war
+#  pragma warning(disable: 4127) // warning C4127: Conditional expression is constant
+#  pragma warning(disable: 4512) // warning C4512: Assignment operator was implicitly defined as deleted
+#  pragma warning(disabl
