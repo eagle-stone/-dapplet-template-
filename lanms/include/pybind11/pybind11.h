@@ -8,4 +8,9 @@
     BSD-style license that can be found in the LICENSE file.
 */
 
-#p
+#pragma once
+
+#if defined(_MSC_VER)
+#  pragma warning(push)
+#  pragma warning(disable: 4100) // warning C4100: Unreferenced formal parameter
+#  pragma warning(disable: 4127) // war
