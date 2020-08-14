@@ -21,4 +21,6 @@
 #  pragma warning(disable: 4522) // warning C4522: multiple assignment operators specified
 #elif defined(__INTEL_COMPILER)
 #  pragma warning(push)
-#  pragma warning(disable: 68)    // integer conversion resulted i
+#  pragma warning(disable: 68)    // integer conversion resulted in a change of sign
+#  pragma warning(disable: 186)   // pointless comparison of unsigned integer with zero
+#  pragma warning(disable: 878)   // incompatible exception specificatio
