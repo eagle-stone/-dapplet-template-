@@ -28,4 +28,8 @@
 #  pragma warning(disable: 1682)  // implicit conversion of a 64-bit integral type to a smaller integral type (potential portability problem)
 #  pragma warning(disable: 1875)  // offsetof applied to non-POD (Plain Old Data) types is nonstandard
 #  pragma warning(disable: 2196)  // warning #2196: routine is both "inline" and "noinline"
-#elif defined(__GNUG__
+#elif defined(__GNUG__) && !defined(__clang__)
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wunused-but-set-parameter"
+#  pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+#  
