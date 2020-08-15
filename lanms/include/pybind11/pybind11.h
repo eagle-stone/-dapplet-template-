@@ -25,4 +25,5 @@
 #  pragma warning(disable: 186)   // pointless comparison of unsigned integer with zero
 #  pragma warning(disable: 878)   // incompatible exception specifications
 #  pragma warning(disable: 1334)  // the "template" keyword used for syntactic disambiguation may only be used within a template
-#  pragma warning(disable:
+#  pragma warning(disable: 1682)  // implicit conversion of a 64-bit integral type to a smaller integral type (potential portability problem)
+#  pragma warning(disable: 1875)  // offse
