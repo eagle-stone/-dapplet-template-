@@ -36,4 +36,14 @@
 #  pragma GCC diagnostic ignored "-Wstrict-aliasing"
 #  pragma GCC diagnostic ignored "-Wattributes"
 #  if __GNUC__ >= 7
-#    
+#    pragma GCC diagnostic ignored "-Wnoexcept-type"
+#  endif
+#endif
+
+#include "attr.h"
+#include "options.h"
+#include "class_support.h"
+
+NAMESPACE_BEGIN(pybind11)
+
+/// Wraps an arbitrary C++ fu
