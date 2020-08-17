@@ -46,4 +46,9 @@
 
 NAMESPACE_BEGIN(pybind11)
 
-/// Wraps an arbitrary C++ fu
+/// Wraps an arbitrary C++ function/method/lambda function/.. into a callable Python object
+class cpp_function : public function {
+public:
+    cpp_function() { }
+
+    /// Construct a cpp_function fro
