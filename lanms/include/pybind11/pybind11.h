@@ -51,4 +51,7 @@ class cpp_function : public function {
 public:
     cpp_function() { }
 
-    /// Construct a cpp_function fro
+    /// Construct a cpp_function from a vanilla function pointer
+    template <typename Return, typename... Args, typename... Extra>
+    cpp_function(Return (*f)(Args...), const Extra&... extra) {
+        initialize(f, f, ex
