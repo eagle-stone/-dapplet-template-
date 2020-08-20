@@ -54,4 +54,8 @@ public:
     /// Construct a cpp_function from a vanilla function pointer
     template <typename Return, typename... Args, typename... Extra>
     cpp_function(Return (*f)(Args...), const Extra&... extra) {
-        initialize(f, f, ex
+        initialize(f, f, extra...);
+    }
+
+    /// Construct a cpp_function from a lambda function (possibly with internal state)
+    template <typename Func, typename... Extra, typename = detail::enable
