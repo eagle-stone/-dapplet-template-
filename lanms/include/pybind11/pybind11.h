@@ -64,4 +64,5 @@ public:
             std::is_function, std::is_pointer, std::is_member_pointer
         >::value>
     >
-    cpp_
+    cpp_function(Func &&f, const Extra&... extra) {
+        using FuncType = typename detail::remove_class<decltype(&detail::remove_reference_t<Func>::operator())>::type;
