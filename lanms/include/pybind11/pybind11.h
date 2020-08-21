@@ -58,4 +58,10 @@ public:
     }
 
     /// Construct a cpp_function from a lambda function (possibly with internal state)
-    template <typename Func, typename... Extra, typename = detail::enable
+    template <typename Func, typename... Extra, typename = detail::enable_if_t<
+        detail::satisfies_none_of<
+            detail::remove_reference_t<Func>,
+            std::is_function, std::is_pointer, std::is_member_pointer
+        >::value>
+    >
+    cpp_
