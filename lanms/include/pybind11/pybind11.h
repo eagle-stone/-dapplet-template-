@@ -71,4 +71,6 @@ public:
     }
 
     /// Construct a cpp_function from a class method (non-const)
-    template <typename R
+    template <typename Return, typename Class, typename... Arg, typename... Extra>
+    cpp_function(Return (Class::*f)(Arg...), const Extra&... extra) {
+        initialize([f](Class *c, Arg
