@@ -66,3 +66,9 @@ public:
     >
     cpp_function(Func &&f, const Extra&... extra) {
         using FuncType = typename detail::remove_class<decltype(&detail::remove_reference_t<Func>::operator())>::type;
+        initialize(std::forward<Func>(f),
+                   (FuncType *) nullptr, extra...);
+    }
+
+    /// Construct a cpp_function from a class method (non-const)
+    template <typename R
