@@ -79,4 +79,6 @@ public:
 
     /// Construct a cpp_function from a class method (const)
     template <typename Return, typename Class, typename... Arg, typename... Extra>
-    cpp_function(Return (Class::*f)(Arg...) 
+    cpp_function(Return (Class::*f)(Arg...) const, const Extra&... extra) {
+        initialize([f](const Class *c, Arg... args) -> Return { return (c->*f)(args...); },
+                   (Return (*)(
