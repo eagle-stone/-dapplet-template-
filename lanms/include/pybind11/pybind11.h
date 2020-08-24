@@ -77,4 +77,6 @@ public:
                    (Return (*) (Class *, Arg...)) nullptr, extra...);
     }
 
-    /// Construct a cpp_funct
+    /// Construct a cpp_function from a class method (const)
+    template <typename Return, typename Class, typename... Arg, typename... Extra>
+    cpp_function(Return (Class::*f)(Arg...) 
