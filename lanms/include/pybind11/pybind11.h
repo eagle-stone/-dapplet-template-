@@ -81,4 +81,11 @@ public:
     template <typename Return, typename Class, typename... Arg, typename... Extra>
     cpp_function(Return (Class::*f)(Arg...) const, const Extra&... extra) {
         initialize([f](const Class *c, Arg... args) -> Return { return (c->*f)(args...); },
-                   (Return (*)(
+                   (Return (*)(const Class *, Arg ...)) nullptr, extra...);
+    }
+
+    /// Return the function name
+    object name() const { return attr("__name__"); }
+
+protected:
+    /// Space optimization: 
