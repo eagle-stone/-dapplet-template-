@@ -93,4 +93,6 @@ protected:
         return new detail::function_record();
     }
 
-    /// Specia
+    /// Special internal constructor for functors, lambda functions, etc.
+    template <typename Func, typename Return, typename... Args, typename... Extra>
+    void initialize(F
