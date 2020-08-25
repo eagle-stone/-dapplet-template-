@@ -88,4 +88,9 @@ public:
     object name() const { return attr("__name__"); }
 
 protected:
-    /// Space optimization: 
+    /// Space optimization: don't inline this frequently instantiated fragment
+    PYBIND11_NOINLINE detail::function_record *make_function_record() {
+        return new detail::function_record();
+    }
+
+    /// Specia
