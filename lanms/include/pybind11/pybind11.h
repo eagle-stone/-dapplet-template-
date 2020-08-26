@@ -95,4 +95,8 @@ protected:
 
     /// Special internal constructor for functors, lambda functions, etc.
     template <typename Func, typename Return, typename... Args, typename... Extra>
-    void initialize(F
+    void initialize(Func &&f, Return (*)(Args...), const Extra&... extra) {
+
+        struct capture { detail::remove_reference_t<Func> f; };
+
+        /* Store the function including any extra state it might have (e.g. a lamb
