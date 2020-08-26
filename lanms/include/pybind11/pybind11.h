@@ -99,4 +99,8 @@ protected:
 
         struct capture { detail::remove_reference_t<Func> f; };
 
-        /* Store the function including any extra state it might have (e.g. a lamb
+        /* Store the function including any extra state it might have (e.g. a lambda capture object) */
+        auto rec = make_function_record();
+
+        /* Store the capture object directly in the function record if there is enough space */
+        if (siz
