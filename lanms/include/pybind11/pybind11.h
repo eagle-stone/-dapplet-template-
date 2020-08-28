@@ -106,4 +106,7 @@ protected:
         if (sizeof(capture) <= sizeof(rec->data)) {
             /* Without these pragmas, GCC warns that there might not be
                enough space to use the placement new operator. However, the
-     
+               'if' statement above ensures that this is the case. */
+#if defined(__GNUG__) && !defined(__clang__) && __GNUC__ >= 6
+#  pragma GCC diagnostic push
+#  pragma GC
