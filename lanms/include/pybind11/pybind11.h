@@ -109,4 +109,7 @@ protected:
                'if' statement above ensures that this is the case. */
 #if defined(__GNUG__) && !defined(__clang__) && __GNUC__ >= 6
 #  pragma GCC diagnostic push
-#  pragma GC
+#  pragma GCC diagnostic ignored "-Wplacement-new"
+#endif
+            new ((capture *) &rec->data) capture { std::forward<Func>(f) };
+#if defined(__GNUG__) && !defined(__clang__) && _
