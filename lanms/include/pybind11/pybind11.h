@@ -119,4 +119,8 @@ protected:
                 rec->free_data = [](detail::function_record *r) { ((capture *) &r->data)->~capture(); };
         } else {
             rec->data[0] = new capture { std::forward<Func>(f) };
-            rec->free_data = [](detail::funct
+            rec->free_data = [](detail::function_record *r) { delete ((capture *) r->data[0]); };
+        }
+
+        /* Type casters for the function arguments and return value */
+        using cast_in = detail::a
