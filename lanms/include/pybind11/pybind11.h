@@ -112,4 +112,8 @@ protected:
 #  pragma GCC diagnostic ignored "-Wplacement-new"
 #endif
             new ((capture *) &rec->data) capture { std::forward<Func>(f) };
-#if defined(__GNUG__) && !defined(__clang__) && _
+#if defined(__GNUG__) && !defined(__clang__) && __GNUC__ >= 6
+#  pragma GCC diagnostic pop
+#endif
+            if (!std::is_trivially_destructible<Func>::value)
+                rec->free_data = [](detail::function_
