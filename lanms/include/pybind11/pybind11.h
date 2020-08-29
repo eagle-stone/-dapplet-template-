@@ -116,4 +116,7 @@ protected:
 #  pragma GCC diagnostic pop
 #endif
             if (!std::is_trivially_destructible<Func>::value)
-                rec->free_data = [](detail::function_
+                rec->free_data = [](detail::function_record *r) { ((capture *) &r->data)->~capture(); };
+        } else {
+            rec->data[0] = new capture { std::forward<Func>(f) };
+            rec->free_data = [](detail::funct
