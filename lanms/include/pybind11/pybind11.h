@@ -123,4 +123,9 @@ protected:
         }
 
         /* Type casters for the function arguments and return value */
-        using cast_in = detail::a
+        using cast_in = detail::argument_loader<Args...>;
+        using cast_out = detail::make_caster<
+            detail::conditional_t<std::is_void<Return>::value, detail::void_type, Return>
+        >;
+
+ 
