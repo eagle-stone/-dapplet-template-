@@ -132,4 +132,8 @@ protected:
                       "The number of argument annotations does not match the number of function arguments");
 
         /* Dispatch code which converts function arguments and performs the actual function call */
-        rec
+        rec->impl = [](detail::function_call &call) -> handle {
+            cast_in args_converter;
+
+            /* Try to cast the function arguments into the C++ domain */
+           
