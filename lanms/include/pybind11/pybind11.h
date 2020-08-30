@@ -128,4 +128,5 @@ protected:
             detail::conditional_t<std::is_void<Return>::value, detail::void_type, Return>
         >;
 
- 
+        static_assert(detail::expected_num_args<Extra...>(sizeof...(Args), cast_in::has_args, cast_in::has_kwargs),
+                      "The number of argument annotat
