@@ -144,4 +144,7 @@ protected:
 
             /* Get a pointer to the capture object */
             auto data = (sizeof(capture) <= sizeof(call.func.data)
-                       
+                         ? &call.func.data : call.func.data[0]);
+            capture *cap = const_cast<capture *>(reinterpret_cast<const capture *>(data));
+
+            /* Override policy for rval
