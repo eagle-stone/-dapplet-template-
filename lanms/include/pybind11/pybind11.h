@@ -140,4 +140,8 @@ protected:
                 return PYBIND11_TRY_NEXT_OVERLOAD;
 
             /* Invoke call policy pre-call hook */
-            detail:
+            detail::process_attributes<Extra...>::precall(call);
+
+            /* Get a pointer to the capture object */
+            auto data = (sizeof(capture) <= sizeof(call.func.data)
+                       
