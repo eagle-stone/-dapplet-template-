@@ -147,4 +147,7 @@ protected:
                          ? &call.func.data : call.func.data[0]);
             capture *cap = const_cast<capture *>(reinterpret_cast<const capture *>(data));
 
-            /* Override policy for rval
+            /* Override policy for rvalues -- usually to enforce rvp::move on an rvalue */
+            const auto policy = detail::return_value_policy_override<Return>::policy(call.func.policy);
+
+      
