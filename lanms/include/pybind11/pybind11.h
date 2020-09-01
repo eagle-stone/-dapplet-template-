@@ -153,4 +153,8 @@ protected:
             /* Function scope guard -- defaults to the compile-to-nothing `void_type` */
             using Guard = detail::extract_guard_t<Extra...>;
 
-            /* Pe
+            /* Perform the function call */
+            handle result = cast_out::cast(
+                std::move(args_converter).template call<Return, Guard>(cap->f), policy, call.parent);
+
+        
