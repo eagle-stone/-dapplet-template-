@@ -168,4 +168,7 @@ protected:
 
         /* Generate a readable signature describing the function's arguments and return value types */
         using detail::descr; using detail::_;
-        PYBIND11_DESCR signature = _("(") + cast_in::arg_names() + _(") -> ")
+        PYBIND11_DESCR signature = _("(") + cast_in::arg_names() + _(") -> ") + cast_out::name();
+
+        /* Register the function with Python from generic (non-templated) code */
+        initialize_generic(rec, signature.text(), s
