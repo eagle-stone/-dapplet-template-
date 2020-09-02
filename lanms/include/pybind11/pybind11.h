@@ -163,4 +163,7 @@ protected:
             return result;
         };
 
-        /* Process any user-p
+        /* Process any user-provided function attributes */
+        detail::process_attributes<Extra...>::init(extra..., rec);
+
+        /* Generate a readable signature describing the 
