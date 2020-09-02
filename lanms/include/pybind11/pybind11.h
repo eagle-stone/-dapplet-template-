@@ -166,4 +166,6 @@ protected:
         /* Process any user-provided function attributes */
         detail::process_attributes<Extra...>::init(extra..., rec);
 
-        /* Generate a readable signature describing the 
+        /* Generate a readable signature describing the function's arguments and return value types */
+        using detail::descr; using detail::_;
+        PYBIND11_DESCR signature = _("(") + cast_in::arg_names() + _(") -> ")
