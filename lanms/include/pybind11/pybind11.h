@@ -176,4 +176,7 @@ protected:
         if (cast_in::has_args) rec->has_args = true;
         if (cast_in::has_kwargs) rec->has_kwargs = true;
 
-        /* Stash some additional inf
+        /* Stash some additional information used by an important optimization in 'functional.h' */
+        using FunctionType = Return (*)(Args...);
+        constexpr bool is_function_ptr =
+        
