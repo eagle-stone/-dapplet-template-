@@ -171,4 +171,9 @@ protected:
         PYBIND11_DESCR signature = _("(") + cast_in::arg_names() + _(") -> ") + cast_out::name();
 
         /* Register the function with Python from generic (non-templated) code */
-        initialize_generic(rec, signature.text(), s
+        initialize_generic(rec, signature.text(), signature.types(), sizeof...(Args));
+
+        if (cast_in::has_args) rec->has_args = true;
+        if (cast_in::has_kwargs) rec->has_kwargs = true;
+
+        /* Stash some additional inf
