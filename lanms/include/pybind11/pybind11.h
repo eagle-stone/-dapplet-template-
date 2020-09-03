@@ -179,4 +179,7 @@ protected:
         /* Stash some additional information used by an important optimization in 'functional.h' */
         using FunctionType = Return (*)(Args...);
         constexpr bool is_function_ptr =
-        
+            std::is_convertible<Func, FunctionType>::value &&
+            sizeof(capture) == sizeof(void *);
+        if (is_function_ptr) {
+            rec->is_stateless = tru
