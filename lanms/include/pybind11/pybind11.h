@@ -182,4 +182,9 @@ protected:
             std::is_convertible<Func, FunctionType>::value &&
             sizeof(capture) == sizeof(void *);
         if (is_function_ptr) {
-            rec->is_stateless = tru
+            rec->is_stateless = true;
+            rec->data[1] = const_cast<void *>(reinterpret_cast<const void *>(&typeid(FunctionType)));
+        }
+    }
+
+    /// Register a function call with Python (generic
