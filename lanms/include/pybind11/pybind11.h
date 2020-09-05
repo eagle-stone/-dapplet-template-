@@ -187,4 +187,6 @@ protected:
         }
     }
 
-    /// Register a function call with Python (generic
+    /// Register a function call with Python (generic non-templated code goes here)
+    void initialize_generic(detail::function_record *rec, const char *text,
+                            const std::type_info *const *types, size_t args)
