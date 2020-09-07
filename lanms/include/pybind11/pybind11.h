@@ -194,4 +194,9 @@ protected:
         /* Create copies of all referenced C-style strings */
         rec->name = strdup(rec->name ? rec->name : "");
         if (rec->doc) rec->doc = strdup(rec->doc);
-        for (auto
+        for (auto &a: rec->args) {
+            if (a.name)
+                a.name = strdup(a.name);
+            if (a.descr)
+                a.descr = strdup(a.descr);
+            else
