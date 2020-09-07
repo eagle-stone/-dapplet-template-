@@ -199,4 +199,9 @@ protected:
                 a.name = strdup(a.name);
             if (a.descr)
                 a.descr = strdup(a.descr);
-            else
+            else if (a.value)
+                a.descr = strdup(a.value.attr("__repr__")().cast<std::string>().c_str());
+        }
+
+        /* Generate a proper function signature */
+        std::string si
