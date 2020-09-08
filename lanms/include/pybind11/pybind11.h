@@ -204,4 +204,9 @@ protected:
         }
 
         /* Generate a proper function signature */
-        std::string si
+        std::string signature;
+        size_t type_depth = 0, char_index = 0, type_index = 0, arg_index = 0;
+        while (true) {
+            char c = text[char_index++];
+            if (c == '\0')
+          
