@@ -209,4 +209,8 @@ protected:
         while (true) {
             char c = text[char_index++];
             if (c == '\0')
-          
+                break;
+
+            if (c == '{') {
+                // Write arg name for everything except *args, **kwargs and return type.
+                if (type_depth == 0
