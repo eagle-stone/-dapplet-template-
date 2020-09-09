@@ -219,4 +219,8 @@ protected:
                     } else if (arg_index == 0 && rec->is_method) {
                         signature += "self";
                     } else {
-                        signature += "arg" 
+                        signature += "arg" + std::to_string(arg_index - (rec->is_method ? 1 : 0));
+                    }
+                    signature += ": ";
+                }
+        
