@@ -215,4 +215,8 @@ protected:
                 // Write arg name for everything except *args, **kwargs and return type.
                 if (type_depth == 0 && text[char_index] != '*' && arg_index < args) {
                     if (!rec->args.empty() && rec->args[arg_index].name) {
-                        signature += rec->args[arg_index].
+                        signature += rec->args[arg_index].name;
+                    } else if (arg_index == 0 && rec->is_method) {
+                        signature += "self";
+                    } else {
+                        signature += "arg" 
