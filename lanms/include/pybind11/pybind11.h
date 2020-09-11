@@ -223,4 +223,8 @@ protected:
                     }
                     signature += ": ";
                 }
-        
+                ++type_depth;
+            } else if (c == '}') {
+                --type_depth;
+                if (type_depth == 0) {
+                    if (arg_index < rec->
