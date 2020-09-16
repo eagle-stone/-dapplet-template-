@@ -227,4 +227,8 @@ protected:
             } else if (c == '}') {
                 --type_depth;
                 if (type_depth == 0) {
-                    if (arg_index < rec->
+                    if (arg_index < rec->args.size() && rec->args[arg_index].descr) {
+                        signature += "=";
+                        signature += rec->args[arg_index].descr;
+                    }
+                    ar
