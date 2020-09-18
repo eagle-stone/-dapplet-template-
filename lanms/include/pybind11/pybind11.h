@@ -231,4 +231,9 @@ protected:
                         signature += "=";
                         signature += rec->args[arg_index].descr;
                     }
-                    ar
+                    arg_index++;
+                }
+            } else if (c == '%') {
+                const std::type_info *t = types[type_index++];
+                if (!t)
+             
