@@ -239,4 +239,8 @@ protected:
                     pybind11_fail("Internal error while parsing type signature (1)");
                 if (auto tinfo = detail::get_type_info(*t)) {
 #if defined(PYPY_VERSION)
-                    signat
+                    signature += handle((PyObject *) tinfo->type)
+                                     .attr("__module__")
+                                     .cast<std::string>() + ".";
+#endif
+                  
