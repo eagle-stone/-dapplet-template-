@@ -236,4 +236,7 @@ protected:
             } else if (c == '%') {
                 const std::type_info *t = types[type_index++];
                 if (!t)
-             
+                    pybind11_fail("Internal error while parsing type signature (1)");
+                if (auto tinfo = detail::get_type_info(*t)) {
+#if defined(PYPY_VERSION)
+                    signat
