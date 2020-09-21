@@ -243,4 +243,7 @@ protected:
                                      .attr("__module__")
                                      .cast<std::string>() + ".";
 #endif
-                  
+                    signature += tinfo->type->tp_name;
+                } else {
+                    std::string tname(t->name());
+                    detail::clean_type_id(tna
