@@ -253,4 +253,9 @@ protected:
                 signature += c;
             }
         }
-        if (type_depth != 0 || types[type_index] != 
+        if (type_depth != 0 || types[type_index] != nullptr)
+            pybind11_fail("Internal error while parsing type signature (2)");
+
+        #if !defined(PYBIND11_CONSTEXPR_DESCR)
+            delete[] types;
+            delete[] t
