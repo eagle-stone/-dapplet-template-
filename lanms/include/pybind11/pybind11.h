@@ -246,4 +246,11 @@ protected:
                     signature += tinfo->type->tp_name;
                 } else {
                     std::string tname(t->name());
-                    detail::clean_type_id(tna
+                    detail::clean_type_id(tname);
+                    signature += tname;
+                }
+            } else {
+                signature += c;
+            }
+        }
+        if (type_depth != 0 || types[type_index] != 
