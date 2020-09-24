@@ -258,4 +258,10 @@ protected:
 
         #if !defined(PYBIND11_CONSTEXPR_DESCR)
             delete[] types;
-            delete[] t
+            delete[] text;
+        #endif
+
+#if PY_MAJOR_VERSION < 3
+        if (strcmp(rec->name, "__next__") == 0) {
+            std::free(rec->name);
+            rec->name = strdup("next");
