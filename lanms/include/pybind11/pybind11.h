@@ -270,4 +270,7 @@ protected:
             rec->name = strdup("__nonzero__");
         }
 #endif
-        rec->signature = strd
+        rec->signature = strdup(signature.c_str());
+        rec->args.shrink_to_fit();
+        rec->is_constructor = !strcmp(rec->name, "__init__") || !strcmp(rec->name, "__setstate__");
+        rec
