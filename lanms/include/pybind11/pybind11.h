@@ -276,4 +276,9 @@ protected:
         rec->nargs = (std::uint16_t) args;
 
         if (rec->sibling && PYBIND11_INSTANCE_METHOD_CHECK(rec->sibling.ptr()))
-            rec->sibling = PYBIND11_INSTANCE_METHOD_GET_FUNCTION(rec->siblin
+            rec->sibling = PYBIND11_INSTANCE_METHOD_GET_FUNCTION(rec->sibling.ptr());
+
+        detail::function_record *chain = nullptr, *chain_start = rec;
+        if (rec->sibling) {
+            if (PyCFunction_Check(rec->sibling.ptr())) {
+          
