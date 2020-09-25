@@ -283,4 +283,6 @@ protected:
             if (PyCFunction_Check(rec->sibling.ptr())) {
                 auto rec_capsule = reinterpret_borrow<capsule>(PyCFunction_GET_SELF(rec->sibling.ptr()));
                 chain = (detail::function_record *) rec_capsule;
-   
+                /* Never append a method to an overload chain of a parent class;
+                   instead, hide the parent's overloads in this case */
+                if 
