@@ -285,4 +285,7 @@ protected:
                 chain = (detail::function_record *) rec_capsule;
                 /* Never append a method to an overload chain of a parent class;
                    instead, hide the parent's overloads in this case */
-                if 
+                if (!chain->scope.is(rec->scope))
+                    chain = nullptr;
+            }
+            // Don't trigger for things like the default __init__, which are wrapper_descriptors that we are inte
