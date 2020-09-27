@@ -288,4 +288,6 @@ protected:
                 if (!chain->scope.is(rec->scope))
                     chain = nullptr;
             }
-            // Don't trigger for things like the default __init__, which are wrapper_descriptors that we are inte
+            // Don't trigger for things like the default __init__, which are wrapper_descriptors that we are intentionally replacing
+            else if (!rec->sibling.is_none() && rec->name[0] != '_')
+                pybind11_fail("Cannot overload existing non-function object \"" +
