@@ -290,4 +290,9 @@ protected:
             }
             // Don't trigger for things like the default __init__, which are wrapper_descriptors that we are intentionally replacing
             else if (!rec->sibling.is_none() && rec->name[0] != '_')
-                pybind11_fail("Cannot overload existing non-function object \"" +
+                pybind11_fail("Cannot overload existing non-function object \"" + std::string(rec->name) +
+                        "\" with a function of the same name");
+        }
+
+        if (!chain) {
+            /* No existing overload was fou
