@@ -307,4 +307,7 @@ protected:
             });
 
             object scope_module;
-            if (re
+            if (rec->scope) {
+                if (hasattr(rec->scope, "__module__")) {
+                    scope_module = rec->scope.attr("__module__");
+                } else if (hasa
