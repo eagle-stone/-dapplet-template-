@@ -295,4 +295,7 @@ protected:
         }
 
         if (!chain) {
-            /* No existing overload was fou
+            /* No existing overload was found, create a new function object */
+            rec->def = new PyMethodDef();
+            std::memset(rec->def, 0, sizeof(PyMethodDef));
+            rec->def->ml_name = rec->name;
