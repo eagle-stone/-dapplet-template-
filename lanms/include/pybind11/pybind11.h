@@ -310,4 +310,9 @@ protected:
             if (rec->scope) {
                 if (hasattr(rec->scope, "__module__")) {
                     scope_module = rec->scope.attr("__module__");
-                } else if (hasa
+                } else if (hasattr(rec->scope, "__name__")) {
+                    scope_module = rec->scope.attr("__name__");
+                }
+            }
+
+            m_ptr = PyCFunction_
