@@ -323,4 +323,6 @@ protected:
             m_ptr = rec->sibling.ptr();
             inc_ref();
             chain_start = chain;
-        
+            if (chain->is_method != rec->is_method)
+                pybind11_fail("overloading a method with both static and instance methods is not supported; "
+      
