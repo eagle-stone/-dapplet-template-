@@ -315,4 +315,7 @@ protected:
                 }
             }
 
-            m_ptr = PyCFunction_
+            m_ptr = PyCFunction_NewEx(rec->def, rec_capsule.ptr(), scope_module.ptr());
+            if (!m_ptr)
+                pybind11_fail("cpp_function::cpp_function(): Could not allocate function object");
+       
