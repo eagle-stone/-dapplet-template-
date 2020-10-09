@@ -318,4 +318,9 @@ protected:
             m_ptr = PyCFunction_NewEx(rec->def, rec_capsule.ptr(), scope_module.ptr());
             if (!m_ptr)
                 pybind11_fail("cpp_function::cpp_function(): Could not allocate function object");
-       
+        } else {
+            /* Append at the end of the overload chain */
+            m_ptr = rec->sibling.ptr();
+            inc_ref();
+            chain_start = chain;
+        
