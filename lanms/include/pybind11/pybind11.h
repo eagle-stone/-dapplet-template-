@@ -329,4 +329,9 @@ protected:
                         "compile in debug mode for more details"
                     #else
                         "error while attempting to bind " + std::string(rec->is_method ? "instance" : "static") + " method " +
-                        std::string(pybind11::str(rec->scope.attr("__name__"))) + "." + std::string(
+                        std::string(pybind11::str(rec->scope.attr("__name__"))) + "." + std::string(rec->name) + signature
+                    #endif
+                );
+            while (chain->next)
+                chain = chain->next;
+            chain->next = rec
