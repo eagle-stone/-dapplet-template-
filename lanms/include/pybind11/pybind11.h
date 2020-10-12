@@ -328,4 +328,5 @@ protected:
                     #if defined(NDEBUG)
                         "compile in debug mode for more details"
                     #else
-                        "error while atte
+                        "error while attempting to bind " + std::string(rec->is_method ? "instance" : "static") + " method " +
+                        std::string(pybind11::str(rec->scope.attr("__name__"))) + "." + std::string(
