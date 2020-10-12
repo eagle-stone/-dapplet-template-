@@ -325,4 +325,7 @@ protected:
             chain_start = chain;
             if (chain->is_method != rec->is_method)
                 pybind11_fail("overloading a method with both static and instance methods is not supported; "
-      
+                    #if defined(NDEBUG)
+                        "compile in debug mode for more details"
+                    #else
+                        "error while atte
