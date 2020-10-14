@@ -334,4 +334,10 @@ protected:
                 );
             while (chain->next)
                 chain = chain->next;
-            chain->next = rec
+            chain->next = rec;
+        }
+
+        std::string signatures;
+        int index = 0;
+        /* Create a nice pydoc rec including all signatures and
+           docstrings of the functions in the overload chai
