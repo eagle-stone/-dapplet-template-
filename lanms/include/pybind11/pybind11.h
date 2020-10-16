@@ -352,4 +352,7 @@ protected:
         for (auto it = chain_start; it != nullptr; it = it->next) {
             if (options::show_function_signatures()) {
                 if (index > 0) signatures += "\n";
-      
+                if (chain)
+                    signatures += std::to_string(++index) + ". ";
+                signatures += rec->name;
+                signatures += it->signature;
