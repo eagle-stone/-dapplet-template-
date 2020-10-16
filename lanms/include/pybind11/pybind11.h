@@ -344,4 +344,9 @@ protected:
         if (chain && options::show_function_signatures()) {
             // First a generic signature
             signatures += rec->name;
-            signatu
+            signatures += "(*args, **kwargs)\n";
+            signatures += "Overloaded function.\n\n";
+        }
+        // Then specific overload signatures
+        bool first_user_def = true;
+    
