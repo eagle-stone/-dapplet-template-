@@ -340,4 +340,8 @@ protected:
         std::string signatures;
         int index = 0;
         /* Create a nice pydoc rec including all signatures and
-           docstrings of the functions in the overload chai
+           docstrings of the functions in the overload chain */
+        if (chain && options::show_function_signatures()) {
+            // First a generic signature
+            signatures += rec->name;
+            signatu
