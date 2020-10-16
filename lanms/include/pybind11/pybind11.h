@@ -349,4 +349,7 @@ protected:
         }
         // Then specific overload signatures
         bool first_user_def = true;
-    
+        for (auto it = chain_start; it != nullptr; it = it->next) {
+            if (options::show_function_signatures()) {
+                if (index > 0) signatures += "\n";
+      
