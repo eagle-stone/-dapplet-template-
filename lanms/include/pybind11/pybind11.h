@@ -356,3 +356,7 @@ protected:
                     signatures += std::to_string(++index) + ". ";
                 signatures += rec->name;
                 signatures += it->signature;
+                signatures += "\n";
+            }
+            if (it->doc && strlen(it->doc) > 0 && options::show_user_defined_docstrings()) {
+                // If we're appending ano
