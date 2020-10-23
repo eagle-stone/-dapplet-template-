@@ -365,4 +365,7 @@ protected:
                     if (first_user_def) first_user_def = false;
                     else signatures += "\n";
                 }
-                if (options::show_functi
+                if (options::show_function_signatures()) signatures += "\n";
+                signatures += it->doc;
+                if (options::show_function_signatures()) signatures += "\n";
+         
