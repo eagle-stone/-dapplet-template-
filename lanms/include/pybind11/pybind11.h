@@ -368,4 +368,10 @@ protected:
                 if (options::show_function_signatures()) signatures += "\n";
                 signatures += it->doc;
                 if (options::show_function_signatures()) signatures += "\n";
-         
+            }
+        }
+
+        /* Install docstring */
+        PyCFunctionObject *func = (PyCFunctionObject *) m_ptr;
+        if (func->m_ml->ml_doc)
+  
