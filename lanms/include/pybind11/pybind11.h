@@ -361,4 +361,8 @@ protected:
             if (it->doc && strlen(it->doc) > 0 && options::show_user_defined_docstrings()) {
                 // If we're appending another docstring, and aren't printing function signatures, we
                 // need to append a newline first:
-                if (!options::show_function_signatu
+                if (!options::show_function_signatures()) {
+                    if (first_user_def) first_user_def = false;
+                    else signatures += "\n";
+                }
+                if (options::show_functi
