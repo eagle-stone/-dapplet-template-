@@ -374,4 +374,8 @@ protected:
         /* Install docstring */
         PyCFunctionObject *func = (PyCFunctionObject *) m_ptr;
         if (func->m_ml->ml_doc)
-  
+            std::free(const_cast<char *>(func->m_ml->ml_doc));
+        func->m_ml->ml_doc = strdup(signatures.c_str());
+
+        if (rec->is_method) {
+            m_ptr = PYB
