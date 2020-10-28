@@ -380,4 +380,10 @@ protected:
         if (rec->is_method) {
             m_ptr = PYBIND11_INSTANCE_METHOD_NEW(m_ptr, rec->scope.ptr());
             if (!m_ptr)
-                pybind11_fail("cpp_function::cpp_function(): Could not allocate inst
+                pybind11_fail("cpp_function::cpp_function(): Could not allocate instance method object");
+            Py_DECREF(func);
+        }
+    }
+
+    /// When a cpp_function is GCed, release any memory allocated by pybind11
+    static void destruct(detail:
