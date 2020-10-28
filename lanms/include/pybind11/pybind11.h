@@ -378,4 +378,6 @@ protected:
         func->m_ml->ml_doc = strdup(signatures.c_str());
 
         if (rec->is_method) {
-            m_ptr = PYB
+            m_ptr = PYBIND11_INSTANCE_METHOD_NEW(m_ptr, rec->scope.ptr());
+            if (!m_ptr)
+                pybind11_fail("cpp_function::cpp_function(): Could not allocate inst
