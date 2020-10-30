@@ -386,4 +386,9 @@ protected:
     }
 
     /// When a cpp_function is GCed, release any memory allocated by pybind11
-    static void destruct(detail:
+    static void destruct(detail::function_record *rec) {
+        while (rec) {
+            detail::function_record *next = rec->next;
+            if (rec->free_data)
+                rec->free_data(rec);
+            std::fr
