@@ -391,4 +391,8 @@ protected:
             detail::function_record *next = rec->next;
             if (rec->free_data)
                 rec->free_data(rec);
-            std::fr
+            std::free((char *) rec->name);
+            std::free((char *) rec->doc);
+            std::free((char *) rec->signature);
+            for (auto &arg: rec->args) {
+                std::free(const
