@@ -395,4 +395,9 @@ protected:
             std::free((char *) rec->doc);
             std::free((char *) rec->signature);
             for (auto &arg: rec->args) {
-                std::free(const
+                std::free(const_cast<char *>(arg.name));
+                std::free(const_cast<char *>(arg.descr));
+                arg.value.dec_ref();
+            }
+            if (rec->def) {
+   
