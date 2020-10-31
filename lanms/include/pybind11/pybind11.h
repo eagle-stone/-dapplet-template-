@@ -400,4 +400,12 @@ protected:
                 arg.value.dec_ref();
             }
             if (rec->def) {
-   
+                std::free(const_cast<char *>(rec->def->ml_doc));
+                delete rec->def;
+            }
+            delete rec;
+            rec = next;
+        }
+    }
+
+    /// Main dispatch logic for
