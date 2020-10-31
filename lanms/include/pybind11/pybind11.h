@@ -408,4 +408,8 @@ protected:
         }
     }
 
-    /// Main dispatch logic for
+    /// Main dispatch logic for calls to functions bound using pybind11
+    static PyObject *dispatcher(PyObject *self, PyObject *args_in, PyObject *kwargs_in) {
+        using namespace detail;
+
+     
