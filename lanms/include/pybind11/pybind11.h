@@ -412,4 +412,6 @@ protected:
     static PyObject *dispatcher(PyObject *self, PyObject *args_in, PyObject *kwargs_in) {
         using namespace detail;
 
-     
+        /* Iterator over the list of potentially admissible overloads */
+        function_record *overloads = (function_record *) PyCapsule_GetPointer(self, nullptr),
+    
