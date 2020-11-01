@@ -414,4 +414,7 @@ protected:
 
         /* Iterator over the list of potentially admissible overloads */
         function_record *overloads = (function_record *) PyCapsule_GetPointer(self, nullptr),
-    
+                        *it = overloads;
+
+        /* Need to know how many arguments + keyword arguments there are to pick the right overload */
+        const size_t n_args_in = (si
