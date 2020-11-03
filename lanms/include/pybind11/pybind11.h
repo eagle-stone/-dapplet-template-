@@ -422,4 +422,6 @@ protected:
         handle parent = n_args_in > 0 ? PyTuple_GET_ITEM(args_in, 0) : nullptr,
                result = PYBIND11_TRY_NEXT_OVERLOAD;
 
-      
+        try {
+            // We do this in two passes: in the first pass, we load arguments with `convert=false`;
+            // in the second, we allow conversion (except for arguments with an
