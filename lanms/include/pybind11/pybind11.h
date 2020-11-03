@@ -417,4 +417,9 @@ protected:
                         *it = overloads;
 
         /* Need to know how many arguments + keyword arguments there are to pick the right overload */
-        const size_t n_args_in = (si
+        const size_t n_args_in = (size_t) PyTuple_GET_SIZE(args_in);
+
+        handle parent = n_args_in > 0 ? PyTuple_GET_ITEM(args_in, 0) : nullptr,
+               result = PYBIND11_TRY_NEXT_OVERLOAD;
+
+      
