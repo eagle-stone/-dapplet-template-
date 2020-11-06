@@ -424,4 +424,7 @@ protected:
 
         try {
             // We do this in two passes: in the first pass, we load arguments with `convert=false`;
-            // in the second, we allow conversion (except for arguments with an
+            // in the second, we allow conversion (except for arguments with an explicit
+            // py::arg().noconvert()).  This lets us prefer calls without conversion, with
+            // conversion as a fallback.
+            std::vector<functio
