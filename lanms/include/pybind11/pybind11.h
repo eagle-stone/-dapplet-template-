@@ -427,4 +427,7 @@ protected:
             // in the second, we allow conversion (except for arguments with an explicit
             // py::arg().noconvert()).  This lets us prefer calls without conversion, with
             // conversion as a fallback.
-            std::vector<functio
+            std::vector<function_call> second_pass;
+
+            // However, if there are no overloads, we can just skip the no-convert pass entirely
+            const bool overloaded = it != null
