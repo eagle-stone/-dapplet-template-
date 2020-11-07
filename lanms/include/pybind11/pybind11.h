@@ -430,4 +430,9 @@ protected:
             std::vector<function_call> second_pass;
 
             // However, if there are no overloads, we can just skip the no-convert pass entirely
-            const bool overloaded = it != null
+            const bool overloaded = it != nullptr && it->next != nullptr;
+
+            for (; it != nullptr; it = it->next) {
+
+                /* For each overload:
+                   1. Copy all posit
