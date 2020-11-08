@@ -438,4 +438,7 @@ protected:
                    1. Copy all positional arguments we were given, also checking to make sure that
                       named positional arguments weren't *also* specified via kwarg.
                    2. If we weren't given enough, try to make up the omitted ones by checking
-                      whether they were provided by a kwarg matching the `py::arg("name")` name.
+                      whether they were provided by a kwarg matching the `py::arg("name")` name.  If
+                      so, use it (and remove it from kwargs; if not, see if the function binding
+                      provided a default that we can use.
+          
