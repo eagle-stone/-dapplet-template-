@@ -435,4 +435,6 @@ protected:
             for (; it != nullptr; it = it->next) {
 
                 /* For each overload:
-                   1. Copy all posit
+                   1. Copy all positional arguments we were given, also checking to make sure that
+                      named positional arguments weren't *also* specified via kwarg.
+                 
