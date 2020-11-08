@@ -441,4 +441,6 @@ protected:
                       whether they were provided by a kwarg matching the `py::arg("name")` name.  If
                       so, use it (and remove it from kwargs; if not, see if the function binding
                       provided a default that we can use.
-          
+                   3. Ensure that either all keyword arguments were "consumed", or that the function
+                      takes a kwargs argument to accept unconsumed kwargs.
+            
