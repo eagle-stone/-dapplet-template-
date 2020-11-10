@@ -445,4 +445,6 @@ protected:
                       takes a kwargs argument to accept unconsumed kwargs.
                    4. Any positional arguments still left get put into a tuple (for args), and any
                       leftover kwargs get put into a dict.
-                  
+                   5. Pack everything into a vector; if we have py::args or py::kwargs, they are an
+                      extra tuple or dict at the end of the positional arguments.
+                   6. Call the function call d
