@@ -443,4 +443,6 @@ protected:
                       provided a default that we can use.
                    3. Ensure that either all keyword arguments were "consumed", or that the function
                       takes a kwargs argument to accept unconsumed kwargs.
-            
+                   4. Any positional arguments still left get put into a tuple (for args), and any
+                      leftover kwargs get put into a dict.
+                  
