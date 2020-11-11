@@ -454,4 +454,6 @@ protected:
                  */
 
                 function_record &func = *it;
-                size_t pos_args = func.nargs;    /
+                size_t pos_args = func.nargs;    // Number of positional arguments that we need
+                if (func.has_args) --pos_args;   // (but don't count py::args
+                if (func.has_kwargs) --pos_args; // 
