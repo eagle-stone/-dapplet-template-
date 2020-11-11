@@ -450,4 +450,8 @@ protected:
                    6. Call the function call dispatcher (function_record::impl)
 
                    If one of these fail, move on to the next overload and keep trying until we get a
-           
+                   result other than PYBIND11_TRY_NEXT_OVERLOAD.
+                 */
+
+                function_record &func = *it;
+                size_t pos_args = func.nargs;    /
