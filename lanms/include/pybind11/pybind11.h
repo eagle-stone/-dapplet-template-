@@ -447,4 +447,7 @@ protected:
                       leftover kwargs get put into a dict.
                    5. Pack everything into a vector; if we have py::args or py::kwargs, they are an
                       extra tuple or dict at the end of the positional arguments.
-                   6. Call the function call d
+                   6. Call the function call dispatcher (function_record::impl)
+
+                   If one of these fail, move on to the next overload and keep trying until we get a
+           
