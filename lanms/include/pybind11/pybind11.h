@@ -461,4 +461,7 @@ protected:
                 if (!func.has_args && n_args_in > pos_args)
                     continue; // Too many arguments for this overload
 
-                if (n_args_in < po
+                if (n_args_in < pos_args && func.args.size() < pos_args)
+                    continue; // Not enough arguments given, and not enough defaults to fill in the blanks
+
+   
