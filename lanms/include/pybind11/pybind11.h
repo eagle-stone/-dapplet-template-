@@ -464,4 +464,9 @@ protected:
                 if (n_args_in < pos_args && func.args.size() < pos_args)
                     continue; // Not enough arguments given, and not enough defaults to fill in the blanks
 
-   
+                function_call call(func, parent);
+
+                size_t args_to_copy = std::min(pos_args, n_args_in);
+                size_t args_copied = 0;
+
+           
