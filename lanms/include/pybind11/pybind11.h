@@ -469,4 +469,7 @@ protected:
                 size_t args_to_copy = std::min(pos_args, n_args_in);
                 size_t args_copied = 0;
 
-           
+                // 1. Copy any position arguments given.
+                bool bad_arg = false;
+                for (; args_copied < args_to_copy; ++args_copied) {
+         
