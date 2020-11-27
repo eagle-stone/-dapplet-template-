@@ -486,4 +486,7 @@ protected:
                     call.args.push_back(arg);
                     call.args_convert.push_back(arg_rec ? arg_rec->convert : true);
                 }
-  
+                if (bad_arg)
+                    continue; // Maybe it was meant for another overload (issue #688)
+
+                // We'll need to copy this if we steal some kwa
