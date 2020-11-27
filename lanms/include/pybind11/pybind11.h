@@ -482,4 +482,8 @@ protected:
                     if (arg_rec && !arg_rec->none && arg.is_none()) {
                         bad_arg = true;
                         break;
-     
+                    }
+                    call.args.push_back(arg);
+                    call.args_convert.push_back(arg_rec ? arg_rec->convert : true);
+                }
+  
