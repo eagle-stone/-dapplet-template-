@@ -478,4 +478,8 @@ protected:
                         break;
                     }
 
-                    handle arg(PyTuple
+                    handle arg(PyTuple_GET_ITEM(args_in, args_copied));
+                    if (arg_rec && !arg_rec->none && arg.is_none()) {
+                        bad_arg = true;
+                        break;
+     
