@@ -489,4 +489,7 @@ protected:
                 if (bad_arg)
                     continue; // Maybe it was meant for another overload (issue #688)
 
-                // We'll need to copy this if we steal some kwa
+                // We'll need to copy this if we steal some kwargs for defaults
+                dict kwargs = reinterpret_borrow<dict>(kwargs_in);
+
+                // 2. Check kwargs and, failing that, defaults that may help comple
