@@ -492,4 +492,8 @@ protected:
                 // We'll need to copy this if we steal some kwargs for defaults
                 dict kwargs = reinterpret_borrow<dict>(kwargs_in);
 
-                // 2. Check kwargs and, failing that, defaults that may help comple
+                // 2. Check kwargs and, failing that, defaults that may help complete the list
+                if (args_copied < pos_args) {
+                    bool copied_kwargs = false;
+
+                    for (; args_copied < pos_args; 
