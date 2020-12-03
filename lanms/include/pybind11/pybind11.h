@@ -496,4 +496,8 @@ protected:
                 if (args_copied < pos_args) {
                     bool copied_kwargs = false;
 
-                    for (; args_copied < pos_args; 
+                    for (; args_copied < pos_args; ++args_copied) {
+                        const auto &arg = func.args[args_copied];
+
+                        handle value;
+                     
