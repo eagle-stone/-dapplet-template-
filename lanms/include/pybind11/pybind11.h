@@ -504,4 +504,6 @@ protected:
                             value = PyDict_GetItemString(kwargs.ptr(), arg.name);
 
                         if (value) {
-   
+                            // Consume a kwargs value
+                            if (!copied_kwargs) {
+                                kwargs = reinterpret_steal<
