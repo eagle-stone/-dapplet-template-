@@ -500,4 +500,8 @@ protected:
                         const auto &arg = func.args[args_copied];
 
                         handle value;
-                     
+                        if (kwargs_in && arg.name)
+                            value = PyDict_GetItemString(kwargs.ptr(), arg.name);
+
+                        if (value) {
+   
