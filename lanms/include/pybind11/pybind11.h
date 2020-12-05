@@ -515,4 +515,7 @@ protected:
                         }
 
                         if (value) {
-  
+                            call.args.push_back(value);
+                            call.args_convert.push_back(arg.convert);
+                        }
+                     
