@@ -506,4 +506,7 @@ protected:
                         if (value) {
                             // Consume a kwargs value
                             if (!copied_kwargs) {
-                                kwargs = reinterpret_steal<
+                                kwargs = reinterpret_steal<dict>(PyDict_Copy(kwargs.ptr()));
+                                copied_kwargs = true;
+                            }
+                            PyDict_DelItemString(kwargs.ptr()
