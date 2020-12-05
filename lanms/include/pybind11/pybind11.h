@@ -509,4 +509,10 @@ protected:
                                 kwargs = reinterpret_steal<dict>(PyDict_Copy(kwargs.ptr()));
                                 copied_kwargs = true;
                             }
-                            PyDict_DelItemString(kwargs.ptr()
+                            PyDict_DelItemString(kwargs.ptr(), arg.name);
+                        } else if (arg.value) {
+                            value = arg.value;
+                        }
+
+                        if (value) {
+  
