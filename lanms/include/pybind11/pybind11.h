@@ -518,4 +518,9 @@ protected:
                             call.args.push_back(value);
                             call.args_convert.push_back(arg.convert);
                         }
-                     
+                        else
+                            break;
+                    }
+
+                    if (args_copied < pos_args)
+                        continue; // Not enough arguments, defaults, or kwarg
