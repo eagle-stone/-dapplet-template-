@@ -523,4 +523,8 @@ protected:
                     }
 
                     if (args_copied < pos_args)
-                        continue; // Not enough arguments, defaults, or kwarg
+                        continue; // Not enough arguments, defaults, or kwargs to fill the positional arguments
+                }
+
+                // 3. Check everything was consumed (unless we have a kwargs arg)
+                if (kwargs && kwargs.size() 
