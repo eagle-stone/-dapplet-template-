@@ -527,4 +527,7 @@ protected:
                 }
 
                 // 3. Check everything was consumed (unless we have a kwargs arg)
-                if (kwargs && kwargs.size() 
+                if (kwargs && kwargs.size() > 0 && !func.has_kwargs)
+                    continue; // Unconsumed kwargs, but no py::kwargs argument to accept them
+
+                // 4a. If we have a py::args argument, create 
