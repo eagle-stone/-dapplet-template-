@@ -534,4 +534,6 @@ protected:
                 tuple extra_args;
                 if (func.has_args) {
                     if (args_to_copy == 0) {
-                        // We d
+                        // We didn't copy out any position arguments from the args_in tuple, so we
+                        // can reuse it directly without copying:
+                        extra_args = reinterpret_
