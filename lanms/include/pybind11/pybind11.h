@@ -536,4 +536,8 @@ protected:
                     if (args_to_copy == 0) {
                         // We didn't copy out any position arguments from the args_in tuple, so we
                         // can reuse it directly without copying:
-                        extra_args = reinterpret_
+                        extra_args = reinterpret_borrow<tuple>(args_in);
+                    } else if (args_copied >= n_args_in) {
+                        extra_args = tuple(0);
+                    } else {
+                        size
