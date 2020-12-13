@@ -540,4 +540,7 @@ protected:
                     } else if (args_copied >= n_args_in) {
                         extra_args = tuple(0);
                     } else {
-                        size
+                        size_t args_size = n_args_in - args_copied;
+                        extra_args = tuple(args_size);
+                        for (size_t i = 0; i < args_size; ++i) {
+            
