@@ -554,4 +554,9 @@ protected:
                 // 4b. If we have a py::kwargs, pass on any remaining kwargs
                 if (func.has_kwargs) {
                     if (!kwargs.ptr())
-                        kwargs = 
+                        kwargs = dict(); // If we didn't get one, send an empty one
+                    call.args.push_back(kwargs);
+                    call.args_convert.push_back(false);
+                }
+
+                // 5
