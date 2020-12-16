@@ -551,4 +551,7 @@ protected:
                     call.args_convert.push_back(false);
                 }
 
-            
+                // 4b. If we have a py::kwargs, pass on any remaining kwargs
+                if (func.has_kwargs) {
+                    if (!kwargs.ptr())
+                        kwargs = 
