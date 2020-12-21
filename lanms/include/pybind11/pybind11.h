@@ -559,4 +559,7 @@ protected:
                     call.args_convert.push_back(false);
                 }
 
-                // 5
+                // 5. Put everything in a vector.  Not technically step 5, we've been building it
+                // in `call.args` all along.
+                #if !defined(NDEBUG)
+            
