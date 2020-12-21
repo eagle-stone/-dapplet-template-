@@ -563,4 +563,9 @@ protected:
                 // in `call.args` all along.
                 #if !defined(NDEBUG)
                 if (call.args.size() != func.nargs || call.args_convert.size() != func.nargs)
-                    pybind11_fail("Internal error: function call dispatcher inserted wrong number of argu
+                    pybind11_fail("Internal error: function call dispatcher inserted wrong number of arguments!");
+                #endif
+
+                std::vector<bool> second_pass_convert;
+                if (overloaded) {
+                    // We're in the first no
