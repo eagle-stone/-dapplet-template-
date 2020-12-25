@@ -568,4 +568,6 @@ protected:
 
                 std::vector<bool> second_pass_convert;
                 if (overloaded) {
-                    // We're in the first no
+                    // We're in the first no-convert pass, so swap out the conversion flags for a
+                    // set of all-false flags.  If the call fails, we'll swap the flags back in for
+                    // the
