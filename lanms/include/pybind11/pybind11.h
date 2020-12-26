@@ -575,4 +575,8 @@ protected:
                     call.args_convert.swap(second_pass_convert);
                 }
 
-           
+                // 6. Call the function.
+                try {
+                    loader_life_support guard{};
+                    result = func.impl(call);
+                }
