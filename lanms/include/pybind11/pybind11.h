@@ -579,4 +579,8 @@ protected:
                 try {
                     loader_life_support guard{};
                     result = func.impl(call);
+                } catch (reference_cast_error &) {
+                    result = PYBIND11_TRY_NEXT_OVERLOAD;
                 }
+
+                if (result.ptr() != PY
