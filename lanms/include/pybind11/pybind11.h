@@ -588,4 +588,5 @@ protected:
 
                 if (overloaded) {
                     // The (overloaded) call failed; if the call has at least one argument that
- 
+                    // permits conversion (i.e. it hasn't been explicitly specified `.noconvert()`)
+                    // then add this call to the list of second pass overloads to 
