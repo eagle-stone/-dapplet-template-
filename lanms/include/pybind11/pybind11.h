@@ -589,4 +589,7 @@ protected:
                 if (overloaded) {
                     // The (overloaded) call failed; if the call has at least one argument that
                     // permits conversion (i.e. it hasn't been explicitly specified `.noconvert()`)
-                    // then add this call to the list of second pass overloads to 
+                    // then add this call to the list of second pass overloads to try.
+                    for (size_t i = func.is_method ? 1 : 0; i < pos_args; i++) {
+                        if (second_pass_convert[i]) {
+                            // Found one: swap the converting
