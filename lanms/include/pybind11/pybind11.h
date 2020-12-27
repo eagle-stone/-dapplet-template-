@@ -583,4 +583,9 @@ protected:
                     result = PYBIND11_TRY_NEXT_OVERLOAD;
                 }
 
-                if (result.ptr() != PY
+                if (result.ptr() != PYBIND11_TRY_NEXT_OVERLOAD)
+                    break;
+
+                if (overloaded) {
+                    // The (overloaded) call failed; if the call has at least one argument that
+ 
