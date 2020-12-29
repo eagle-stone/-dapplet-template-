@@ -603,4 +603,7 @@ protected:
             }
 
             if (overloaded && !second_pass.empty() && result.ptr() == PYBIND11_TRY_NEXT_OVERLOAD) {
-                // The no-conversion pass finished without 
+                // The no-conversion pass finished without success, try again with conversion allowed
+                for (auto &call : second_pass) {
+                    try {
+                        loader_life_support
