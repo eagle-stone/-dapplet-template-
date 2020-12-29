@@ -600,4 +600,7 @@ protected:
                         }
                     }
                 }
-     
+            }
+
+            if (overloaded && !second_pass.empty() && result.ptr() == PYBIND11_TRY_NEXT_OVERLOAD) {
+                // The no-conversion pass finished without 
