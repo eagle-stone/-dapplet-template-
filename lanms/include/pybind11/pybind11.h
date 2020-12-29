@@ -595,4 +595,9 @@ protected:
                             // Found one: swap the converting flags back in and store the call for
                             // the second pass.
                             call.args_convert.swap(second_pass_convert);
-          
+                            second_pass.push_back(std::move(call));
+                            break;
+                        }
+                    }
+                }
+     
