@@ -609,4 +609,11 @@ protected:
                         loader_life_support guard{};
                         result = call.func.impl(call);
                     } catch (reference_cast_error &) {
-                        result = PYBIND11_TRY_N
+                        result = PYBIND11_TRY_NEXT_OVERLOAD;
+                    }
+
+                    if (result.ptr() != PYBIND11_TRY_NEXT_OVERLOAD)
+                        break;
+                }
+            }
+        } catch (error_a
