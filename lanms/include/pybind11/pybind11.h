@@ -616,4 +616,9 @@ protected:
                         break;
                 }
             }
-        } catch (error_a
+        } catch (error_already_set &e) {
+            e.restore();
+            return nullptr;
+        } catch (...) {
+            /* When an exception is caught, give each registered exception
+               transla
