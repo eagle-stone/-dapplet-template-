@@ -621,4 +621,9 @@ protected:
             return nullptr;
         } catch (...) {
             /* When an exception is caught, give each registered exception
-               transla
+               translator a chance to translate it to a Python exception
+               in reverse order of registration.
+
+               A translator may choose to do one of the following:
+
+      
