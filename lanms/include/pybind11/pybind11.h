@@ -626,4 +626,6 @@ protected:
 
                A translator may choose to do one of the following:
 
-      
+                - catch the exception and call PyErr_SetString or PyErr_SetObject
+                  to set a standard (or custom) Python exception, or
+                - d
