@@ -628,4 +628,5 @@ protected:
 
                 - catch the exception and call PyErr_SetString or PyErr_SetObject
                   to set a standard (or custom) Python exception, or
-                - d
+                - do nothing and let the exception fall through to the next translator, or
+                - delegate translation to the next translator by throwing 
