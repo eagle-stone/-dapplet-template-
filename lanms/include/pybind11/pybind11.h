@@ -629,4 +629,7 @@ protected:
                 - catch the exception and call PyErr_SetString or PyErr_SetObject
                   to set a standard (or custom) Python exception, or
                 - do nothing and let the exception fall through to the next translator, or
-                - delegate translation to the next translator by throwing 
+                - delegate translation to the next translator by throwing a new type of exception. */
+
+            auto last_exception = std::current_exception();
+            auto &registered_exception_translators = get_internals().registered_excep
