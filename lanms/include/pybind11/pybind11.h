@@ -632,4 +632,8 @@ protected:
                 - delegate translation to the next translator by throwing a new type of exception. */
 
             auto last_exception = std::current_exception();
-            auto &registered_exception_translators = get_internals().registered_excep
+            auto &registered_exception_translators = get_internals().registered_exception_translators;
+            for (auto& translator : registered_exception_translators) {
+                try {
+                    translator(last_exception);
+                }
