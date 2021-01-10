@@ -636,4 +636,9 @@ protected:
             for (auto& translator : registered_exception_translators) {
                 try {
                     translator(last_exception);
+                } catch (...) {
+                    last_exception = std::current_exception();
+                    continue;
                 }
+                return nullptr;
+            }
