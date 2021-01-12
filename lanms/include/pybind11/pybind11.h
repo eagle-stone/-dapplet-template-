@@ -642,3 +642,8 @@ protected:
                 }
                 return nullptr;
             }
+            PyErr_SetString(PyExc_SystemError, "Exception escaped from default exception translator!");
+            return nullptr;
+        }
+
+        if (result.ptr() == PY
