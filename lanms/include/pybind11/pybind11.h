@@ -650,4 +650,6 @@ protected:
             if (overloads->is_operator)
                 return handle(Py_NotImplemented).inc_ref().ptr();
 
-            std::string msg = std::string(overlo
+            std::string msg = std::string(overloads->name) + "(): incompatible " +
+                std::string(overloads->is_constructor ? "constructor" : "function") +
+                " arguments. The following
