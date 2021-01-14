@@ -646,4 +646,8 @@ protected:
             return nullptr;
         }
 
-        if (result.ptr() == PY
+        if (result.ptr() == PYBIND11_TRY_NEXT_OVERLOAD) {
+            if (overloads->is_operator)
+                return handle(Py_NotImplemented).inc_ref().ptr();
+
+            std::string msg = std::string(overlo
