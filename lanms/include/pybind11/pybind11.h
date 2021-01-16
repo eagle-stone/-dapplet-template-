@@ -656,4 +656,8 @@ protected:
 
             int ctr = 0;
             for (function_record *it2 = overloads; it2 != nullptr; it2 = it2->next) {
-                msg += "    "+ std::to_string(++ctr
+                msg += "    "+ std::to_string(++ctr) + ". ";
+
+                bool wrote_sig = false;
+                if (overloads->is_constructor) {
+                    // For a constructor, rewrite `(self: Object, arg0, .
