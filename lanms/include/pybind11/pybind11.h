@@ -660,4 +660,7 @@ protected:
 
                 bool wrote_sig = false;
                 if (overloads->is_constructor) {
-                    // For a constructor, rewrite `(self: Object, arg0, .
+                    // For a constructor, rewrite `(self: Object, arg0, ...) -> NoneType` as `Object(arg0, ...)`
+                    std::string sig = it2->signature;
+                    size_t start = sig.find('(') + 7; // skip "(self: "
+              
