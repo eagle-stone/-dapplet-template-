@@ -663,4 +663,7 @@ protected:
                     // For a constructor, rewrite `(self: Object, arg0, ...) -> NoneType` as `Object(arg0, ...)`
                     std::string sig = it2->signature;
                     size_t start = sig.find('(') + 7; // skip "(self: "
-              
+                    if (start < sig.size()) {
+                        // End at the , for the next argument
+                        size_t end = sig.find(", "), next = end + 2;
+                 
