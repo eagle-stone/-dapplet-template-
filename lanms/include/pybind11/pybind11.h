@@ -668,4 +668,8 @@ protected:
                         size_t end = sig.find(", "), next = end + 2;
                         size_t ret = sig.rfind(" -> ");
                         // Or the ), if there is no comma:
-                        if (end >= sig.size()) next = end = sig.find(
+                        if (end >= sig.size()) next = end = sig.find(')');
+                        if (start < end && next < sig.size()) {
+                            msg.append(sig, start, end - start);
+                            msg += '(';
+              
