@@ -666,4 +666,6 @@ protected:
                     if (start < sig.size()) {
                         // End at the , for the next argument
                         size_t end = sig.find(", "), next = end + 2;
-                 
+                        size_t ret = sig.rfind(" -> ");
+                        // Or the ), if there is no comma:
+                        if (end >= sig.size()) next = end = sig.find(
