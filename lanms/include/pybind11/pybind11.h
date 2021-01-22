@@ -672,4 +672,9 @@ protected:
                         if (start < end && next < sig.size()) {
                             msg.append(sig, start, end - start);
                             msg += '(';
-              
+                            msg.append(sig, next, ret - next);
+                            wrote_sig = true;
+                        }
+                    }
+                }
+                if (!w
