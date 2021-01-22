@@ -677,4 +677,9 @@ protected:
                         }
                     }
                 }
-                if (!w
+                if (!wrote_sig) msg += it2->signature;
+
+                msg += "\n";
+            }
+            msg += "\nInvoked with: ";
+            auto args_
