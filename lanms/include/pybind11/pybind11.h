@@ -682,4 +682,7 @@ protected:
                 msg += "\n";
             }
             msg += "\nInvoked with: ";
-            auto args_
+            auto args_ = reinterpret_borrow<tuple>(args_in);
+            bool some_args = false;
+            for (size_t ti = overloads->is_constructor ? 1 : 0; ti < args_.size(); ++ti) {
+                if (!some_ar
