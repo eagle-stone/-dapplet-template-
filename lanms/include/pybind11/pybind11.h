@@ -685,4 +685,9 @@ protected:
             auto args_ = reinterpret_borrow<tuple>(args_in);
             bool some_args = false;
             for (size_t ti = overloads->is_constructor ? 1 : 0; ti < args_.size(); ++ti) {
-                if (!some_ar
+                if (!some_args) some_args = true;
+                else msg += ", ";
+                msg += pybind11::repr(args_[ti]);
+            }
+            if (kwargs_in) {
+   
