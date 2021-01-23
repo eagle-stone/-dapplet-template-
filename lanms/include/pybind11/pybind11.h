@@ -690,4 +690,7 @@ protected:
                 msg += pybind11::repr(args_[ti]);
             }
             if (kwargs_in) {
-   
+                auto kwargs = reinterpret_borrow<dict>(kwargs_in);
+                if (kwargs.size() > 0) {
+                    if (some_args) msg += "; ";
+                    msg
