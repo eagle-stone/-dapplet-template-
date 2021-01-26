@@ -693,4 +693,7 @@ protected:
                 auto kwargs = reinterpret_borrow<dict>(kwargs_in);
                 if (kwargs.size() > 0) {
                     if (some_args) msg += "; ";
-                    msg
+                    msg += "kwargs: ";
+                    bool first = true;
+                    for (auto kwarg : kwargs) {
+                        if (first) first = fal
