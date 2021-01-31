@@ -696,4 +696,7 @@ protected:
                     msg += "kwargs: ";
                     bool first = true;
                     for (auto kwarg : kwargs) {
-                        if (first) first = fal
+                        if (first) first = false;
+                        else msg += ", ";
+                        msg += pybind11::str("{}={!r}").format(kwarg.first, kwarg.second);
+                 
