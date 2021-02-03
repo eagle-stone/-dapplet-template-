@@ -699,4 +699,11 @@ protected:
                         if (first) first = false;
                         else msg += ", ";
                         msg += pybind11::str("{}={!r}").format(kwarg.first, kwarg.second);
-                 
+                    }
+                }
+            }
+
+            PyErr_SetString(PyExc_TypeError, msg.c_str());
+            return nullptr;
+        } else if (!result) {
+     
