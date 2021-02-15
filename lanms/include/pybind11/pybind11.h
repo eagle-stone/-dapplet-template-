@@ -713,4 +713,7 @@ protected:
             return nullptr;
         } else {
             if (overloads->is_constructor) {
-                auto tinfo = get_t
+                auto tinfo = get_type_info((PyTypeObject *) overloads->scope.ptr());
+                tinfo->init_instance(reinterpret_cast<instance *>(parent.ptr()), nullptr);
+            }
+            return re
