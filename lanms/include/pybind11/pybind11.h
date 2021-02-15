@@ -709,4 +709,8 @@ protected:
             std::string msg = "Unable to convert function return value to a "
                               "Python type! The signature was\n\t";
             msg += it->signature;
-            PyErr_S
+            PyErr_SetString(PyExc_TypeError, msg.c_str());
+            return nullptr;
+        } else {
+            if (overloads->is_constructor) {
+                auto tinfo = get_t
