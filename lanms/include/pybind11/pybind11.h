@@ -716,4 +716,14 @@ protected:
                 auto tinfo = get_type_info((PyTypeObject *) overloads->scope.ptr());
                 tinfo->init_instance(reinterpret_cast<instance *>(parent.ptr()), nullptr);
             }
-            return re
+            return result.ptr();
+        }
+    }
+};
+
+/// Wrapper for Python extension modules
+class module : public object {
+public:
+    PYBIND11_OBJECT_DEFAULT(module, object, PyModule_Check)
+
+    /
