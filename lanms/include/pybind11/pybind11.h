@@ -726,4 +726,6 @@ class module : public object {
 public:
     PYBIND11_OBJECT_DEFAULT(module, object, PyModule_Check)
 
-    /
+    /// Create a new top-level Python module with the given name and docstring
+    explicit module(const char *name, const char *doc = nullptr) {
+        if (!options::sho
