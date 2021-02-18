@@ -728,4 +728,8 @@ public:
 
     /// Create a new top-level Python module with the given name and docstring
     explicit module(const char *name, const char *doc = nullptr) {
-        if (!options::sho
+        if (!options::show_user_defined_docstrings()) doc = nullptr;
+#if PY_MAJOR_VERSION >= 3
+        PyModuleDef *def = new PyModuleDef();
+        std::memset(def, 0, sizeof(PyModuleDef));
+        def
