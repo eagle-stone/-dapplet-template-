@@ -738,4 +738,12 @@ public:
         Py_INCREF(def);
         m_ptr = PyModule_Create(def);
 #else
-        m_ptr = Py_InitModule3(name, nul
+        m_ptr = Py_InitModule3(name, nullptr, doc);
+#endif
+        if (m_ptr == nullptr)
+            pybind11_fail("Internal error in module::module()");
+        inc_ref();
+    }
+
+    /** \rst
+        Create Python binding fo
