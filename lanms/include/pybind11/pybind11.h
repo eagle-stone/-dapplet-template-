@@ -732,4 +732,10 @@ public:
 #if PY_MAJOR_VERSION >= 3
         PyModuleDef *def = new PyModuleDef();
         std::memset(def, 0, sizeof(PyModuleDef));
-        def
+        def->m_name = name;
+        def->m_doc = doc;
+        def->m_size = -1;
+        Py_INCREF(def);
+        m_ptr = PyModule_Create(def);
+#else
+        m_ptr = Py_InitModule3(name, nul
