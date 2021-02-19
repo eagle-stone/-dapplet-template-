@@ -748,4 +748,8 @@ public:
     /** \rst
         Create Python binding for a new function within the module scope. ``Func``
         can be a plain C++ function, a function pointer, or a lambda function. For
-        details on the ``Extra&& ... extra`
+        details on the ``Extra&& ... extra`` argument, see section :ref:`extras`.
+    \endrst */
+    template <typename Func, typename... Extra>
+    module &def(const char *name_, Func &&f, const Extra& ... extra) {
+        
