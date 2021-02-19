@@ -746,4 +746,6 @@ public:
     }
 
     /** \rst
-        Create Python binding fo
+        Create Python binding for a new function within the module scope. ``Func``
+        can be a plain C++ function, a function pointer, or a lambda function. For
+        details on the ``Extra&& ... extra`
