@@ -761,4 +761,9 @@ public:
     }
 
     /** \rst
-        Create and return a new Python submodule with the given name
+        Create and return a new Python submodule with the given name and docstring.
+        This also works recursively, i.e.
+
+        .. code-block:: cpp
+
+            py::module m("example", "pybind11
