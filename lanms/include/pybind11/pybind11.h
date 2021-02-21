@@ -755,4 +755,10 @@ public:
         cpp_function func(std::forward<Func>(f), name(name_), scope(*this),
                           sibling(getattr(*this, name_, none())), extra...);
         // NB: allow overwriting here because cpp_function sets up a chain with the intention of
-        // overwriting (and has already checked internally that it isn't overwriting no
+        // overwriting (and has already checked internally that it isn't overwriting non-functions).
+        add_object(name_, func, true /* overwrite */);
+        return *this;
+    }
+
+    /** \rst
+        Create and return a new Python submodule with the given name
