@@ -754,4 +754,5 @@ public:
     module &def(const char *name_, Func &&f, const Extra& ... extra) {
         cpp_function func(std::forward<Func>(f), name(name_), scope(*this),
                           sibling(getattr(*this, name_, none())), extra...);
-        // NB: allow overwr
+        // NB: allow overwriting here because cpp_function sets up a chain with the intention of
+        // overwriting (and has already checked internally that it isn't overwriting no
