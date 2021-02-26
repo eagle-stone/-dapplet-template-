@@ -774,4 +774,10 @@ public:
         std::string full_name = std::string(PyModule_GetName(m_ptr))
             + std::string(".") + std::string(name);
         auto result = reinterpret_borrow<module>(PyImport_AddModule(full_name.c_str()));
-        if (doc && options::show_user_defin
+        if (doc && options::show_user_defined_docstrings())
+            result.attr("__doc__") = pybind11::str(doc);
+        attr(name) = result;
+        return result;
+    }
+
+    /// Import and return a module or throws `error_a
