@@ -766,4 +766,6 @@ public:
 
         .. code-block:: cpp
 
-            py::module m("example", "pybind11
+            py::module m("example", "pybind11 example plugin");
+            py::module m2 = m.def_submodule("sub", "A submodule of 'example'");
+            py::module m3 = m2.def_submodule("subsub", "A submodule of 'example.sub'");
