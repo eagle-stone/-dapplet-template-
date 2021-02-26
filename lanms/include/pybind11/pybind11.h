@@ -772,4 +772,6 @@ public:
     \endrst */
     module def_submodule(const char *name, const char *doc = nullptr) {
         std::string full_name = std::string(PyModule_GetName(m_ptr))
-            + std::string("
+            + std::string(".") + std::string(name);
+        auto result = reinterpret_borrow<module>(PyImport_AddModule(full_name.c_str()));
+        if (doc && options::show_user_defin
