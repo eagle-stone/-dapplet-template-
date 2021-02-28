@@ -784,4 +784,9 @@ public:
     static module import(const char *name) {
         PyObject *obj = PyImport_ImportModule(name);
         if (!obj)
-            throw error_already_s
+            throw error_already_set();
+        return reinterpret_steal<module>(obj);
+    }
+
+    // Adds an object to the module using the given name.  Throws if an object with the given name
+    // already 
