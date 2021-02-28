@@ -793,4 +793,6 @@ public:
     //
     // overwrite should almost always be false: attempting to overwrite objects that pybind11 has
     // established will, in most cases, break things.
-    PYBIND11_NOINLINE void add_obj
+    PYBIND11_NOINLINE void add_object(const char *name, handle obj, bool overwrite = false) {
+        if (!overwrite && hasattr(*this, name))
+            pybind11_fail("Error during initialization
