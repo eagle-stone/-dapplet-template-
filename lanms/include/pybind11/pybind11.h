@@ -780,4 +780,8 @@ public:
         return result;
     }
 
-    /// Import and return a module or throws `error_a
+    /// Import and return a module or throws `error_already_set`.
+    static module import(const char *name) {
+        PyObject *obj = PyImport_ImportModule(name);
+        if (!obj)
+            throw error_already_s
