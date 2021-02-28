@@ -789,4 +789,8 @@ public:
     }
 
     // Adds an object to the module using the given name.  Throws if an object with the given name
-    // already 
+    // already exists.
+    //
+    // overwrite should almost always be false: attempting to overwrite objects that pybind11 has
+    // established will, in most cases, break things.
+    PYBIND11_NOINLINE void add_obj
