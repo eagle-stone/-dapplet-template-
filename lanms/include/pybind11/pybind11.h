@@ -795,4 +795,7 @@ public:
     // established will, in most cases, break things.
     PYBIND11_NOINLINE void add_object(const char *name, handle obj, bool overwrite = false) {
         if (!overwrite && hasattr(*this, name))
-            pybind11_fail("Error during initialization
+            pybind11_fail("Error during initialization: multiple incompatible definitions with name \"" +
+                    std::string(name) + "\"");
+
+        PyModule_AddObject(ptr(), name, obj.inc_ref().pt
