@@ -798,4 +798,10 @@ public:
             pybind11_fail("Error during initialization: multiple incompatible definitions with name \"" +
                     std::string(name) + "\"");
 
-        PyModule_AddObject(ptr(), name, obj.inc_ref().pt
+        PyModule_AddObject(ptr(), name, obj.inc_ref().ptr() /* steals a reference */);
+    }
+};
+
+/// \ingroup python_builtins
+/// Return a dictionary representing the global variables in the current execution frame,
+/// or ``__main__.__d
