@@ -804,4 +804,7 @@ public:
 
 /// \ingroup python_builtins
 /// Return a dictionary representing the global variables in the current execution frame,
-/// or ``__main__.__d
+/// or ``__main__.__dict__`` if there is no frame (usually when the interpreter is embedded).
+inline dict globals() {
+    PyObject *p = PyEval_GetGlobals();
+    return reinterpret_borrow<dict>(p ? 
