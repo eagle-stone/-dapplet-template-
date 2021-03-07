@@ -807,4 +807,10 @@ public:
 /// or ``__main__.__dict__`` if there is no frame (usually when the interpreter is embedded).
 inline dict globals() {
     PyObject *p = PyEval_GetGlobals();
-    return reinterpret_borrow<dict>(p ? 
+    return reinterpret_borrow<dict>(p ? p : module::import("__main__").attr("__dict__").ptr());
+}
+
+NAMESPACE_BEGIN(detail)
+/// Generic support for creating new Python heap types
+class generic_type : public object {
+    template <typename...> 
