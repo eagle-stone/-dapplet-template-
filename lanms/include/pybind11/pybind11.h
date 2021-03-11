@@ -813,4 +813,11 @@ inline dict globals() {
 NAMESPACE_BEGIN(detail)
 /// Generic support for creating new Python heap types
 class generic_type : public object {
-    template <typename...> 
+    template <typename...> friend class class_;
+public:
+    PYBIND11_OBJECT_DEFAULT(generic_type, object, PyType_Check)
+protected:
+    void initialize(const type_record &rec) {
+        if (rec.scope && hasattr(rec.scope, rec.name))
+            pybind11_fail("generic_type: cannot initialize type \"" + std::string(rec.name) +
+                          "\": an object with that name is already def
