@@ -820,4 +820,8 @@ protected:
     void initialize(const type_record &rec) {
         if (rec.scope && hasattr(rec.scope, rec.name))
             pybind11_fail("generic_type: cannot initialize type \"" + std::string(rec.name) +
-                          "\": an object with that name is already def
+                          "\": an object with that name is already defined");
+
+        if (get_type_info(*rec.type))
+            pybind11_fail("generic_type: type \"" + std::string(rec.name) +
+                          "\" i
