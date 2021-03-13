@@ -829,4 +829,8 @@ protected:
         m_ptr = make_new_python_type(rec);
 
         /* Register supplemental type information in C++ dict */
-        auto *tinfo = new detail::t
+        auto *tinfo = new detail::type_info();
+        tinfo->type = (PyTypeObject *) m_ptr;
+        tinfo->cpptype = rec.type;
+        tinfo->type_size = rec.type_size;
+        tinfo->operator_new = rec.operator_n
