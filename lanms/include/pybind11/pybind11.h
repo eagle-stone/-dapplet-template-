@@ -824,4 +824,9 @@ protected:
 
         if (get_type_info(*rec.type))
             pybind11_fail("generic_type: type \"" + std::string(rec.name) +
-                          "\" i
+                          "\" is already registered!");
+
+        m_ptr = make_new_python_type(rec);
+
+        /* Register supplemental type information in C++ dict */
+        auto *tinfo = new detail::t
