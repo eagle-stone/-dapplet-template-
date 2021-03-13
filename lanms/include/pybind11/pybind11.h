@@ -833,4 +833,8 @@ protected:
         tinfo->type = (PyTypeObject *) m_ptr;
         tinfo->cpptype = rec.type;
         tinfo->type_size = rec.type_size;
-        tinfo->operator_new = rec.operator_n
+        tinfo->operator_new = rec.operator_new;
+        tinfo->holder_size_in_ptrs = size_in_ptrs(rec.holder_size);
+        tinfo->init_instance = rec.init_instance;
+        tinfo->dealloc = rec.dealloc;
+        ti
