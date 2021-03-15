@@ -842,4 +842,6 @@ protected:
 
         auto &internals = get_internals();
         auto tindex = std::type_index(*rec.type);
-   
+        tinfo->direct_conversions = &internals.direct_conversions[tindex];
+        tinfo->default_holder = rec.default_holder;
+        internals.registered_types_cpp[tindex] = ti
