@@ -844,4 +844,8 @@ protected:
         auto tindex = std::type_index(*rec.type);
         tinfo->direct_conversions = &internals.direct_conversions[tindex];
         tinfo->default_holder = rec.default_holder;
-        internals.registered_types_cpp[tindex] = ti
+        internals.registered_types_cpp[tindex] = tinfo;
+        internals.registered_types_py[(PyTypeObject *) m_ptr] = { tinfo };
+
+        if (rec.bases.size() > 1 || rec.multiple_inheritance) {
+            mark_paren
