@@ -852,4 +852,9 @@ protected:
             tinfo->simple_ancestors = false;
         }
         else if (rec.bases.size() == 1) {
-            auto parent_tinfo = get_type_info(
+            auto parent_tinfo = get_type_info((PyTypeObject *) rec.bases[0].ptr());
+            tinfo->simple_ancestors = parent_tinfo->simple_ancestors;
+        }
+    }
+
+    /// Helper function which tags all p
