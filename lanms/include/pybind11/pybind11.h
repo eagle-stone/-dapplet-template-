@@ -848,4 +848,8 @@ protected:
         internals.registered_types_py[(PyTypeObject *) m_ptr] = { tinfo };
 
         if (rec.bases.size() > 1 || rec.multiple_inheritance) {
-            mark_paren
+            mark_parents_nonsimple(tinfo->type);
+            tinfo->simple_ancestors = false;
+        }
+        else if (rec.bases.size() == 1) {
+            auto parent_tinfo = get_type_info(
