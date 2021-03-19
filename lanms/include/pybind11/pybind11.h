@@ -857,4 +857,7 @@ protected:
         }
     }
 
-    /// Helper function which tags all p
+    /// Helper function which tags all parents of a type using mult. inheritance
+    void mark_parents_nonsimple(PyTypeObject *value) {
+        auto t = reinterpret_borrow<tuple>(value->tp_bases);
+        for (handle h
