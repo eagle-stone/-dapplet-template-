@@ -860,4 +860,9 @@ protected:
     /// Helper function which tags all parents of a type using mult. inheritance
     void mark_parents_nonsimple(PyTypeObject *value) {
         auto t = reinterpret_borrow<tuple>(value->tp_bases);
-        for (handle h
+        for (handle h : t) {
+            auto tinfo2 = get_type_info((PyTypeObject *) h.ptr());
+            if (tinfo2)
+                tinfo2->simple_type = false;
+            mark_parents_nonsimple((PyTypeObject *) h.ptr());
+  
