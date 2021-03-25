@@ -865,4 +865,10 @@ protected:
             if (tinfo2)
                 tinfo2->simple_type = false;
             mark_parents_nonsimple((PyTypeObject *) h.ptr());
-  
+        }
+    }
+
+    void install_buffer_funcs(
+            buffer_info *(*get_buffer)(PyObject *, void *),
+            void *get_buffer_data) {
+        PyHeapTypeObject 
