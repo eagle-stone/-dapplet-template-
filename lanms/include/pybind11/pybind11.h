@@ -876,3 +876,6 @@ protected:
 
         if (!type->ht_type.tp_as_buffer)
             pybind11_fail(
+                "To be able to register buffer protocol support for the type '" +
+                std::string(tinfo->type->tp_name) +
+                "' the associated class<>
