@@ -871,4 +871,8 @@ protected:
     void install_buffer_funcs(
             buffer_info *(*get_buffer)(PyObject *, void *),
             void *get_buffer_data) {
-        PyHeapTypeObject 
+        PyHeapTypeObject *type = (PyHeapTypeObject*) m_ptr;
+        auto tinfo = detail::get_type_info(&type->ht_type);
+
+        if (!type->ht_type.tp_as_buffer)
+            pybind11_fail(
