@@ -878,4 +878,8 @@ protected:
             pybind11_fail(
                 "To be able to register buffer protocol support for the type '" +
                 std::string(tinfo->type->tp_name) +
-                "' the associated class<>
+                "' the associated class<>(..) invocation must "
+                "include the pybind11::buffer_protocol() annotation!");
+
+        tinfo->get_buffer = get_buffer;
+        tinfo->get
