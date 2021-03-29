@@ -889,4 +889,7 @@ protected:
                                   handle fget, handle fset,
                                   detail::function_record *rec_fget) {
         const auto is_static = !(rec_fget->is_method && rec_fget->scope);
-        const auto has_doc = rec_fget->doc &&
+        const auto has_doc = rec_fget->doc && pybind11::options::show_user_defined_docstrings();
+
+        auto property = handle((PyObject *) (is_static ? get_internals().static_property_type
+                 
