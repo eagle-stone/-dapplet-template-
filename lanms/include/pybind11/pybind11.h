@@ -887,4 +887,6 @@ protected:
 
     void def_property_static_impl(const char *name,
                                   handle fget, handle fset,
-                             
+                                  detail::function_record *rec_fget) {
+        const auto is_static = !(rec_fget->is_method && rec_fget->scope);
+        const auto has_doc = rec_fget->doc &&
