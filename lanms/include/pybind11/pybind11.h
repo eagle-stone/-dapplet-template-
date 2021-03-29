@@ -882,4 +882,9 @@ protected:
                 "include the pybind11::buffer_protocol() annotation!");
 
         tinfo->get_buffer = get_buffer;
-        tinfo->get
+        tinfo->get_buffer_data = get_buffer_data;
+    }
+
+    void def_property_static_impl(const char *name,
+                                  handle fget, handle fset,
+                             
