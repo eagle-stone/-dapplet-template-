@@ -895,4 +895,9 @@ protected:
                                                        : &PyProperty_Type));
         attr(name) = property(fget.ptr() ? fget : none(),
                               fset.ptr() ? fset : none(),
-    
+                              /*deleter*/none(),
+                              pybind11::str(has_doc ? rec_fget->doc : ""));
+    }
+};
+
+/// Set the pointer to operator new 
