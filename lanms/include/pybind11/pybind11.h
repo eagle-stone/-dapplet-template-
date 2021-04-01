@@ -892,4 +892,7 @@ protected:
         const auto has_doc = rec_fget->doc && pybind11::options::show_user_defined_docstrings();
 
         auto property = handle((PyObject *) (is_static ? get_internals().static_property_type
-                 
+                                                       : &PyProperty_Type));
+        attr(name) = property(fget.ptr() ? fget : none(),
+                              fset.ptr() ? fset : none(),
+    
