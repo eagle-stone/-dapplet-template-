@@ -910,4 +910,6 @@ template <typename T, typename SFINAE = void> struct has_operator_delete : std::
 template <typename T> struct has_operator_delete<T, void_t<decltype(static_cast<void (*)(void *)>(T::operator delete))>>
     : std::true_type { };
 template <typename T, typename SFINAE = void> struct has_operator_delete_size : std::false_type { };
-template <typename T> struct has_operator_delete_size<T, void_t<decltype(stati
+template <typename T> struct has_operator_delete_size<T, void_t<decltype(static_cast<void (*)(void *, size_t)>(T::operator delete))>>
+    : std::true_type { };
+/// Call class-specific delete if it exists or global otherwise. Can also b
