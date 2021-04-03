@@ -909,4 +909,5 @@ template <typename> void set_operator_new(...) { }
 template <typename T, typename SFINAE = void> struct has_operator_delete : std::false_type { };
 template <typename T> struct has_operator_delete<T, void_t<decltype(static_cast<void (*)(void *)>(T::operator delete))>>
     : std::true_type { };
-templ
+template <typename T, typename SFINAE = void> struct has_operator_delete_size : std::false_type { };
+template <typename T> struct has_operator_delete_size<T, void_t<decltype(stati
