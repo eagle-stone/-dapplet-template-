@@ -902,4 +902,8 @@ protected:
 
 /// Set the pointer to operator new if it exists. The cast is needed because it can be overloaded.
 template <typename T, typename = void_t<decltype(static_cast<void *(*)(size_t)>(T::operator new))>>
-void set_o
+void set_operator_new(type_record *r) { r->operator_new = &T::operator new; }
+
+template <typename> void set_operator_new(...) { }
+
+template <typename T, typename SFINAE = void> struct has_operator_delete : s
