@@ -914,4 +914,6 @@ template <typename T> struct has_operator_delete_size<T, void_t<decltype(static_
     : std::true_type { };
 /// Call class-specific delete if it exists or global otherwise. Can also be an overload set.
 template <typename T, enable_if_t<has_operator_delete<T>::value, int> = 0>
-void call_operator_delete(T *p, size_t) { T::operator d
+void call_operator_delete(T *p, size_t) { T::operator delete(p); }
+template <typename T, enable_if_t<!has_operator_delete<T>::value && has_operator_delete_size<T>::value, int> = 0>
+void call_operator_delete(T *p
