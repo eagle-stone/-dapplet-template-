@@ -925,4 +925,7 @@ NAMESPACE_END(detail)
 /// Given a pointer to a member function, cast it to its `Derived` version.
 /// Forward everything else unchanged.
 template <typename /*Derived*/, typename F>
-auto method_adaptor(F &&f) -> decltype(std::forward<F>(f)) { retu
+auto method_adaptor(F &&f) -> decltype(std::forward<F>(f)) { return std::forward<F>(f); }
+
+template <typename Derived, typename Return, typename Class, typename... Args>
+auto method_adaptor(Return (Class::*pmf)(Args...)) -> Return (Deriv
