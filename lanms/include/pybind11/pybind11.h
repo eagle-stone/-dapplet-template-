@@ -916,4 +916,10 @@ template <typename T> struct has_operator_delete_size<T, void_t<decltype(static_
 template <typename T, enable_if_t<has_operator_delete<T>::value, int> = 0>
 void call_operator_delete(T *p, size_t) { T::operator delete(p); }
 template <typename T, enable_if_t<!has_operator_delete<T>::value && has_operator_delete_size<T>::value, int> = 0>
-void call_operator_delete(T *p
+void call_operator_delete(T *p, size_t s) { T::operator delete(p, s); }
+
+inline void call_operator_delete(void *p, size_t) { ::operator delete(p); }
+
+NAMESPACE_END(detail)
+
+/// Given a pointer to a membe
