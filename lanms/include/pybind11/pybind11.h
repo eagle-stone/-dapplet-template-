@@ -922,4 +922,7 @@ inline void call_operator_delete(void *p, size_t) { ::operator delete(p); }
 
 NAMESPACE_END(detail)
 
-/// Given a pointer to a membe
+/// Given a pointer to a member function, cast it to its `Derived` version.
+/// Forward everything else unchanged.
+template <typename /*Derived*/, typename F>
+auto method_adaptor(F &&f) -> decltype(std::forward<F>(f)) { retu
