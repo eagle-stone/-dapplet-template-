@@ -931,4 +931,8 @@ template <typename Derived, typename Return, typename Class, typename... Args>
 auto method_adaptor(Return (Class::*pmf)(Args...)) -> Return (Derived::*)(Args...) { return pmf; }
 
 template <typename Derived, typename Return, typename Class, typename... Args>
-auto method_adaptor(Return (Class::*pmf)(Args...) const) -> Return (Derived::*)
+auto method_adaptor(Return (Class::*pmf)(Args...) const) -> Return (Derived::*)(Args...) const { return pmf; }
+
+template <typename type_, typename... options>
+class class_ : public detail::generic_type {
+    template <typename T> using is_holder = detail::is_hold
