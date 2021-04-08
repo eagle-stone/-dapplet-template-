@@ -935,4 +935,6 @@ auto method_adaptor(Return (Class::*pmf)(Args...) const) -> Return (Derived::*)(
 
 template <typename type_, typename... options>
 class class_ : public detail::generic_type {
-    template <typename T> using is_holder = detail::is_hold
+    template <typename T> using is_holder = detail::is_holder_type<type_, T>;
+    template <typename T> using is_subtype = detail::is_strict_base_of<type_, T>;
+    template <typename T> using is_base = detail::is_st
