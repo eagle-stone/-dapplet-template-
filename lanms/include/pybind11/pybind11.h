@@ -945,4 +945,7 @@ class class_ : public detail::generic_type {
 public:
     using type = type_;
     using type_alias = detail::exactly_one_t<is_subtype, void, options...>;
-    constexpr static bool has_alias = !std::is_void
+    constexpr static bool has_alias = !std::is_void<type_alias>::value;
+    using holder_type = detail::exactly_one_t<is_holder, std::unique_ptr<type>, options...>;
+
+    static_assert(detail::all_of<is_valid_class_op
