@@ -940,4 +940,9 @@ class class_ : public detail::generic_type {
     template <typename T> using is_base = detail::is_strict_base_of<T, type_>;
     // struct instead of using here to help MSVC:
     template <typename T> struct is_valid_class_option :
-        detail::any_of<is_holder<T>, is_subtyp
+        detail::any_of<is_holder<T>, is_subtype<T>, is_base<T>> {};
+
+public:
+    using type = type_;
+    using type_alias = detail::exactly_one_t<is_subtype, void, options...>;
+    constexpr static bool has_alias = !std::is_void
