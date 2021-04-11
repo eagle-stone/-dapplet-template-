@@ -953,4 +953,8 @@ public:
 
     PYBIND11_OBJECT(class_, generic_type, PyType_Check)
 
-    template <
+    template <typename... Extra>
+    class_(handle scope, const char *name, const Extra &... extra) {
+        using namespace detail;
+
+        // MI can only be specified via class_ templa
