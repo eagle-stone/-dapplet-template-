@@ -948,4 +948,9 @@ public:
     constexpr static bool has_alias = !std::is_void<type_alias>::value;
     using holder_type = detail::exactly_one_t<is_holder, std::unique_ptr<type>, options...>;
 
-    static_assert(detail::all_of<is_valid_class_op
+    static_assert(detail::all_of<is_valid_class_option<options>...>::value,
+            "Unknown/invalid class_ template parameters provided");
+
+    PYBIND11_OBJECT(class_, generic_type, PyType_Check)
+
+    template <
