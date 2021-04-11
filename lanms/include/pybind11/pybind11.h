@@ -957,4 +957,7 @@ public:
     class_(handle scope, const char *name, const Extra &... extra) {
         using namespace detail;
 
-        // MI can only be specified via class_ templa
+        // MI can only be specified via class_ template options, not constructor parameters
+        static_assert(
+            none_of<is_pyobject<Extra>...>::value || // no base class arguments, or:
+            (  
