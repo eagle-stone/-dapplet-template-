@@ -962,4 +962,5 @@ public:
             none_of<is_pyobject<Extra>...>::value || // no base class arguments, or:
             (   constexpr_sum(is_pyobject<Extra>::value...) == 1 && // Exactly one base
                 constexpr_sum(is_base<options>::value...)   == 0 && // no template option bases
-       
+                none_of<std::is_same<multiple_inheritance, Extra>...>::value), // no multiple_inheritance attr
+            "Error: multiple inheritance bases must be specified via class_
