@@ -963,4 +963,10 @@ public:
             (   constexpr_sum(is_pyobject<Extra>::value...) == 1 && // Exactly one base
                 constexpr_sum(is_base<options>::value...)   == 0 && // no template option bases
                 none_of<std::is_same<multiple_inheritance, Extra>...>::value), // no multiple_inheritance attr
-            "Error: multiple inheritance bases must be specified via class_
+            "Error: multiple inheritance bases must be specified via class_ template options");
+
+        type_record record;
+        record.scope = scope;
+        record.name = name;
+        record.type = &typeid(type);
+        record.type_size
