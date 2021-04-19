@@ -969,4 +969,7 @@ public:
         record.scope = scope;
         record.name = name;
         record.type = &typeid(type);
-        record.type_size
+        record.type_size = sizeof(conditional_t<has_alias, type_alias, type>);
+        record.holder_size = sizeof(holder_type);
+        record.init_instance = init_instance;
+        record.dealloc = 
