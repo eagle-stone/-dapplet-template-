@@ -972,4 +972,9 @@ public:
         record.type_size = sizeof(conditional_t<has_alias, type_alias, type>);
         record.holder_size = sizeof(holder_type);
         record.init_instance = init_instance;
-        record.dealloc = 
+        record.dealloc = dealloc;
+        record.default_holder = std::is_same<holder_type, std::unique_ptr<type>>::value;
+
+        set_operator_new<type>(&record);
+
+        /* Register base cla
