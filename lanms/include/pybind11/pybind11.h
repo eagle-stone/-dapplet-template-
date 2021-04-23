@@ -977,4 +977,8 @@ public:
 
         set_operator_new<type>(&record);
 
-        /* Register base cla
+        /* Register base classes specified via template arguments to class_, if any */
+        PYBIND11_EXPAND_SIDE_EFFECTS(add_base<options>(record));
+
+        /* Process optional arguments, if any */
+        p
