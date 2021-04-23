@@ -986,4 +986,9 @@ public:
         generic_type::initialize(record);
 
         if (has_alias) {
-            auto &instances = get
+            auto &instances = get_internals().registered_types_cpp;
+            instances[std::type_index(typeid(type_alias))] = instances[std::type_index(typeid(type))];
+        }
+    }
+
+    template <
