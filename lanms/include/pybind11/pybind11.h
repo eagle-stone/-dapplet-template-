@@ -981,4 +981,9 @@ public:
         PYBIND11_EXPAND_SIDE_EFFECTS(add_base<options>(record));
 
         /* Process optional arguments, if any */
-        p
+        process_attributes<Extra...>::init(extra..., &record);
+
+        generic_type::initialize(record);
+
+        if (has_alias) {
+            auto &instances = get
