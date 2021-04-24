@@ -994,4 +994,8 @@ public:
     template <typename Base, detail::enable_if_t<is_base<Base>::value, int> = 0>
     static void add_base(detail::type_record &rec) {
         rec.add_base(typeid(Base), [](void *src) -> void * {
- 
+            return static_cast<Base *>(reinterpret_cast<type *>(src));
+        });
+    }
+
+    template <typename Base, detail::enable_if_t<!is_base<Base>:
