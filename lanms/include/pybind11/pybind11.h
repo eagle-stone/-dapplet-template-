@@ -1010,4 +1010,6 @@ public:
     }
 
     template <typename Func, typename... Extra> class_ &
-    def_sta
+    def_static(const char *name_, Func &&f, const Extra&... extra) {
+        static_assert(!std::is_member_function_pointer<Func>::value,
+                "def_static(...) called 
