@@ -1002,4 +1002,6 @@ public:
     static void add_base(detail::type_record &) { }
 
     template <typename Func, typename... Extra>
-    class_ &def(const char *name_, Func&& f, co
+    class_ &def(const char *name_, Func&& f, const Extra&... extra) {
+        cpp_function cf(method_adaptor<type>(std::forward<Func>(f)), name(name_), is_method(*this),
+                        sibling(getattr(*this, nam
