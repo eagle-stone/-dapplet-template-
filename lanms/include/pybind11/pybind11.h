@@ -1004,4 +1004,10 @@ public:
     template <typename Func, typename... Extra>
     class_ &def(const char *name_, Func&& f, const Extra&... extra) {
         cpp_function cf(method_adaptor<type>(std::forward<Func>(f)), name(name_), is_method(*this),
-                        sibling(getattr(*this, nam
+                        sibling(getattr(*this, name_, none())), extra...);
+        attr(cf.name()) = cf;
+        return *this;
+    }
+
+    template <typename Func, typename... Extra> class_ &
+    def_sta
