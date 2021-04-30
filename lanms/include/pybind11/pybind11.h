@@ -1025,4 +1025,7 @@ public:
         return *this;
     }
 
-    template <detail::op_id id, detail::op_
+    template <detail::op_id id, detail::op_type ot, typename L, typename R, typename... Extra>
+    class_ & def_cast(const detail::op_<id, ot, L, R> &op, const Extra&... extra) {
+        op.execute_cast(*this, extra...);
+        retu
