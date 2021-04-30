@@ -1015,4 +1015,9 @@ public:
                 "def_static(...) called with a non-static member function pointer");
         cpp_function cf(std::forward<Func>(f), name(name_), scope(*this),
                         sibling(getattr(*this, name_, none())), extra...);
- 
+        attr(cf.name()) = cf;
+        return *this;
+    }
+
+    template <detail::op_id id, detail::op_type ot, typename L, typename R, typename... Extra>
+    class_ &
