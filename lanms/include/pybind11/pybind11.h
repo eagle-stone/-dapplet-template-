@@ -1020,4 +1020,9 @@ public:
     }
 
     template <detail::op_id id, detail::op_type ot, typename L, typename R, typename... Extra>
-    class_ &
+    class_ &def(const detail::op_<id, ot, L, R> &op, const Extra&... extra) {
+        op.execute(*this, extra...);
+        return *this;
+    }
+
+    template <detail::op_id id, detail::op_
