@@ -1033,4 +1033,9 @@ public:
 
     template <typename... Args, typename... Extra>
     class_ &def(const detail::init<Args...> &init, const Extra&... extra) {
-        init.execute(
+        init.execute(*this, extra...);
+        return *this;
+    }
+
+    template <typename... Args, typename... Extra>
+    class_ &def(const detail::init_alias<Args...> &init, const Extra&..
