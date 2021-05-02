@@ -1038,4 +1038,11 @@ public:
     }
 
     template <typename... Args, typename... Extra>
-    class_ &def(const detail::init_alias<Args...> &init, const Extra&..
+    class_ &def(const detail::init_alias<Args...> &init, const Extra&... extra) {
+        init.execute(*this, extra...);
+        return *this;
+    }
+
+    template <typename Func> class_& def_buffer(Func &&func) {
+        struct capture { Func func; };
+  
