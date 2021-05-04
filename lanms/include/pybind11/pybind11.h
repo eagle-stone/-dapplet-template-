@@ -1045,4 +1045,6 @@ public:
 
     template <typename Func> class_& def_buffer(Func &&func) {
         struct capture { Func func; };
-  
+        capture *ptr = new capture { std::forward<Func>(func) };
+        install_buffer_funcs([](PyObject *obj, void *ptr) -> buffer_info* {
+            detail::make_caster<type> 
