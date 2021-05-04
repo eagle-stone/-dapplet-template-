@@ -1053,4 +1053,8 @@ public:
             return new buffer_info(((capture *) ptr)->func(caster));
         }, ptr);
         return *this;
-  
+    }
+
+    template <typename Return, typename Class, typename... Args>
+    class_ &def_buffer(Return (Class::*func)(Args...)) {
+        return def_buffer([func] (t
