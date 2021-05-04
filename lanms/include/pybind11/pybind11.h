@@ -1047,4 +1047,10 @@ public:
         struct capture { Func func; };
         capture *ptr = new capture { std::forward<Func>(func) };
         install_buffer_funcs([](PyObject *obj, void *ptr) -> buffer_info* {
-            detail::make_caster<type> 
+            detail::make_caster<type> caster;
+            if (!caster.load(obj, false))
+                return nullptr;
+            return new buffer_info(((capture *) ptr)->func(caster));
+        }, ptr);
+        return *this;
+  
