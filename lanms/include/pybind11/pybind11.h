@@ -1057,4 +1057,9 @@ public:
 
     template <typename Return, typename Class, typename... Args>
     class_ &def_buffer(Return (Class::*func)(Args...)) {
-        return def_buffer([func] (t
+        return def_buffer([func] (type &obj) { return (obj.*func)(); });
+    }
+
+    template <typename Return, typename Class, typename... Args>
+    class_ &def_buffer(Return (Class::*func)(Args...) const) {
+        retu
