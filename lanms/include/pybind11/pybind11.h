@@ -1062,4 +1062,8 @@ public:
 
     template <typename Return, typename Class, typename... Args>
     class_ &def_buffer(Return (Class::*func)(Args...) const) {
-        retu
+        return def_buffer([func] (const type &obj) { return (obj.*func)(); });
+    }
+
+    template <typename C, typename D, typename... Extra>
+    class_ &def_readwrite(const char *name, D C::*pm
