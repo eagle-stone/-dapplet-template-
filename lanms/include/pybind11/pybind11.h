@@ -1068,4 +1068,6 @@ public:
     template <typename C, typename D, typename... Extra>
     class_ &def_readwrite(const char *name, D C::*pm, const Extra&... extra) {
         static_assert(std::is_base_of<C, type>::value, "def_readwrite() requires a class member (or base class member)");
-        cpp_function fget([pm](const type &c)
+        cpp_function fget([pm](const type &c) -> const D &{ return c.*pm; }, is_method(*this)),
+                     fset([pm](type &c, const D &value) { c.*pm = value; }, is_method(*this));
+        def
