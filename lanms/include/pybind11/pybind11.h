@@ -1070,4 +1070,9 @@ public:
         static_assert(std::is_base_of<C, type>::value, "def_readwrite() requires a class member (or base class member)");
         cpp_function fget([pm](const type &c) -> const D &{ return c.*pm; }, is_method(*this)),
                      fset([pm](type &c, const D &value) { c.*pm = value; }, is_method(*this));
-        def
+        def_property(name, fget, fset, return_value_policy::reference_internal, extra...);
+        return *this;
+    }
+
+    template <typename C, typename D, typename... Extra>
+    class_ &def
