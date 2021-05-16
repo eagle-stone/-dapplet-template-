@@ -1075,4 +1075,5 @@ public:
     }
 
     template <typename C, typename D, typename... Extra>
-    class_ &def
+    class_ &def_readonly(const char *name, const D C::*pm, const Extra& ...extra) {
+        static_assert(std::is_base_of<C, type>::value, "def_readonly() requires a class member (or base cl
