@@ -1078,4 +1078,9 @@ public:
     class_ &def_readonly(const char *name, const D C::*pm, const Extra& ...extra) {
         static_assert(std::is_base_of<C, type>::value, "def_readonly() requires a class member (or base class member)");
         cpp_function fget([pm](const type &c) -> const D &{ return c.*pm; }, is_method(*this));
-        def_property_readonly(name, fget, retur
+        def_property_readonly(name, fget, return_value_policy::reference_internal, extra...);
+        return *this;
+    }
+
+    template <typename D, typename... Extra>
+    class_ &def_readwrite_static(const char *name, D *pm, 
