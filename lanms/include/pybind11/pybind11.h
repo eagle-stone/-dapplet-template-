@@ -1091,4 +1091,6 @@ public:
     }
 
     template <typename D, typename... Extra>
-    class_ &def
+    class_ &def_readonly_static(const char *name, const D *pm, const Extra& ...extra) {
+        cpp_function fget([pm](object) -> const D &{ return *pm; }, scope(*this));
+        def_property_r
