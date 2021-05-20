@@ -1085,4 +1085,10 @@ public:
     template <typename D, typename... Extra>
     class_ &def_readwrite_static(const char *name, D *pm, const Extra& ...extra) {
         cpp_function fget([pm](object) -> const D &{ return *pm; }, scope(*this)),
-                     fset([pm](object, const D &value) { *pm = value; 
+                     fset([pm](object, const D &value) { *pm = value; }, scope(*this));
+        def_property_static(name, fget, fset, return_value_policy::reference, extra...);
+        return *this;
+    }
+
+    template <typename D, typename... Extra>
+    class_ &def
