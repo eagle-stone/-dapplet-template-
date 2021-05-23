@@ -1093,4 +1093,8 @@ public:
     template <typename D, typename... Extra>
     class_ &def_readonly_static(const char *name, const D *pm, const Extra& ...extra) {
         cpp_function fget([pm](object) -> const D &{ return *pm; }, scope(*this));
-        def_property_r
+        def_property_readonly_static(name, fget, return_value_policy::reference, extra...);
+        return *this;
+    }
+
+    /// Uses return_value_policy::reference_i
