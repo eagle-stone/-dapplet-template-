@@ -1097,4 +1097,7 @@ public:
         return *this;
     }
 
-    /// Uses return_value_policy::reference_i
+    /// Uses return_value_policy::reference_internal by default
+    template <typename Getter, typename... Extra>
+    class_ &def_property_readonly(const char *name, const Getter &fget, const Extra& ...extra) {
+     
