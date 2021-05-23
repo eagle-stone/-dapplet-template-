@@ -1101,4 +1101,9 @@ public:
     template <typename Getter, typename... Extra>
     class_ &def_property_readonly(const char *name, const Getter &fget, const Extra& ...extra) {
         return def_property_readonly(name, cpp_function(method_adaptor<type>(fget)),
-                                     return_value_policy::reference_interna
+                                     return_value_policy::reference_internal, extra...);
+    }
+
+    /// Uses cpp_function's return_value_policy by default
+    template <typename... Extra>
+    class_ &def_property_readonly(const char *name, const cpp_function 
