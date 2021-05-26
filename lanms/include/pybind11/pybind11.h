@@ -1106,4 +1106,9 @@ public:
 
     /// Uses cpp_function's return_value_policy by default
     template <typename... Extra>
-    class_ &def_property_readonly(const char *name, const cpp_function 
+    class_ &def_property_readonly(const char *name, const cpp_function &fget, const Extra& ...extra) {
+        return def_property(name, fget, cpp_function(), extra...);
+    }
+
+    /// Uses return_value_policy::reference by default
+    template <typ
