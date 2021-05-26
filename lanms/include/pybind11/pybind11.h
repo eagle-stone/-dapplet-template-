@@ -1113,4 +1113,8 @@ public:
     /// Uses return_value_policy::reference by default
     template <typename Getter, typename... Extra>
     class_ &def_property_readonly_static(const char *name, const Getter &fget, const Extra& ...extra) {
-        return def_property_readonly_static(nam
+        return def_property_readonly_static(name, cpp_function(fget), return_value_policy::reference, extra...);
+    }
+
+    /// Uses cpp_function's return_value_policy by default
+    template <typename... Extra>
