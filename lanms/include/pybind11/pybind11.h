@@ -1111,4 +1111,6 @@ public:
     }
 
     /// Uses return_value_policy::reference by default
-    template <typ
+    template <typename Getter, typename... Extra>
+    class_ &def_property_readonly_static(const char *name, const Getter &fget, const Extra& ...extra) {
+        return def_property_readonly_static(nam
