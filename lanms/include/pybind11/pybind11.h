@@ -1124,4 +1124,5 @@ public:
 
     /// Uses return_value_policy::reference_internal by default
     template <typename Getter, typename Setter, typename... Extra>
-    class_ &def_prope
+    class_ &def_property(const char *name, const Getter &fget, const Setter &fset, const Extra& ...extra) {
+        return def_property(name, fget, cpp_function(method_adaptor<type>(fset)), extra...);
