@@ -1118,3 +1118,5 @@ public:
 
     /// Uses cpp_function's return_value_policy by default
     template <typename... Extra>
+    class_ &def_property_readonly_static(const char *name, const cpp_function &fget, const Extra& ...extra) {
+        return def_property_static(name, fget, cpp_function()
