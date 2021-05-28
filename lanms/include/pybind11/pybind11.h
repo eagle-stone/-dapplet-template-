@@ -1126,3 +1126,6 @@ public:
     template <typename Getter, typename Setter, typename... Extra>
     class_ &def_property(const char *name, const Getter &fget, const Setter &fset, const Extra& ...extra) {
         return def_property(name, fget, cpp_function(method_adaptor<type>(fset)), extra...);
+    }
+    template <typename Getter, typename... Extra>
+    class_ &def_property(const char *name, const Getter &fget, const cpp_function &fset, const Extra& ...extr
