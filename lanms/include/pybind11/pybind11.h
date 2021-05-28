@@ -1128,4 +1128,6 @@ public:
         return def_property(name, fget, cpp_function(method_adaptor<type>(fset)), extra...);
     }
     template <typename Getter, typename... Extra>
-    class_ &def_property(const char *name, const Getter &fget, const cpp_function &fset, const Extra& ...extr
+    class_ &def_property(const char *name, const Getter &fget, const cpp_function &fset, const Extra& ...extra) {
+        return def_property(name, cpp_function(method_adaptor<type>(fget)), fset,
+                            return_value_policy::reference_internal, extra...
