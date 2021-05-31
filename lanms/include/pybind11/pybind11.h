@@ -1141,4 +1141,8 @@ public:
 
     /// Uses return_value_policy::reference by default
     template <typename Getter, typename... Extra>
-    class_ &def_property_static(const char *name, const Getter &fget, const cpp_function &fset, c
+    class_ &def_property_static(const char *name, const Getter &fget, const cpp_function &fset, const Extra& ...extra) {
+        return def_property_static(name, cpp_function(fget), fset, return_value_policy::reference, extra...);
+    }
+
+    /// Uses cpp_function's return_value
