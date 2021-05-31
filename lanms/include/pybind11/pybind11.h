@@ -1135,4 +1135,8 @@ public:
 
     /// Uses cpp_function's return_value_policy by default
     template <typename... Extra>
-    class_ &def_property(const char *name, const cpp_fun
+    class_ &def_property(const char *name, const cpp_function &fget, const cpp_function &fset, const Extra& ...extra) {
+        return def_property_static(name, fget, fset, is_method(*this), extra...);
+    }
+
+    /// Uses retur
