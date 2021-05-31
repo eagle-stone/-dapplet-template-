@@ -1139,4 +1139,6 @@ public:
         return def_property_static(name, fget, fset, is_method(*this), extra...);
     }
 
-    /// Uses retur
+    /// Uses return_value_policy::reference by default
+    template <typename Getter, typename... Extra>
+    class_ &def_property_static(const char *name, const Getter &fget, const cpp_function &fset, c
