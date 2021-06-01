@@ -1150,4 +1150,7 @@ public:
     class_ &def_property_static(const char *name, const cpp_function &fget, const cpp_function &fset, const Extra& ...extra) {
         auto rec_fget = get_function_record(fget), rec_fset = get_function_record(fset);
         char *doc_prev = rec_fget->doc; /* 'extra' field may include a property-specific documentation string */
-     
+        detail::process_attributes<Extra...>::init(extra..., rec_fget);
+        if (rec_fget->doc && rec_fget->doc != doc_prev) {
+            free(doc_prev);
+            rec_fget
