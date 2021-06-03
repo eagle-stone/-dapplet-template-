@@ -1153,4 +1153,8 @@ public:
         detail::process_attributes<Extra...>::init(extra..., rec_fget);
         if (rec_fget->doc && rec_fget->doc != doc_prev) {
             free(doc_prev);
-            rec_fget
+            rec_fget->doc = strdup(rec_fget->doc);
+        }
+        if (rec_fset) {
+            doc_prev = rec_fset->doc;
+            detail::process_attributes<Extra...>::init(extra..., rec_fs
