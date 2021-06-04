@@ -1162,4 +1162,10 @@ public:
                 free(doc_prev);
                 rec_fset->doc = strdup(rec_fset->doc);
             }
-   
+        }
+        def_property_static_impl(name, fget, fset, rec_fget);
+        return *this;
+    }
+
+private:
+    /// Initialize holder object, variant 1: object derives from enable_shared_
