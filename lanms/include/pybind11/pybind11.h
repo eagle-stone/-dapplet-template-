@@ -1177,4 +1177,9 @@ private:
                     v_h.value_ptr<type>()->shared_from_this());
             if (sh) {
                 new (&v_h.holder<holder_type>()) holder_type(std::move(sh));
-               
+                v_h.set_holder_constructed();
+            }
+        } catch (const std::bad_weak_ptr &) {}
+
+        if (!v_h.holder_constructed() && inst->owned) {
+          
