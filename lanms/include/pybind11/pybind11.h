@@ -1171,4 +1171,7 @@ private:
     /// Initialize holder object, variant 1: object derives from enable_shared_from_this
     template <typename T>
     static void init_holder(detail::instance *inst, detail::value_and_holder &v_h,
-            const holder_type * /* unused */, const
+            const holder_type * /* unused */, const std::enable_shared_from_this<T> * /* dummy */) {
+        try {
+            auto sh = std::dynamic_pointer_cast<typename holder_type::element_type>(
+                    v_h
