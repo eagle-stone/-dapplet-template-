@@ -1174,4 +1174,7 @@ private:
             const holder_type * /* unused */, const std::enable_shared_from_this<T> * /* dummy */) {
         try {
             auto sh = std::dynamic_pointer_cast<typename holder_type::element_type>(
-                    v_h
+                    v_h.value_ptr<type>()->shared_from_this());
+            if (sh) {
+                new (&v_h.holder<holder_type>()) holder_type(std::move(sh));
+               
