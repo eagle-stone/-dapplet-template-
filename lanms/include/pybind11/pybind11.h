@@ -1201,4 +1201,7 @@ private:
     static void init_holder(detail::instance *inst, detail::value_and_holder &v_h,
             const holder_type *holder_ptr, const void * /* dummy -- not enable_shared_from_this<T>) */) {
         if (holder_ptr) {
-            init_holder_from_existing(v_h, holder_ptr, std::is_co
+            init_holder_from_existing(v_h, holder_ptr, std::is_copy_constructible<holder_type>());
+            v_h.set_holder_constructed();
+        } else if (inst->owned || detail::always_construct_holder<holder_type>::value) {
+            new (&v_h.hol
