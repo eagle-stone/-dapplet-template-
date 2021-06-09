@@ -1193,4 +1193,8 @@ private:
     }
 
     static void init_holder_from_existing(const detail::value_and_holder &v_h,
-            const holder_type *holder_pt
+            const holder_type *holder_ptr, std::false_type /*is_copy_constructible*/) {
+        new (&v_h.holder<holder_type>()) holder_type(std::move(*const_cast<holder_type *>(holder_ptr)));
+    }
+
+    /// Initialize holder ob
