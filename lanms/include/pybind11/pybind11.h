@@ -1199,4 +1199,6 @@ private:
 
     /// Initialize holder object, variant 2: try to construct from existing holder object, if possible
     static void init_holder(detail::instance *inst, detail::value_and_holder &v_h,
-            cons
+            const holder_type *holder_ptr, const void * /* dummy -- not enable_shared_from_this<T>) */) {
+        if (holder_ptr) {
+            init_holder_from_existing(v_h, holder_ptr, std::is_co
