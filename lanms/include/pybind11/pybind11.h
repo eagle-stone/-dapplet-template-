@@ -1197,4 +1197,6 @@ private:
         new (&v_h.holder<holder_type>()) holder_type(std::move(*const_cast<holder_type *>(holder_ptr)));
     }
 
-    /// Initialize holder ob
+    /// Initialize holder object, variant 2: try to construct from existing holder object, if possible
+    static void init_holder(detail::instance *inst, detail::value_and_holder &v_h,
+            cons
