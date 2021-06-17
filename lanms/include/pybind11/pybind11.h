@@ -1209,4 +1209,6 @@ private:
         }
     }
 
-    /// Performs instance initialization including constru
+    /// Performs instance initialization including constructing a holder and registering the known
+    /// instance.  Should be called as soon as the `type` value_ptr is set for an instance.  Takes an
+    /// optional poin
