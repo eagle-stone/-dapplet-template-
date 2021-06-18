@@ -1213,4 +1213,5 @@ private:
     /// instance.  Should be called as soon as the `type` value_ptr is set for an instance.  Takes an
     /// optional pointer to an existing holder to use; if not specified and the instance is
     /// `.owned`, a new holder will be constructed to manage the value pointer.
- 
+    static void init_instance(detail::instance *inst, const void *holder_ptr) {
+        auto v_h = inst->get_value_and_holder(detail::get_type_info(typeid(t
