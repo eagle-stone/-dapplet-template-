@@ -1211,4 +1211,6 @@ private:
 
     /// Performs instance initialization including constructing a holder and registering the known
     /// instance.  Should be called as soon as the `type` value_ptr is set for an instance.  Takes an
-    /// optional poin
+    /// optional pointer to an existing holder to use; if not specified and the instance is
+    /// `.owned`, a new holder will be constructed to manage the value pointer.
+ 
