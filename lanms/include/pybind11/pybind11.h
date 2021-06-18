@@ -1219,3 +1219,7 @@ private:
             register_instance(inst, v_h.value_ptr(), v_h.type);
             v_h.set_instance_registered();
         }
+        init_holder(inst, v_h, (const holder_type *) holder_ptr, v_h.value_ptr<type>());
+    }
+
+    /// Deallocates an instance; via holder, if constructed;
