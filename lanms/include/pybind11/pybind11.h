@@ -1227,4 +1227,8 @@ private:
         if (v_h.holder_constructed())
             v_h.holder<holder_type>().~holder_type();
         else
-     
+            detail::call_operator_delete(v_h.value_ptr<type>(), v_h.type->type_size);
+    }
+
+    static detail::function_record *get_function_record(handle h) {
+        h = detail:
