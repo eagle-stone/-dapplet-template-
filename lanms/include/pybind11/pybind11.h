@@ -1222,4 +1222,9 @@ private:
         init_holder(inst, v_h, (const holder_type *) holder_ptr, v_h.value_ptr<type>());
     }
 
-    /// Deallocates an instance; via holder, if constructed;
+    /// Deallocates an instance; via holder, if constructed; otherwise via operator delete.
+    static void dealloc(const detail::value_and_holder &v_h) {
+        if (v_h.holder_constructed())
+            v_h.holder<holder_type>().~holder_type();
+        else
+     
