@@ -1231,4 +1231,10 @@ private:
     }
 
     static detail::function_record *get_function_record(handle h) {
-        h = detail:
+        h = detail::get_function(h);
+        return h ? (detail::function_record *) reinterpret_borrow<capsule>(PyCFunction_GET_SELF(h.ptr()))
+                 : nullptr;
+    }
+};
+
+/// Binds C++ enumerations and enumeration cl
