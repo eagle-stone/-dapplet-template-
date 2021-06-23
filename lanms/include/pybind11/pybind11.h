@@ -1237,4 +1237,8 @@ private:
     }
 };
 
-/// Binds C++ enumerations and enumeration cl
+/// Binds C++ enumerations and enumeration classes to Python
+template <typename Type> class enum_ : public class_<Type> {
+public:
+    using class_<Type>::def;
+    using class_<Type>::def_property_readonly_
