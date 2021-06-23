@@ -1241,4 +1241,8 @@ private:
 template <typename Type> class enum_ : public class_<Type> {
 public:
     using class_<Type>::def;
-    using class_<Type>::def_property_readonly_
+    using class_<Type>::def_property_readonly_static;
+    using Scalar = typename std::underlying_type<Type>::type;
+
+    template <typename... Extra>
+    enum_(const handle &scope, const char *name, const Extra&... ext
