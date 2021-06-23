@@ -1245,4 +1245,9 @@ public:
     using Scalar = typename std::underlying_type<Type>::type;
 
     template <typename... Extra>
-    enum_(const handle &scope, const char *name, const Extra&... ext
+    enum_(const handle &scope, const char *name, const Extra&... extra)
+      : class_<Type>(scope, name, extra...), m_entries(), m_parent(scope) {
+
+        constexpr bool is_arithmetic = detail::any_of<std::is_same<arithmetic, Extra>...>::value;
+
+        aut
