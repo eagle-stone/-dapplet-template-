@@ -1250,4 +1250,6 @@ public:
 
         constexpr bool is_arithmetic = detail::any_of<std::is_same<arithmetic, Extra>...>::value;
 
-        aut
+        auto m_entries_ptr = m_entries.inc_ref().ptr();
+        def("__repr__", [name, m_entries_ptr](Type value) -> pybind11::str {
+            for (const auto &kv : reinter
