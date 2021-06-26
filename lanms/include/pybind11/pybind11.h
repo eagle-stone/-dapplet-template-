@@ -1254,4 +1254,9 @@ public:
         def("__repr__", [name, m_entries_ptr](Type value) -> pybind11::str {
             for (const auto &kv : reinterpret_borrow<dict>(m_entries_ptr)) {
                 if (pybind11::cast<Type>(kv.second) == value)
-                    return pybind11::str("{}.{}").format(name, kv.first
+                    return pybind11::str("{}.{}").format(name, kv.first);
+            }
+            return pybind11::str("{}.???").format(name);
+        });
+        def_property_readonly_static("__members__", [m_entries_ptr](object /* self */) {
+            dic
