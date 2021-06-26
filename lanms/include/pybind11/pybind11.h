@@ -1259,4 +1259,8 @@ public:
             return pybind11::str("{}.???").format(name);
         });
         def_property_readonly_static("__members__", [m_entries_ptr](object /* self */) {
-            dic
+            dict m;
+            for (const auto &kv : reinterpret_borrow<dict>(m_entries_ptr))
+                m[kv.first] = kv.second;
+            return m;
+        }, return
