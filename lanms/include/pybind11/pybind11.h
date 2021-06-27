@@ -1263,4 +1263,7 @@ public:
             for (const auto &kv : reinterpret_borrow<dict>(m_entries_ptr))
                 m[kv.first] = kv.second;
             return m;
-        }, return
+        }, return_value_policy::copy);
+        def("__init__", [](Type& value, Scalar i) { value = (Type)i; });
+        def("__int__", [](Type value) { return (Scalar) value; });
+        #
