@@ -1269,4 +1269,7 @@ public:
         #if PY_MAJOR_VERSION < 3
             def("__long__", [](Type value) { return (Scalar) value; });
         #endif
-        def("__eq__", [](const Type &value, Type *value2) { return valu
+        def("__eq__", [](const Type &value, Type *value2) { return value2 && value == *value2; });
+        def("__ne__", [](const Type &value, Type *value2) { return !value2 || value != *value2; });
+        if (is_arithmetic) {
+            def("
