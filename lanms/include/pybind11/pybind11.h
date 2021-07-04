@@ -1273,4 +1273,6 @@ public:
         def("__ne__", [](const Type &value, Type *value2) { return !value2 || value != *value2; });
         if (is_arithmetic) {
             def("__lt__", [](const Type &value, Type *value2) { return value2 && value < *value2; });
-            def("__gt__", [](const Type &value, Type *value2) { return value2 && value > *valu
+            def("__gt__", [](const Type &value, Type *value2) { return value2 && value > *value2; });
+            def("__le__", [](const Type &value, Type *value2) { return value2 && value <= *value2; });
+            def("__ge__", [](const Type &value, 
