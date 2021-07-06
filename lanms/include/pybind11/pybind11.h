@@ -1275,4 +1275,7 @@ public:
             def("__lt__", [](const Type &value, Type *value2) { return value2 && value < *value2; });
             def("__gt__", [](const Type &value, Type *value2) { return value2 && value > *value2; });
             def("__le__", [](const Type &value, Type *value2) { return value2 && value <= *value2; });
-            def("__ge__", [](const Type &value, 
+            def("__ge__", [](const Type &value, Type *value2) { return value2 && value >= *value2; });
+        }
+        if (std::is_convertible<Type, Scalar>::value) {
+            // Don't provide comparison with 
