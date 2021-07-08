@@ -1278,4 +1278,6 @@ public:
             def("__ge__", [](const Type &value, Type *value2) { return value2 && value >= *value2; });
         }
         if (std::is_convertible<Type, Scalar>::value) {
-            // Don't provide comparison with 
+            // Don't provide comparison with the underlying type if the enum isn't convertible,
+            // i.e. if Type is a scoped enum, mirroring the C++ behaviour.  (NB: we explicitly
+            // convert Type to Scala
