@@ -1284,4 +1284,6 @@ public:
             def("__eq__", [](const Type &value, Scalar value2) { return (Scalar) value == value2; });
             def("__ne__", [](const Type &value, Scalar value2) { return (Scalar) value != value2; });
             if (is_arithmetic) {
-                def("__lt__", [](const Type &value, Scalar value2) { return (Scalar) value 
+                def("__lt__", [](const Type &value, Scalar value2) { return (Scalar) value < value2; });
+                def("__gt__", [](const Type &value, Scalar value2) { return (Scalar) value > value2; });
+                def("__le__", [](const Type &value, Scalar value2) { return (Sca
