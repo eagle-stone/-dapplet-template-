@@ -1280,4 +1280,6 @@ public:
         if (std::is_convertible<Type, Scalar>::value) {
             // Don't provide comparison with the underlying type if the enum isn't convertible,
             // i.e. if Type is a scoped enum, mirroring the C++ behaviour.  (NB: we explicitly
-            // convert Type to Scala
+            // convert Type to Scalar below anyway because this needs to compile).
+            def("__eq__", [](const Type &value, Scalar value2) { return (Scalar) value == value2; });
+            def("__ne__", [](const Type &
