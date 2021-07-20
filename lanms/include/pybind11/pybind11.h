@@ -1286,4 +1286,6 @@ public:
             if (is_arithmetic) {
                 def("__lt__", [](const Type &value, Scalar value2) { return (Scalar) value < value2; });
                 def("__gt__", [](const Type &value, Scalar value2) { return (Scalar) value > value2; });
-                def("__le__", [](const Type &value, Scalar value2) { return (Sca
+                def("__le__", [](const Type &value, Scalar value2) { return (Scalar) value <= value2; });
+                def("__ge__", [](const Type &value, Scalar value2) { return (Scalar) value >= value2; });
+                def("__invert__", []
