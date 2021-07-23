@@ -1290,4 +1290,5 @@ public:
                 def("__ge__", [](const Type &value, Scalar value2) { return (Scalar) value >= value2; });
                 def("__invert__", [](const Type &value) { return ~((Scalar) value); });
                 def("__and__", [](const Type &value, Scalar value2) { return (Scalar) value & value2; });
-                def("__or__", [](c
+                def("__or__", [](const Type &value, Scalar value2) { return (Scalar) value | value2; });
+                def("__xor__", [](const Type &value, Scalar value2) { return (Scalar) value ^ val
