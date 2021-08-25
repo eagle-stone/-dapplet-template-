@@ -1294,4 +1294,6 @@ public:
                 def("__xor__", [](const Type &value, Scalar value2) { return (Scalar) value ^ value2; });
                 def("__rand__", [](const Type &value, Scalar value2) { return (Scalar) value & value2; });
                 def("__ror__", [](const Type &value, Scalar value2) { return (Scalar) value | value2; });
-                def("__rxor__", [](const Type &value, Scalar value2) { return (Scalar) value ^ value2
+                def("__rxor__", [](const Type &value, Scalar value2) { return (Scalar) value ^ value2; });
+                def("__and__", [](const Type &value, const Type &value2) { return (Scalar) value & (Scalar) value2; });
+                def(
