@@ -1297,4 +1297,8 @@ public:
                 def("__rxor__", [](const Type &value, Scalar value2) { return (Scalar) value ^ value2; });
                 def("__and__", [](const Type &value, const Type &value2) { return (Scalar) value & (Scalar) value2; });
                 def("__or__", [](const Type &value, const Type &value2) { return (Scalar) value | (Scalar) value2; });
-                def("__xor__", [](const Type &value, const Type &value2) { return (S
+                def("__xor__", [](const Type &value, const Type &value2) { return (Scalar) value ^ (Scalar) value2; });
+            }
+        }
+        def("__hash__", [](const Type &value) { return (Scalar) value; });
+        // Pickling and unpic
