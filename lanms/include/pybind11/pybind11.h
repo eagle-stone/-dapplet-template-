@@ -1303,4 +1303,9 @@ public:
         def("__hash__", [](const Type &value) { return (Scalar) value; });
         // Pickling and unpickling -- needed for use with the 'multiprocessing' module
         def("__getstate__", [](const Type &value) { return pybind11::make_tuple((Scalar) value); });
-        de
+        def("__setstate__", [](Type &p, tuple t) { new (&p) Type((Type) t[0].cast<Scalar>()); });
+    }
+
+    /// Export enumeration entries into the parent scope
+    enum_& export_values() {
+        for (co
