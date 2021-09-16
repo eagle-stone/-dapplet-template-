@@ -1301,4 +1301,6 @@ public:
             }
         }
         def("__hash__", [](const Type &value) { return (Scalar) value; });
-        // Pickling and unpic
+        // Pickling and unpickling -- needed for use with the 'multiprocessing' module
+        def("__getstate__", [](const Type &value) { return pybind11::make_tuple((Scalar) value); });
+        de
