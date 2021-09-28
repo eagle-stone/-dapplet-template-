@@ -1328,4 +1328,7 @@ private:
 
 NAMESPACE_BEGIN(detail)
 template <typename... Args> struct init {
-    template <typename Class, 
+    template <typename Class, typename... Extra, enable_if_t<!Class::has_alias, int> = 0>
+    static void execute(Class &cl, const Extra&... extra) {
+        using Base = typename Class::type;
+        /// Funct
