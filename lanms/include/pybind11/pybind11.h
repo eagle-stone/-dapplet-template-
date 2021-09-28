@@ -1314,4 +1314,7 @@ public:
     }
 
     /// Add an enumeration entry
-    en
+    enum_& value(char const* name, Type value) {
+        auto v = pybind11::cast(value, return_value_policy::copy);
+        this->attr(name) = v;
+        m_entries[pybind11::
