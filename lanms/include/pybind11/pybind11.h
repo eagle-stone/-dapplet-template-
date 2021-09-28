@@ -1317,4 +1317,15 @@ public:
     enum_& value(char const* name, Type value) {
         auto v = pybind11::cast(value, return_value_policy::copy);
         this->attr(name) = v;
-        m_entries[pybind11::
+        m_entries[pybind11::str(name)] = v;
+        return *this;
+    }
+
+private:
+    dict m_entries;
+    handle m_parent;
+};
+
+NAMESPACE_BEGIN(detail)
+template <typename... Args> struct init {
+    template <typename Class, 
