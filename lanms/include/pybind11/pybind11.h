@@ -1308,4 +1308,10 @@ public:
 
     /// Export enumeration entries into the parent scope
     enum_& export_values() {
-        for (co
+        for (const auto &kv : m_entries)
+            m_parent.attr(kv.first) = kv.second;
+        return *this;
+    }
+
+    /// Add an enumeration entry
+    en
