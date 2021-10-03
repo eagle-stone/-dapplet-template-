@@ -1331,4 +1331,8 @@ template <typename... Args> struct init {
     template <typename Class, typename... Extra, enable_if_t<!Class::has_alias, int> = 0>
     static void execute(Class &cl, const Extra&... extra) {
         using Base = typename Class::type;
-        /// Funct
+        /// Function which calls a specific C++ in-place constructor
+        cl.def("__init__", [](Base *self_, Args... args) { new (self_) Base(args...); }, extra...);
+    }
+
+    templat
