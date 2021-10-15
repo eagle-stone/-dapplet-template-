@@ -1335,4 +1335,6 @@ template <typename... Args> struct init {
         cl.def("__init__", [](Base *self_, Args... args) { new (self_) Base(args...); }, extra...);
     }
 
-    templat
+    template <typename Class, typename... Extra,
+              enable_if_t<Class::has_alias &&
+                          std::is_constructible<typename Class::type, Args...
