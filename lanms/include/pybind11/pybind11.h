@@ -1337,4 +1337,9 @@ template <typename... Args> struct init {
 
     template <typename Class, typename... Extra,
               enable_if_t<Class::has_alias &&
-                          std::is_constructible<typename Class::type, Args...
+                          std::is_constructible<typename Class::type, Args...>::value, int> = 0>
+    static void execute(Class &cl, const Extra&... extra) {
+        using Base = typename Class::type;
+        using Alias = typename Class::type_alias;
+        handle cl_type = cl;
+    
