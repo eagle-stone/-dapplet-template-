@@ -1342,4 +1342,7 @@ template <typename... Args> struct init {
         using Base = typename Class::type;
         using Alias = typename Class::type_alias;
         handle cl_type = cl;
-    
+        cl.def("__init__", [cl_type](handle self_, Args... args) {
+                if (self_.get_type().is(cl_type))
+                    new (self_.cast<Base *>()) Base(args...);
+ 
