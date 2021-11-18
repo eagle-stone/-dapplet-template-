@@ -1345,4 +1345,10 @@ template <typename... Args> struct init {
         cl.def("__init__", [cl_type](handle self_, Args... args) {
                 if (self_.get_type().is(cl_type))
                     new (self_.cast<Base *>()) Base(args...);
- 
+                else
+                    new (self_.cast<Alias *>()) Alias(args...);
+            }, extra...);
+    }
+
+    template <typename Class, typename... Extra,
+              enable_if_t<Class::has
