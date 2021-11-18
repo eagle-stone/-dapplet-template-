@@ -1351,4 +1351,7 @@ template <typename... Args> struct init {
     }
 
     template <typename Class, typename... Extra,
-              enable_if_t<Class::has
+              enable_if_t<Class::has_alias &&
+                          !std::is_constructible<typename Class::type, Args...>::value, int> = 0>
+    static void execute(Class &cl, const Extra&... extra) {
+        init
