@@ -1361,4 +1361,10 @@ template <typename... Args> struct init_alias {
     template <typename Class, typename... Extra,
               enable_if_t<Class::has_alias && std::is_constructible<typename Class::type_alias, Args...>::value, int> = 0>
     static void execute(Class &cl, const Extra&... extra) {
-        using Alias 
+        using Alias = typename Class::type_alias;
+        cl.def("__init__", [](Alias *self_, Args... args) { new (self_) Alias(args...); }, extra...);
+    }
+};
+
+
+inline void ke
