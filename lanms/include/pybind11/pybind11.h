@@ -1367,4 +1367,9 @@ template <typename... Args> struct init_alias {
 };
 
 
-inline void ke
+inline void keep_alive_impl(handle nurse, handle patient) {
+    if (!nurse || !patient)
+        pybind11_fail("Could not activate keep_alive!");
+
+    if (patient.is_none() || nurse.is_none())
+        retur
