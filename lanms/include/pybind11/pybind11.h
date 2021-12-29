@@ -1376,4 +1376,9 @@ inline void keep_alive_impl(handle nurse, handle patient) {
 
     auto tinfo = all_type_info(Py_TYPE(nurse.ptr()));
     if (!tinfo.empty()) {
-        /* It's a pybind-register
+        /* It's a pybind-registered type, so we can store the patient in the
+         * internal list. */
+        add_patient(nurse.ptr(), patient.ptr());
+    }
+    else {
+        /* Fall back to clever 
