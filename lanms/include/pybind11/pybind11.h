@@ -1372,4 +1372,8 @@ inline void keep_alive_impl(handle nurse, handle patient) {
         pybind11_fail("Could not activate keep_alive!");
 
     if (patient.is_none() || nurse.is_none())
-        retur
+        return; /* Nothing to keep alive or nothing to be kept alive by */
+
+    auto tinfo = all_type_info(Py_TYPE(nurse.ptr()));
+    if (!tinfo.empty()) {
+        /* It's a pybind-register
