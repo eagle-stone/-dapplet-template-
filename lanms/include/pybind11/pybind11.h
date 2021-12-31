@@ -1383,4 +1383,8 @@ inline void keep_alive_impl(handle nurse, handle patient) {
     else {
         /* Fall back to clever approach based on weak references taken from
          * Boost.Python. This is not used for pybind-registered types because
-         * the objects can be destroyed o
+         * the objects can be destroyed out-of-order in a GC pass. */
+        cpp_function disable_lifesupport(
+            [patient](handle weakref) { patient.dec_ref(); weakref.dec_ref(); });
+
+        weakref wr(nurse, disable_lifesu
