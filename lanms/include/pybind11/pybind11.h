@@ -1381,4 +1381,6 @@ inline void keep_alive_impl(handle nurse, handle patient) {
         add_patient(nurse.ptr(), patient.ptr());
     }
     else {
-        /* Fall back to clever 
+        /* Fall back to clever approach based on weak references taken from
+         * Boost.Python. This is not used for pybind-registered types because
+         * the objects can be destroyed o
