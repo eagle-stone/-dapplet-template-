@@ -1387,4 +1387,11 @@ inline void keep_alive_impl(handle nurse, handle patient) {
         cpp_function disable_lifesupport(
             [patient](handle weakref) { patient.dec_ref(); weakref.dec_ref(); });
 
-        weakref wr(nurse, disable_lifesu
+        weakref wr(nurse, disable_lifesupport);
+
+        patient.inc_ref(); /* reference patient and leak the weak reference */
+        (void) wr.release();
+    }
+}
+
+PYBIND11_NOINLINE inline void kee
