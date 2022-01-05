@@ -1406,4 +1406,8 @@ inline std::pair<decltype(internals::registered_types_py)::iterator, bool> all_t
 #ifdef __cpp_lib_unordered_map_try_emplace
         .try_emplace(type);
 #else
-        .emplace(type, std::ve
+        .emplace(type, std::vector<detail::type_info *>());
+#endif
+    if (res.second) {
+        // New cache entry created; set up a weak reference to automatically remove it if the type
+   
