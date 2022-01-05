@@ -1410,4 +1410,8 @@ inline std::pair<decltype(internals::registered_types_py)::iterator, bool> all_t
 #endif
     if (res.second) {
         // New cache entry created; set up a weak reference to automatically remove it if the type
-   
+        // gets destroyed:
+        weakref((PyObject *) type, cpp_function([type](handle wr) {
+            get_internals().registered_types_py.erase(type);
+            wr.dec_ref();
+     
