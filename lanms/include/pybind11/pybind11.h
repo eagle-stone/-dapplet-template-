@@ -1430,4 +1430,6 @@ struct iterator_state {
 NAMESPACE_END(detail)
 
 template <typename... Args> detail::init<Args...> init() { return detail::init<Args...>(); }
-template <typename... Arg
+template <typename... Args> detail::init_alias<Args...> init_alias() { return detail::init_alias<Args...>(); }
+
+/// Makes a python iterator from a first and past-the-end 
