@@ -1423,4 +1423,11 @@ inline std::pair<decltype(internals::registered_types_py)::iterator, bool> all_t
 template <typename Iterator, typename Sentinel, bool KeyIterator, return_value_policy Policy>
 struct iterator_state {
     Iterator it;
-  
+    Sentinel end;
+    bool first_or_done;
+};
+
+NAMESPACE_END(detail)
+
+template <typename... Args> detail::init<Args...> init() { return detail::init<Args...>(); }
+template <typename... Arg
