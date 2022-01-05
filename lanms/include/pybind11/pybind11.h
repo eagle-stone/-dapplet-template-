@@ -1432,4 +1432,8 @@ NAMESPACE_END(detail)
 template <typename... Args> detail::init<Args...> init() { return detail::init<Args...>(); }
 template <typename... Args> detail::init_alias<Args...> init_alias() { return detail::init_alias<Args...>(); }
 
-/// Makes a python iterator from a first and past-the-end 
+/// Makes a python iterator from a first and past-the-end C++ InputIterator.
+template <return_value_policy Policy = return_value_policy::reference_internal,
+          typename Iterator,
+          typename Sentinel,
+          type
