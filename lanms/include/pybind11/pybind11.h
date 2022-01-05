@@ -1401,4 +1401,9 @@ PYBIND11_NOINLINE inline void keep_alive_impl(size_t Nurse, size_t Patient, func
     );
 }
 
-inline std::pair<decltype(internals::registered_types_py)::iterato
+inline std::pair<decltype(internals::registered_types_py)::iterator, bool> all_type_info_get_cache(PyTypeObject *type) {
+    auto res = get_internals().registered_types_py
+#ifdef __cpp_lib_unordered_map_try_emplace
+        .try_emplace(type);
+#else
+        .emplace(type, std::ve
