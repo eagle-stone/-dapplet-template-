@@ -1394,4 +1394,6 @@ inline void keep_alive_impl(handle nurse, handle patient) {
     }
 }
 
-PYBIND11_NOINLINE inline void kee
+PYBIND11_NOINLINE inline void keep_alive_impl(size_t Nurse, size_t Patient, function_call &call, handle ret) {
+    keep_alive_impl(
+        Nurse   == 0 ? ret : Nurse   <= call.args.size() ? call.args[Nu
