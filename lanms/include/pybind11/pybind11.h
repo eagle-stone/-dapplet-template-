@@ -1396,4 +1396,9 @@ inline void keep_alive_impl(handle nurse, handle patient) {
 
 PYBIND11_NOINLINE inline void keep_alive_impl(size_t Nurse, size_t Patient, function_call &call, handle ret) {
     keep_alive_impl(
-        Nurse   == 0 ? ret : Nurse   <= call.args.size() ? call.args[Nu
+        Nurse   == 0 ? ret : Nurse   <= call.args.size() ? call.args[Nurse   - 1] : handle(),
+        Patient == 0 ? ret : Patient <= call.args.size() ? call.args[Patient - 1] : handle()
+    );
+}
+
+inline std::pair<decltype(internals::registered_types_py)::iterato
