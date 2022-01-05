@@ -1414,4 +1414,13 @@ inline std::pair<decltype(internals::registered_types_py)::iterator, bool> all_t
         weakref((PyObject *) type, cpp_function([type](handle wr) {
             get_internals().registered_types_py.erase(type);
             wr.dec_ref();
-     
+        })).release();
+    }
+
+    return res;
+}
+
+template <typename Iterator, typename Sentinel, bool KeyIterator, return_value_policy Policy>
+struct iterator_state {
+    Iterator it;
+  
