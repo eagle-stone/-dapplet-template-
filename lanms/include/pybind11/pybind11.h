@@ -1436,4 +1436,7 @@ template <typename... Args> detail::init_alias<Args...> init_alias() { return de
 template <return_value_policy Policy = return_value_policy::reference_internal,
           typename Iterator,
           typename Sentinel,
-          type
+          typename ValueType = decltype(*std::declval<Iterator>()),
+          typename... Extra>
+iterator make_iterator(Iterator first, Sentinel last, Extra &&... extra) {
+    typedef de
