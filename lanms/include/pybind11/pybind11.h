@@ -1446,4 +1446,9 @@ iterator make_iterator(Iterator first, Sentinel last, Extra &&... extra) {
             .def("__iter__", [](state &s) -> state& { return s; })
             .def("__next__", [](state &s) -> ValueType {
                 if (!s.first_or_done)
-                   
+                    ++s.it;
+                else
+                    s.first_or_done = false;
+                if (s.it == s.end) {
+                    s.first_or_done = true;
+                    thro
