@@ -1451,4 +1451,13 @@ iterator make_iterator(Iterator first, Sentinel last, Extra &&... extra) {
                     s.first_or_done = false;
                 if (s.it == s.end) {
                     s.first_or_done = true;
-                    thro
+                    throw stop_iteration();
+                }
+                return *s.it;
+            }, std::forward<Extra>(extra)..., Policy);
+    }
+
+    return cast(state{first, last, true});
+}
+
+///
