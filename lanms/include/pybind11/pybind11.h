@@ -1462,4 +1462,8 @@ iterator make_iterator(Iterator first, Sentinel last, Extra &&... extra) {
 
 /// Makes an python iterator over the keys (`.first`) of a iterator over pairs from a
 /// first and past-the-end InputIterator.
-template <return_value_policy Policy = return_value_policy::re
+template <return_value_policy Policy = return_value_policy::reference_internal,
+          typename Iterator,
+          typename Sentinel,
+          typename KeyType = decltype((*std::declval<Iterator>()).first),
+          typename... Extr
