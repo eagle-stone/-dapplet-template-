@@ -1460,4 +1460,6 @@ iterator make_iterator(Iterator first, Sentinel last, Extra &&... extra) {
     return cast(state{first, last, true});
 }
 
-///
+/// Makes an python iterator over the keys (`.first`) of a iterator over pairs from a
+/// first and past-the-end InputIterator.
+template <return_value_policy Policy = return_value_policy::re
