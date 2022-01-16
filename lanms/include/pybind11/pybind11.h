@@ -1470,4 +1470,8 @@ template <return_value_policy Policy = return_value_policy::reference_internal,
 iterator make_key_iterator(Iterator first, Sentinel last, Extra &&... extra) {
     typedef detail::iterator_state<Iterator, Sentinel, true, Policy> state;
 
-    if (!detail::get_type_info(typei
+    if (!detail::get_type_info(typeid(state), false)) {
+        class_<state>(handle(), "iterator")
+            .def("__iter__", [](state &s) -> state& { return s; })
+            .def("__next__", [](state &s) -> KeyType {
+    
