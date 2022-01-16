@@ -1466,4 +1466,8 @@ template <return_value_policy Policy = return_value_policy::reference_internal,
           typename Iterator,
           typename Sentinel,
           typename KeyType = decltype((*std::declval<Iterator>()).first),
-          typename... Extr
+          typename... Extra>
+iterator make_key_iterator(Iterator first, Sentinel last, Extra &&... extra) {
+    typedef detail::iterator_state<Iterator, Sentinel, true, Policy> state;
+
+    if (!detail::get_type_info(typei
