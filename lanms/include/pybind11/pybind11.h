@@ -1474,4 +1474,8 @@ iterator make_key_iterator(Iterator first, Sentinel last, Extra &&... extra) {
         class_<state>(handle(), "iterator")
             .def("__iter__", [](state &s) -> state& { return s; })
             .def("__next__", [](state &s) -> KeyType {
-    
+                if (!s.first_or_done)
+                    ++s.it;
+                else
+                    s.first_or_done = false;
+                if (s.it == s
