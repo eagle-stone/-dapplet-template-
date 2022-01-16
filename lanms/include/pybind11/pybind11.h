@@ -1478,4 +1478,9 @@ iterator make_key_iterator(Iterator first, Sentinel last, Extra &&... extra) {
                     ++s.it;
                 else
                     s.first_or_done = false;
-                if (s.it == s
+                if (s.it == s.end) {
+                    s.first_or_done = true;
+                    throw stop_iteration();
+                }
+                return (*s.it).first;
+            }, std::forward<Extra>(e
