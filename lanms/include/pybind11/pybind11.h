@@ -1483,4 +1483,12 @@ iterator make_key_iterator(Iterator first, Sentinel last, Extra &&... extra) {
                     throw stop_iteration();
                 }
                 return (*s.it).first;
-            }, std::forward<Extra>(e
+            }, std::forward<Extra>(extra)..., Policy);
+    }
+
+    return cast(state{first, last, true});
+}
+
+/// Makes an iterator over values of an stl container or other container supporting
+/// `std::begin()`/`std::end()`
+templa
