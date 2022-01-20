@@ -1491,4 +1491,6 @@ iterator make_key_iterator(Iterator first, Sentinel last, Extra &&... extra) {
 
 /// Makes an iterator over values of an stl container or other container supporting
 /// `std::begin()`/`std::end()`
-templa
+template <return_value_policy Policy = return_value_policy::reference_internal,
+          typename Type, typename... Extra> iterator make_iterator(Type &value, Extra&&... extra) {
+    retu
