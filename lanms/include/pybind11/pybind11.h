@@ -1493,4 +1493,8 @@ iterator make_key_iterator(Iterator first, Sentinel last, Extra &&... extra) {
 /// `std::begin()`/`std::end()`
 template <return_value_policy Policy = return_value_policy::reference_internal,
           typename Type, typename... Extra> iterator make_iterator(Type &value, Extra&&... extra) {
-    retu
+    return make_iterator<Policy>(std::begin(value), std::end(value), extra...);
+}
+
+/// Makes an iterator over the keys (`.first`) of a stl map-like container supporting
+/// `std::begi
