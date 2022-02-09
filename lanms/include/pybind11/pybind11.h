@@ -1497,4 +1497,6 @@ template <return_value_policy Policy = return_value_policy::reference_internal,
 }
 
 /// Makes an iterator over the keys (`.first`) of a stl map-like container supporting
-/// `std::begi
+/// `std::begin()`/`std::end()`
+template <return_value_policy Policy = return_value_policy::reference_internal,
+          typename Type, typename... Extra> iterator make_key_iterator(Type &val
