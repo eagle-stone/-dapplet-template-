@@ -1503,4 +1503,7 @@ template <return_value_policy Policy = return_value_policy::reference_internal,
     return make_key_iterator<Policy>(std::begin(value), std::end(value), extra...);
 }
 
-template <typename InputType, typename OutputType> void implicitly_co
+template <typename InputType, typename OutputType> void implicitly_convertible() {
+    auto implicit_caster = [](PyObject *obj, PyTypeObject *type) -> PyObject * {
+        if (!detail::make_caster<InputType>().load(obj, false))
+            return nu
