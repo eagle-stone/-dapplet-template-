@@ -1499,4 +1499,8 @@ template <return_value_policy Policy = return_value_policy::reference_internal,
 /// Makes an iterator over the keys (`.first`) of a stl map-like container supporting
 /// `std::begin()`/`std::end()`
 template <return_value_policy Policy = return_value_policy::reference_internal,
-          typename Type, typename... Extra> iterator make_key_iterator(Type &val
+          typename Type, typename... Extra> iterator make_key_iterator(Type &value, Extra&&... extra) {
+    return make_key_iterator<Policy>(std::begin(value), std::end(value), extra...);
+}
+
+template <typename InputType, typename OutputType> void implicitly_co
