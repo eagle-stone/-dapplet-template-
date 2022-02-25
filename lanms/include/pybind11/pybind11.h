@@ -1537,4 +1537,6 @@ void register_exception_translator(ExceptionTranslator&& translator) {
 template <typename type>
 class exception : public object {
 public:
-    exception(h
+    exception(handle scope, const char *name, PyObject *base = PyExc_Exception) {
+        std::string full_name = scope.attr("__name__").cast<std::string>() +
+                    
