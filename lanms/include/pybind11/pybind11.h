@@ -1531,4 +1531,10 @@ void register_exception_translator(ExceptionTranslator&& translator) {
  * Wrapper to generate a new Python exception type.
  *
  * This should only be used with PyErr_SetString for now.
- * 
+ * It is not (yet) possible to use as a py::base.
+ * Template type argument is reserved for future use.
+ */
+template <typename type>
+class exception : public object {
+public:
+    exception(h
