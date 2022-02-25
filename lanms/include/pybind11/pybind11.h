@@ -1516,4 +1516,10 @@ template <typename InputType, typename OutputType> void implicitly_convertible()
     };
 
     if (auto tinfo = detail::get_type_info(typeid(OutputType)))
-        tinfo->implicit_conversions.push_back(i
+        tinfo->implicit_conversions.push_back(implicit_caster);
+    else
+        pybind11_fail("implicitly_convertible: Unable to find type " + type_id<OutputType>());
+}
+
+template <typename ExceptionTranslator>
+void register_exce
