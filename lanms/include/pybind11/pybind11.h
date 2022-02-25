@@ -1511,4 +1511,9 @@ template <typename InputType, typename OutputType> void implicitly_convertible()
         args[0] = obj;
         PyObject *result = PyObject_Call((PyObject *) type, args.ptr(), nullptr);
         if (result == nullptr)
-            PyErr_Clear(
+            PyErr_Clear();
+        return result;
+    };
+
+    if (auto tinfo = detail::get_type_info(typeid(OutputType)))
+        tinfo->implicit_conversions.push_back(i
