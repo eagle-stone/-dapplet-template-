@@ -1522,4 +1522,6 @@ template <typename InputType, typename OutputType> void implicitly_convertible()
 }
 
 template <typename ExceptionTranslator>
-void register_exce
+void register_exception_translator(ExceptionTranslator&& translator) {
+    detail::get_internals().registered_exception_translators.push_front(
+        std::forward<Exce
