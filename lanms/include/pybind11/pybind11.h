@@ -1506,4 +1506,9 @@ template <return_value_policy Policy = return_value_policy::reference_internal,
 template <typename InputType, typename OutputType> void implicitly_convertible() {
     auto implicit_caster = [](PyObject *obj, PyTypeObject *type) -> PyObject * {
         if (!detail::make_caster<InputType>().load(obj, false))
-            return nu
+            return nullptr;
+        tuple args(1);
+        args[0] = obj;
+        PyObject *result = PyObject_Call((PyObject *) type, args.ptr(), nullptr);
+        if (result == nullptr)
+            PyErr_Clear(
