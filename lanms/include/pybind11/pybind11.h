@@ -1524,4 +1524,11 @@ template <typename InputType, typename OutputType> void implicitly_convertible()
 template <typename ExceptionTranslator>
 void register_exception_translator(ExceptionTranslator&& translator) {
     detail::get_internals().registered_exception_translators.push_front(
-        std::forward<Exce
+        std::forward<ExceptionTranslator>(translator));
+}
+
+/**
+ * Wrapper to generate a new Python exception type.
+ *
+ * This should only be used with PyErr_SetString for now.
+ * 
