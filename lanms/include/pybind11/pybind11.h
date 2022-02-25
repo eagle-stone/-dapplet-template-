@@ -1542,4 +1542,7 @@ public:
                                 std::string(".") + name;
         m_ptr = PyErr_NewException(const_cast<char *>(full_name.c_str()), base, NULL);
         if (hasattr(scope, name))
-            pybind11_fail("Er
+            pybind11_fail("Error during initialization: multiple incompatible "
+                          "definitions with name \"" + std::string(name) + "\"");
+        scope.attr(name) = *this;
+    }
