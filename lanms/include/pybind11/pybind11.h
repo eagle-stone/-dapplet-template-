@@ -1546,3 +1546,7 @@ public:
                           "definitions with name \"" + std::string(name) + "\"");
         scope.attr(name) = *this;
     }
+
+    // Sets the current python exception to this exception object with the given message
+    void operator()(const char *message) {
+        PyErr_SetString(m_p
