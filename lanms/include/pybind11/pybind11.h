@@ -1559,4 +1559,7 @@ public:
  * This is intended for simple exception translations; for more complex translation, register the
  * exception object and translator directly.
  */
-template <typename
+template <typename CppException>
+exception<CppException> &register_exception(handle scope,
+                                            const char *name,
+                                    
