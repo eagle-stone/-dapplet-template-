@@ -1549,4 +1549,10 @@ public:
 
     // Sets the current python exception to this exception object with the given message
     void operator()(const char *message) {
-        PyErr_SetString(m_p
+        PyErr_SetString(m_ptr, message);
+    }
+};
+
+/**
+ * Registers a Python exception in `m` of the given `name` and installs an exception translator to
+ * translate the C++ exception to the created Python exception using the 
