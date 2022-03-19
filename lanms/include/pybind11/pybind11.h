@@ -1562,4 +1562,6 @@ public:
 template <typename CppException>
 exception<CppException> &register_exception(handle scope,
                                             const char *name,
-                                    
+                                            PyObject *base = PyExc_Exception) {
+    static exception<CppException> ex(scope, name, base);
+    register_exception_translator([](std::exception_ptr 
