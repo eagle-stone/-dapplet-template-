@@ -1564,4 +1564,12 @@ exception<CppException> &register_exception(handle scope,
                                             const char *name,
                                             PyObject *base = PyExc_Exception) {
     static exception<CppException> ex(scope, name, base);
-    register_exception_translator([](std::exception_ptr 
+    register_exception_translator([](std::exception_ptr p) {
+        if (!p) return;
+        try {
+            std::rethrow_exception(p);
+        } catch (const CppException &e) {
+            ex(e.what());
+        }
+    });
+   
