@@ -1572,4 +1572,10 @@ exception<CppException> &register_exception(handle scope,
             ex(e.what());
         }
     });
-   
+    return ex;
+}
+
+NAMESPACE_BEGIN(detail)
+PYBIND11_NOINLINE inline void print(tuple args, dict kwargs) {
+    auto strings = tuple(args.size());
+    for (size_t i = 0; i < a
