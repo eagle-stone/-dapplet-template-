@@ -1578,4 +1578,10 @@ exception<CppException> &register_exception(handle scope,
 NAMESPACE_BEGIN(detail)
 PYBIND11_NOINLINE inline void print(tuple args, dict kwargs) {
     auto strings = tuple(args.size());
-    for (size_t i = 0; i < a
+    for (size_t i = 0; i < args.size(); ++i) {
+        strings[i] = str(args[i]);
+    }
+    auto sep = kwargs.contains("sep") ? kwargs["sep"] : cast(" ");
+    auto line = sep.attr("join")(strings);
+
+    object fil
