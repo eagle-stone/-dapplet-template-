@@ -1589,4 +1589,8 @@ PYBIND11_NOINLINE inline void print(tuple args, dict kwargs) {
         file = kwargs["file"].cast<object>();
     } else {
         try {
-            file = module::import("sys").attr("std
+            file = module::import("sys").attr("stdout");
+        } catch (const error_already_set &) {
+            /* If print() is called from code that is executed as
+               part of garbage collection during interpreter shutdown,
+               im
