@@ -1584,4 +1584,9 @@ PYBIND11_NOINLINE inline void print(tuple args, dict kwargs) {
     auto sep = kwargs.contains("sep") ? kwargs["sep"] : cast(" ");
     auto line = sep.attr("join")(strings);
 
-    object fil
+    object file;
+    if (kwargs.contains("file")) {
+        file = kwargs["file"].cast<object>();
+    } else {
+        try {
+            file = module::import("sys").attr("std
