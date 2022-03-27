@@ -1593,4 +1593,11 @@ PYBIND11_NOINLINE inline void print(tuple args, dict kwargs) {
         } catch (const error_already_set &) {
             /* If print() is called from code that is executed as
                part of garbage collection during interpreter shutdown,
-               im
+               importing 'sys' can fail. Give up rather than crashing the
+               interpreter in this case. */
+            return;
+        }
+    }
+
+    auto write = file.attr("write");
+    write(li
