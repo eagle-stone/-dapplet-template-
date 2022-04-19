@@ -1627,4 +1627,6 @@ void print(Args &&...args) {
  *    of a PyThreadState and its associated thread, which allows moving it to
  *    another thread (this is a fairly rare/advanced use case).
  *
- * 3. The refere
+ * 3. The reference count of an acquired thread state can be controlled. This
+ *    can be handy to prevent cases where callbacks issued from an external
+ *    thread would otherwise constantly con
