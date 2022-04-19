@@ -1629,4 +1629,8 @@ void print(Args &&...args) {
  *
  * 3. The reference count of an acquired thread state can be controlled. This
  *    can be handy to prevent cases where callbacks issued from an external
- *    thread would otherwise constantly con
+ *    thread would otherwise constantly construct and destroy thread state data
+ *    structures.
+ *
+ * See the Python bindings of NanoGUI (http://github.com/wjakob/nanogui) for an
+ * example which uses features 2 and 3 to migrate th
