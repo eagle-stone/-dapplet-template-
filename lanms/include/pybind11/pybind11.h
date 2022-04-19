@@ -1606,4 +1606,8 @@ PYBIND11_NOINLINE inline void print(tuple args, dict kwargs) {
     if (kwargs.contains("flush") && kwargs["flush"].cast<bool>())
         file.attr("flush")();
 }
-NA
+NAMESPACE_END(detail)
+
+template <return_value_policy policy = return_value_policy::automatic_reference, typename... Args>
+void print(Args &&...args) {
+    auto c = detail::collect_
