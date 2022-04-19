@@ -1633,4 +1633,11 @@ void print(Args &&...args) {
  *    structures.
  *
  * See the Python bindings of NanoGUI (http://github.com/wjakob/nanogui) for an
- * example which uses features 2 and 3 to migrate th
+ * example which uses features 2 and 3 to migrate the Python thread of
+ * execution to another thread (to run the event loop on the original thread,
+ * in this case).
+ */
+
+class gil_scoped_acquire {
+public:
+    P
