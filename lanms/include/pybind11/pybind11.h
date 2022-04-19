@@ -1616,4 +1616,7 @@ void print(Args &&...args) {
 
 #if defined(WITH_THREAD) && !defined(PYPY_VERSION)
 
-/* The fun
+/* The functions below essentially reproduce the PyGILState_* API using a RAII
+ * pattern, but there are a few important differences:
+ *
+ * 1. When acquiring the GIL from an non-main thread during the f
