@@ -1600,4 +1600,10 @@ PYBIND11_NOINLINE inline void print(tuple args, dict kwargs) {
     }
 
     auto write = file.attr("write");
-    write(li
+    write(line);
+    write(kwargs.contains("end") ? kwargs["end"] : cast("\n"));
+
+    if (kwargs.contains("flush") && kwargs["flush"].cast<bool>())
+        file.attr("flush")();
+}
+NA
