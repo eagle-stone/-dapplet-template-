@@ -1619,4 +1619,8 @@ void print(Args &&...args) {
 /* The functions below essentially reproduce the PyGILState_* API using a RAII
  * pattern, but there are a few important differences:
  *
- * 1. When acquiring the GIL from an non-main thread during the f
+ * 1. When acquiring the GIL from an non-main thread during the finalization
+ *    phase, the GILState API blindly terminates the calling thread, which
+ *    is often not what is wanted. This API does not do this.
+ *
+ * 2. The gil_scoped_release function ca
