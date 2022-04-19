@@ -1623,4 +1623,8 @@ void print(Args &&...args) {
  *    phase, the GILState API blindly terminates the calling thread, which
  *    is often not what is wanted. This API does not do this.
  *
- * 2. The gil_scoped_release function ca
+ * 2. The gil_scoped_release function can optionally cut the relationship
+ *    of a PyThreadState and its associated thread, which allows moving it to
+ *    another thread (this is a fairly rare/advanced use case).
+ *
+ * 3. The refere
