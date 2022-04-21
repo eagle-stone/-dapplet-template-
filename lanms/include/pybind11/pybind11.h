@@ -1640,4 +1640,8 @@ void print(Args &&...args) {
 
 class gil_scoped_acquire {
 public:
-    P
+    PYBIND11_NOINLINE gil_scoped_acquire() {
+        auto const &internals = detail::get_internals();
+        tstate = (PyThreadState *) PyThread_get_key_value(internals.tstate);
+
+        if (!tstate) {
