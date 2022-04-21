@@ -1645,3 +1645,7 @@ public:
         tstate = (PyThreadState *) PyThread_get_key_value(internals.tstate);
 
         if (!tstate) {
+            tstate = PyThreadState_New(internals.istate);
+            #if !defined(NDEBUG)
+                if (!tstate)
+                    pybind11_fail("s
