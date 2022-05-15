@@ -1648,4 +1648,8 @@ public:
             tstate = PyThreadState_New(internals.istate);
             #if !defined(NDEBUG)
                 if (!tstate)
-                    pybind11_fail("s
+                    pybind11_fail("scoped_acquire: could not create thread state!");
+            #endif
+            tstate->gilstate_counter = 0;
+            #if PY_MAJOR_VERSION < 3
+                PyThread_delete_key_value(internals.t
