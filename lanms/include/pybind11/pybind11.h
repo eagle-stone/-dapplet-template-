@@ -1662,4 +1662,8 @@ public:
         if (release) {
             /* Work around an annoying assertion in PyThreadState_Swap */
             #if defined(Py_DEBUG)
+                PyInterpreterState *interp = tstate->interp;
+                tstate->interp = nullptr;
+            #endif
+            PyEval_AcquireThread(tstate);
  
