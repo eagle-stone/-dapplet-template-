@@ -1652,4 +1652,8 @@ public:
             #endif
             tstate->gilstate_counter = 0;
             #if PY_MAJOR_VERSION < 3
-                PyThread_delete_key_value(internals.t
+                PyThread_delete_key_value(internals.tstate);
+            #endif
+            PyThread_set_key_value(internals.tstate, tstate);
+        } else {
+            release = detail::get_thread_state_unchecked() 
