@@ -1656,4 +1656,10 @@ public:
             #endif
             PyThread_set_key_value(internals.tstate, tstate);
         } else {
-            release = detail::get_thread_state_unchecked() 
+            release = detail::get_thread_state_unchecked() != tstate;
+        }
+
+        if (release) {
+            /* Work around an annoying assertion in PyThreadState_Swap */
+            #if defined(Py_DEBUG)
+ 
