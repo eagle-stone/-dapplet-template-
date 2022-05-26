@@ -1666,4 +1666,12 @@ public:
                 tstate->interp = nullptr;
             #endif
             PyEval_AcquireThread(tstate);
- 
+            #if defined(Py_DEBUG)
+                tstate->interp = interp;
+            #endif
+        }
+
+        inc_ref();
+    }
+
+    void inc_ref(
