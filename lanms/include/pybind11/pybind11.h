@@ -1674,4 +1674,11 @@ public:
         inc_ref();
     }
 
-    void inc_ref(
+    void inc_ref() {
+        ++tstate->gilstate_counter;
+    }
+
+    PYBIND11_NOINLINE void dec_ref() {
+        --tstate->gilstate_counter;
+        #if !defined(NDEBUG)
+            if (de
