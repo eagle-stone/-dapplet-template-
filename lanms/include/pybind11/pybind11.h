@@ -1681,4 +1681,6 @@ public:
     PYBIND11_NOINLINE void dec_ref() {
         --tstate->gilstate_counter;
         #if !defined(NDEBUG)
-            if (de
+            if (detail::get_thread_state_unchecked() != tstate)
+                pybind11_fail("scoped_acquire::dec_ref(): thread state must be current!");
+            if (tstate->gilstate_cou
