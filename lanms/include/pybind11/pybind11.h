@@ -1683,4 +1683,8 @@ public:
         #if !defined(NDEBUG)
             if (detail::get_thread_state_unchecked() != tstate)
                 pybind11_fail("scoped_acquire::dec_ref(): thread state must be current!");
-            if (tstate->gilstate_cou
+            if (tstate->gilstate_counter < 0)
+                pybind11_fail("scoped_acquire::dec_ref(): reference count underflow!");
+        #endif
+        if (tstate->gilstate_counter == 0) {
+            #if !defined(NDEBUG)
