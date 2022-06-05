@@ -1688,3 +1688,7 @@ public:
         #endif
         if (tstate->gilstate_counter == 0) {
             #if !defined(NDEBUG)
+                if (!release)
+                    pybind11_fail("scoped_acquire::dec_ref(): internal error!");
+            #endif
+            PyThreadState_Clear(tst
