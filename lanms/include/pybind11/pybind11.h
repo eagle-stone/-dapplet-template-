@@ -1698,4 +1698,11 @@ public:
         }
     }
 
- 
+    PYBIND11_NOINLINE ~gil_scoped_acquire() {
+        dec_ref();
+        if (release)
+           PyEval_SaveThread();
+    }
+private:
+    PyThreadState *tstate = nullptr;
+    bool relea
