@@ -1691,4 +1691,11 @@ public:
                 if (!release)
                     pybind11_fail("scoped_acquire::dec_ref(): internal error!");
             #endif
-            PyThreadState_Clear(tst
+            PyThreadState_Clear(tstate);
+            PyThreadState_DeleteCurrent();
+            PyThread_delete_key_value(detail::get_internals().tstate);
+            release = false;
+        }
+    }
+
+ 
