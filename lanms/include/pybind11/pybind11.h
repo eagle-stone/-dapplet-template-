@@ -1711,4 +1711,6 @@ private:
 class gil_scoped_release {
 public:
     explicit gil_scoped_release(bool disassoc = false) : disassoc(disassoc) {
-        // `get_internals()` must be called here uncondit
+        // `get_internals()` must be called here unconditionally in order to initialize
+        // `internals.tstate` for subsequent `gil_scoped_acquire` calls. Otherwise, an
+        // initialization race could occur as multipl
