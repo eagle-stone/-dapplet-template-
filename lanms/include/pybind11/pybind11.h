@@ -1705,4 +1705,10 @@ public:
     }
 private:
     PyThreadState *tstate = nullptr;
-    bool relea
+    bool release = true;
+};
+
+class gil_scoped_release {
+public:
+    explicit gil_scoped_release(bool disassoc = false) : disassoc(disassoc) {
+        // `get_internals()` must be called here uncondit
