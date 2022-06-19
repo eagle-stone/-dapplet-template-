@@ -1713,4 +1713,8 @@ public:
     explicit gil_scoped_release(bool disassoc = false) : disassoc(disassoc) {
         // `get_internals()` must be called here unconditionally in order to initialize
         // `internals.tstate` for subsequent `gil_scoped_acquire` calls. Otherwise, an
-        // initialization race could occur as multipl
+        // initialization race could occur as multiple threads try `gil_scoped_acquire`.
+        const auto &internals = detail::get_internals();
+        tstate = PyEval_SaveThread();
+        if (disassoc) {
+            auto key = in
