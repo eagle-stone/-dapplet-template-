@@ -1717,4 +1717,9 @@ public:
         const auto &internals = detail::get_internals();
         tstate = PyEval_SaveThread();
         if (disassoc) {
-            auto key = in
+            auto key = internals.tstate;
+            #if PY_MAJOR_VERSION < 3
+                PyThread_delete_key_value(key);
+            #else
+                PyThread_set_key_value(key, nullptr);
+      
