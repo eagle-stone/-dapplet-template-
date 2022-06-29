@@ -1722,4 +1722,11 @@ public:
                 PyThread_delete_key_value(key);
             #else
                 PyThread_set_key_value(key, nullptr);
-      
+            #endif
+        }
+    }
+    ~gil_scoped_release() {
+        if (!tstate)
+            return;
+        PyEval_RestoreThread(tstate);
+        if (disassoc)
