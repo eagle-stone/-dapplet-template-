@@ -1742,4 +1742,11 @@ private:
     bool disassoc;
 };
 #elif defined(PYPY_VERSION)
-class gil
+class gil_scoped_acquire {
+    PyGILState_STATE state;
+public:
+    gil_scoped_acquire() { state = PyGILState_Ensure(); }
+    ~gil_scoped_acquire() { PyGILState_Release(state); }
+};
+
+class gil_scoped_relea
