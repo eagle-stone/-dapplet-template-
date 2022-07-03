@@ -1729,4 +1729,9 @@ public:
         if (!tstate)
             return;
         PyEval_RestoreThread(tstate);
-        if (disassoc)
+        if (disassoc) {
+            auto key = detail::get_internals().tstate;
+            #if PY_MAJOR_VERSION < 3
+                PyThread_delete_key_value(key);
+            #endif
+ 
