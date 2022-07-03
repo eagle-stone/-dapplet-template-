@@ -1734,4 +1734,12 @@ public:
             #if PY_MAJOR_VERSION < 3
                 PyThread_delete_key_value(key);
             #endif
- 
+            PyThread_set_key_value(key, tstate);
+        }
+    }
+private:
+    PyThreadState *tstate;
+    bool disassoc;
+};
+#elif defined(PYPY_VERSION)
+class gil
