@@ -1749,4 +1749,11 @@ public:
     ~gil_scoped_acquire() { PyGILState_Release(state); }
 };
 
-class gil_scoped_relea
+class gil_scoped_release {
+    PyThreadState *state;
+public:
+    gil_scoped_release() { state = PyEval_SaveThread(); }
+    ~gil_scoped_release() { PyEval_RestoreThread(state); }
+};
+#else
+class gil_scoped_acquire 
