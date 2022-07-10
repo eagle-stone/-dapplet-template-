@@ -1756,4 +1756,12 @@ public:
     ~gil_scoped_release() { PyEval_RestoreThread(state); }
 };
 #else
-class gil_scoped_acquire 
+class gil_scoped_acquire { };
+class gil_scoped_release { };
+#endif
+
+error_already_set::~error_already_set() {
+    if (type) {
+        gil_scoped_acquire gil;
+        type.release().dec_ref();
+        value.rel
