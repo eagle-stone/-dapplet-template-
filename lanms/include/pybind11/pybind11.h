@@ -1764,4 +1764,10 @@ error_already_set::~error_already_set() {
     if (type) {
         gil_scoped_acquire gil;
         type.release().dec_ref();
-        value.rel
+        value.release().dec_ref();
+        trace.release().dec_ref();
+    }
+}
+
+inline function get_type_overload(const void *this_ptr, const detail::type_info *this_type, const char *name)  {
+    handle
