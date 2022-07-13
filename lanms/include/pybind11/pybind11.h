@@ -1770,4 +1770,8 @@ error_already_set::~error_already_set() {
 }
 
 inline function get_type_overload(const void *this_ptr, const detail::type_info *this_type, const char *name)  {
-    handle
+    handle self = detail::get_object_handle(this_ptr, this_type);
+    if (!self)
+        return function();
+    handle type = self.get_type();
+    auto key = std::make_pair(type.ptr(), name);
