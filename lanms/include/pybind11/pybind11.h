@@ -1775,3 +1775,8 @@ inline function get_type_overload(const void *this_ptr, const detail::type_info 
         return function();
     handle type = self.get_type();
     auto key = std::make_pair(type.ptr(), name);
+
+    /* Cache functions that aren't overloaded in Python to avoid
+       many costly Python dictionary lookups below */
+    auto &cache = detail::get_internals().inactive_overload_cache;
+    if (cache
