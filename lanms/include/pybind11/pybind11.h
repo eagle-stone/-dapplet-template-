@@ -1779,4 +1779,10 @@ inline function get_type_overload(const void *this_ptr, const detail::type_info 
     /* Cache functions that aren't overloaded in Python to avoid
        many costly Python dictionary lookups below */
     auto &cache = detail::get_internals().inactive_overload_cache;
-    if (cache
+    if (cache.find(key) != cache.end())
+        return function();
+
+    function overload = getattr(self, name, function());
+    if (overload.is_cpp_function()) {
+        cache.insert(key);
+        return functi
