@@ -1791,4 +1791,7 @@ inline function get_type_overload(const void *this_ptr, const detail::type_info 
     /* Don't call dispatch code if invoked from overridden function.
        Unfortunately this doesn't work on PyPy. */
 #if !defined(PYPY_VERSION)
-    PyFrameObject *fra
+    PyFrameObject *frame = PyThreadState_Get()->frame;
+    if (frame && (std::string) str(frame->f_code->co_name) == name &&
+        frame->f_code->co_argcount > 0) {
+        PyFrame_FastToL
