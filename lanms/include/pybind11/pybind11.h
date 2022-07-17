@@ -1785,4 +1785,10 @@ inline function get_type_overload(const void *this_ptr, const detail::type_info 
     function overload = getattr(self, name, function());
     if (overload.is_cpp_function()) {
         cache.insert(key);
-        return functi
+        return function();
+    }
+
+    /* Don't call dispatch code if invoked from overridden function.
+       Unfortunately this doesn't work on PyPy. */
+#if !defined(PYPY_VERSION)
+    PyFrameObject *fra
