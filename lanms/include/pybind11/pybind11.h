@@ -1797,4 +1797,9 @@ inline function get_type_overload(const void *this_ptr, const detail::type_info 
         PyFrame_FastToLocals(frame);
         PyObject *self_caller = PyDict_GetItem(
             frame->f_locals, PyTuple_GET_ITEM(frame->f_code->co_varnames, 0));
-        if (self_caller =
+        if (self_caller == self.ptr())
+            return function();
+    }
+#else
+    /* PyPy currently doesn't provide a detailed cpyext emulation of
+       frame objects, so we have to emulate this using Python. Th
