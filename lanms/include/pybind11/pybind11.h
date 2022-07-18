@@ -1794,4 +1794,7 @@ inline function get_type_overload(const void *this_ptr, const detail::type_info 
     PyFrameObject *frame = PyThreadState_Get()->frame;
     if (frame && (std::string) str(frame->f_code->co_name) == name &&
         frame->f_code->co_argcount > 0) {
-        PyFrame_FastToL
+        PyFrame_FastToLocals(frame);
+        PyObject *self_caller = PyDict_GetItem(
+            frame->f_locals, PyTuple_GET_ITEM(frame->f_code->co_varnames, 0));
+        if (self_caller =
