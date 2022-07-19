@@ -1802,4 +1802,9 @@ inline function get_type_overload(const void *this_ptr, const detail::type_info 
     }
 #else
     /* PyPy currently doesn't provide a detailed cpyext emulation of
-       frame objects, so we have to emulate this using Python. Th
+       frame objects, so we have to emulate this using Python. This
+       is going to be slow..*/
+    dict d; d["self"] = self; d["name"] = pybind11::str(name);
+    PyObject *result = PyRun_String(
+        "import inspect\n"
+      
