@@ -1807,4 +1807,8 @@ inline function get_type_overload(const void *this_ptr, const detail::type_info 
     dict d; d["self"] = self; d["name"] = pybind11::str(name);
     PyObject *result = PyRun_String(
         "import inspect\n"
-      
+        "frame = inspect.currentframe()\n"
+        "if frame is not None:\n"
+        "    frame = frame.f_back\n"
+        "    if frame is not None and str(frame.f_code.co_name) == name and "
+ 
