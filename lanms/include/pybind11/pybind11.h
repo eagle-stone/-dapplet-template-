@@ -1811,4 +1811,7 @@ inline function get_type_overload(const void *this_ptr, const detail::type_info 
         "if frame is not None:\n"
         "    frame = frame.f_back\n"
         "    if frame is not None and str(frame.f_code.co_name) == name and "
- 
+        "frame.f_code.co_argcount > 0:\n"
+        "        self_caller = frame.f_locals[frame.f_code.co_varnames[0]]\n"
+        "        if self_caller == self:\n"
+   
