@@ -1814,4 +1814,9 @@ inline function get_type_overload(const void *this_ptr, const detail::type_info 
         "frame.f_code.co_argcount > 0:\n"
         "        self_caller = frame.f_locals[frame.f_code.co_varnames[0]]\n"
         "        if self_caller == self:\n"
-   
+        "            self = None\n",
+        Py_file_input, d.ptr(), d.ptr());
+    if (result == nullptr)
+        throw error_already_set();
+    if (d["self"].is_none())
+        retu
