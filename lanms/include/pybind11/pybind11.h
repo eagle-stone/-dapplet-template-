@@ -1819,4 +1819,12 @@ inline function get_type_overload(const void *this_ptr, const detail::type_info 
     if (result == nullptr)
         throw error_already_set();
     if (d["self"].is_none())
-        retu
+        return function();
+    Py_DECREF(result);
+#endif
+
+    return overload;
+}
+
+template <class T> function get_overload(const T *this_ptr, const char *name) {
+    auto tinfo = detail::get_type_info(
