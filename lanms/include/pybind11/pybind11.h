@@ -1827,4 +1827,9 @@ inline function get_type_overload(const void *this_ptr, const detail::type_info 
 }
 
 template <class T> function get_overload(const T *this_ptr, const char *name) {
-    auto tinfo = detail::get_type_info(
+    auto tinfo = detail::get_type_info(typeid(T));
+    return tinfo ? get_type_overload(this_ptr, tinfo, name) : function();
+}
+
+#define PYBIND11_OVERLOAD_INT(ret_type, cname, name, ...) { \
+        pybind11::gil_scoped_acquir
