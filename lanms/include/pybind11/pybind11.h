@@ -1832,4 +1832,7 @@ template <class T> function get_overload(const T *this_ptr, const char *name) {
 }
 
 #define PYBIND11_OVERLOAD_INT(ret_type, cname, name, ...) { \
-        pybind11::gil_scoped_acquir
+        pybind11::gil_scoped_acquire gil; \
+        pybind11::function overload = pybind11::get_overload(static_cast<const cname *>(this), name); \
+        if (overload) { \
+            auto o = overload(__V
