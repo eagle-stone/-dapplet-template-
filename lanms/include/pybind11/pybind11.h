@@ -1840,4 +1840,10 @@ template <class T> function get_overload(const T *this_ptr, const char *name) {
                 static pybind11::detail::overload_caster_t<ret_type> caster; \
                 return pybind11::detail::cast_ref<ret_type>(std::move(o), caster); \
             } \
-            else return pybind11::detail::cast_safe<re
+            else return pybind11::detail::cast_safe<ret_type>(std::move(o)); \
+        } \
+    }
+
+#define PYBIND11_OVERLOAD_NAME(ret_type, cname, name, fn, ...) \
+    PYBIND11_OVERLOAD_INT(ret_type, cname, name, __VA_ARGS__) \
+    retur
