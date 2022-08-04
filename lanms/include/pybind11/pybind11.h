@@ -1846,4 +1846,8 @@ template <class T> function get_overload(const T *this_ptr, const char *name) {
 
 #define PYBIND11_OVERLOAD_NAME(ret_type, cname, name, fn, ...) \
     PYBIND11_OVERLOAD_INT(ret_type, cname, name, __VA_ARGS__) \
-    retur
+    return cname::fn(__VA_ARGS__)
+
+#define PYBIND11_OVERLOAD_PURE_NAME(ret_type, cname, name, fn, ...) \
+    PYBIND11_OVERLOAD_INT(ret_type, cname, name, __VA_ARGS__) \
+    pybind11::pybind11_f
