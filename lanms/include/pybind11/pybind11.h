@@ -1853,4 +1853,9 @@ template <class T> function get_overload(const T *this_ptr, const char *name) {
     pybind11::pybind11_fail("Tried to call pure virtual function \"" #cname "::" name "\"");
 
 #define PYBIND11_OVERLOAD(ret_type, cname, fn, ...) \
-    PYBIND11_OVERLOAD_NAME(ret_type, cname, #fn, fn, __VA_AR
+    PYBIND11_OVERLOAD_NAME(ret_type, cname, #fn, fn, __VA_ARGS__)
+
+#define PYBIND11_OVERLOAD_PURE(ret_type, cname, fn, ...) \
+    PYBIND11_OVERLOAD_PURE_NAME(ret_type, cname, #fn, fn, __VA_ARGS__)
+
+NAMESPACE
