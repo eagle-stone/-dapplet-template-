@@ -1858,4 +1858,10 @@ template <class T> function get_overload(const T *this_ptr, const char *name) {
 #define PYBIND11_OVERLOAD_PURE(ret_type, cname, fn, ...) \
     PYBIND11_OVERLOAD_PURE_NAME(ret_type, cname, #fn, fn, __VA_ARGS__)
 
-NAMESPACE
+NAMESPACE_END(pybind11)
+
+#if defined(_MSC_VER)
+#  pragma warning(pop)
+#elif defined(__INTEL_COMPILER)
+/* Leave ignored warnings on */
+#elif defined(__GNUG__) && !defined(__cla
