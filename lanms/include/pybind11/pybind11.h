@@ -1864,4 +1864,6 @@ NAMESPACE_END(pybind11)
 #  pragma warning(pop)
 #elif defined(__INTEL_COMPILER)
 /* Leave ignored warnings on */
-#elif defined(__GNUG__) && !defined(__cla
+#elif defined(__GNUG__) && !defined(__clang__)
+#  pragma GCC diagnostic pop
+#endif
