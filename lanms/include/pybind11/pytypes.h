@@ -287,3 +287,171 @@ NAMESPACE_END(detail)
 /// Fetch and hold an error which was already set in Python.  An instance of this is typically
 /// thrown to propagate python-side errors back through C++ which can either be caught manually or
 /// else falls back to the function dispatcher (which then raises the captured error back to
+/// python).
+class error_already_set : public std::runtime_error {
+public:
+    /// Constructs a new exception from the current Python error indicator, if any.  The current
+    /// Python error indicator will be cleared.
+    error_already_set() : std::runtime_error(detail::error_string()) {
+        PyErr_Fetch(&type.ptr(), &value.ptr(), &trace.ptr());
+    }
+
+    inline ~error_already_set();
+
+    /// Give the currently-held error back to Python, if any.  If there is currently a Python error
+    /// already set it is cleared first.  After this call, the current object no longer stores the
+    /// error variables (but the `.what()` string is still available).
+    void restore() { PyErr_Restore(type.release().ptr(), value.release().ptr(), trace.release().ptr()); }
+
+    // Does nothing; provided for backwards compatibility.
+    PYBIND11_DEPRECATED("Use of error_already_set.clear() is deprecated")
+    void clear() {}
+
+    /// Check if the currently trapped error type matches the given Python exception class (or a
+    /// subclass thereof).  May also be passed a tuple to search for any exception class matches in
+    /// the given tuple.
+    bool matches(handle ex) const { return PyErr_GivenExceptionMatches(ex.ptr(), type.ptr()); }
+
+private:
+    object type, value, trace;
+};
+
+/** \defgroup python_builtins _
+    Unless stated otherwise, the following C++ functions behave the same
+    as their Python counterparts.
+ */
+
+/** \ingroup python_builtins
+    \rst
+    Return true if ``obj`` is an instance of ``T``. Type ``T`` must be a subclass of
+    `object` or a class which was exposed to Python as ``py::class_<T>``.
+\endrst */
+template <typename T, detail::enable_if_t<std::is_base_of<object, T>::value, int> = 0>
+bool isinstance(handle obj) { return T::check_(obj); }
+
+template <typename T, detail::enable_if_t<!std::is_base_of<object, T>::value, int> = 0>
+bool isinstance(handle obj) { return detail::isinstance_generic(obj, typeid(T)); }
+
+template <> inline bool isinstance<handle>(handle obj) = delete;
+template <> inline bool isinstance<object>(handle obj) { return obj.ptr() != nullptr; }
+
+/// \ingroup python_builtins
+/// Return true if ``obj`` is an instance of the ``type``.
+inline bool isinstance(handle obj, handle type) {
+    const auto result = PyObject_IsInstance(obj.ptr(), type.ptr());
+    if (result == -1)
+        throw error_already_set();
+    return result != 0;
+}
+
+/// \addtogroup python_builtins
+/// @{
+inline bool hasattr(handle obj, handle name) {
+    return PyObject_HasAttr(obj.ptr(), name.ptr()) == 1;
+}
+
+inline bool hasattr(handle obj, const char *name) {
+    return PyObject_HasAttrString(obj.ptr(), name) == 1;
+}
+
+inline object getattr(handle obj, handle name) {
+    PyObject *result = PyObject_GetAttr(obj.ptr(), name.ptr());
+    if (!result) { throw error_already_set(); }
+    return reinterpret_steal<object>(result);
+}
+
+inline object getattr(handle obj, const char *name) {
+    PyObject *result = PyObject_GetAttrString(obj.ptr(), name);
+    if (!result) { throw error_already_set(); }
+    return reinterpret_steal<object>(result);
+}
+
+inline object getattr(handle obj, handle name, handle default_) {
+    if (PyObject *result = PyObject_GetAttr(obj.ptr(), name.ptr())) {
+        return reinterpret_steal<object>(result);
+    } else {
+        PyErr_Clear();
+        return reinterpret_borrow<object>(default_);
+    }
+}
+
+inline object getattr(handle obj, const char *name, handle default_) {
+    if (PyObject *result = PyObject_GetAttrString(obj.ptr(), name)) {
+        return reinterpret_steal<object>(result);
+    } else {
+        PyErr_Clear();
+        return reinterpret_borrow<object>(default_);
+    }
+}
+
+inline void setattr(handle obj, handle name, handle value) {
+    if (PyObject_SetAttr(obj.ptr(), name.ptr(), value.ptr()) != 0) { throw error_already_set(); }
+}
+
+inline void setattr(handle obj, const char *name, handle value) {
+    if (PyObject_SetAttrString(obj.ptr(), name, value.ptr()) != 0) { throw error_already_set(); }
+}
+/// @} python_builtins
+
+NAMESPACE_BEGIN(detail)
+inline handle get_function(handle value) {
+    if (value) {
+#if PY_MAJOR_VERSION >= 3
+        if (PyInstanceMethod_Check(value.ptr()))
+            value = PyInstanceMethod_GET_FUNCTION(value.ptr());
+        else
+#endif
+        if (PyMethod_Check(value.ptr()))
+            value = PyMethod_GET_FUNCTION(value.ptr());
+    }
+    return value;
+}
+
+// Helper aliases/functions to support implicit casting of values given to python accessors/methods.
+// When given a pyobject, this simply returns the pyobject as-is; for other C++ type, the value goes
+// through pybind11::cast(obj) to convert it to an `object`.
+template <typename T, enable_if_t<is_pyobject<T>::value, int> = 0>
+auto object_or_cast(T &&o) -> decltype(std::forward<T>(o)) { return std::forward<T>(o); }
+// The following casting version is implemented in cast.h:
+template <typename T, enable_if_t<!is_pyobject<T>::value, int> = 0>
+object object_or_cast(T &&o);
+// Match a PyObject*, which we want to convert directly to handle via its converting constructor
+inline handle object_or_cast(PyObject *ptr) { return ptr; }
+
+
+template <typename Policy>
+class accessor : public object_api<accessor<Policy>> {
+    using key_type = typename Policy::key_type;
+
+public:
+    accessor(handle obj, key_type key) : obj(obj), key(std::move(key)) { }
+    accessor(const accessor &a) = default;
+    accessor(accessor &&a) = default;
+
+    // accessor overload required to override default assignment operator (templates are not allowed
+    // to replace default compiler-generated assignments).
+    void operator=(const accessor &a) && { std::move(*this).operator=(handle(a)); }
+    void operator=(const accessor &a) & { operator=(handle(a)); }
+
+    template <typename T> void operator=(T &&value) && {
+        Policy::set(obj, key, object_or_cast(std::forward<T>(value)));
+    }
+    template <typename T> void operator=(T &&value) & {
+        get_cache() = reinterpret_borrow<object>(object_or_cast(std::forward<T>(value)));
+    }
+
+    template <typename T = Policy>
+    PYBIND11_DEPRECATED("Use of obj.attr(...) as bool is deprecated in favor of pybind11::hasattr(obj, ...)")
+    explicit operator enable_if_t<std::is_same<T, accessor_policies::str_attr>::value ||
+            std::is_same<T, accessor_policies::obj_attr>::value, bool>() const {
+        return hasattr(obj, key);
+    }
+    template <typename T = Policy>
+    PYBIND11_DEPRECATED("Use of obj[key] as bool is deprecated in favor of obj.contains(key)")
+    explicit operator enable_if_t<std::is_same<T, accessor_policies::generic_item>::value, bool>() const {
+        return obj.contains(key);
+    }
+
+    operator object() const { return get_cache(); }
+    PyObject *ptr() const { return get_cache().ptr(); }
+    template <typename T> T cast() const { return get_cache().template cast<T>(); }
