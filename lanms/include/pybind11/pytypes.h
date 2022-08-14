@@ -631,3 +631,196 @@ protected:
     void increment() { ++index; }
     void decrement() { --index; }
     void advance(ssize_t n) { index += n; }
+    bool equal(const sequence_slow_readwrite &b) const { return index == b.index; }
+    ssize_t distance_to(const sequence_slow_readwrite &b) const { return index - b.index; }
+
+private:
+    handle obj;
+    ssize_t index;
+};
+
+/// Python's dictionary protocol permits this to be a forward iterator
+class dict_readonly {
+protected:
+    using iterator_category = std::forward_iterator_tag;
+    using value_type = std::pair<handle, handle>;
+    using reference = const value_type;
+    using pointer = arrow_proxy<const value_type>;
+
+    dict_readonly() = default;
+    dict_readonly(handle obj, ssize_t pos) : obj(obj), pos(pos) { increment(); }
+
+    reference dereference() const { return {key, value}; }
+    void increment() { if (!PyDict_Next(obj.ptr(), &pos, &key, &value)) { pos = -1; } }
+    bool equal(const dict_readonly &b) const { return pos == b.pos; }
+
+private:
+    handle obj;
+    PyObject *key, *value;
+    ssize_t pos = -1;
+};
+NAMESPACE_END(iterator_policies)
+
+#if !defined(PYPY_VERSION)
+using tuple_iterator = generic_iterator<iterator_policies::sequence_fast_readonly>;
+using list_iterator = generic_iterator<iterator_policies::sequence_fast_readonly>;
+#else
+using tuple_iterator = generic_iterator<iterator_policies::sequence_slow_readwrite>;
+using list_iterator = generic_iterator<iterator_policies::sequence_slow_readwrite>;
+#endif
+
+using sequence_iterator = generic_iterator<iterator_policies::sequence_slow_readwrite>;
+using dict_iterator = generic_iterator<iterator_policies::dict_readonly>;
+
+inline bool PyIterable_Check(PyObject *obj) {
+    PyObject *iter = PyObject_GetIter(obj);
+    if (iter) {
+        Py_DECREF(iter);
+        return true;
+    } else {
+        PyErr_Clear();
+        return false;
+    }
+}
+
+inline bool PyNone_Check(PyObject *o) { return o == Py_None; }
+
+inline bool PyUnicode_Check_Permissive(PyObject *o) { return PyUnicode_Check(o) || PYBIND11_BYTES_CHECK(o); }
+
+class kwargs_proxy : public handle {
+public:
+    explicit kwargs_proxy(handle h) : handle(h) { }
+};
+
+class args_proxy : public handle {
+public:
+    explicit args_proxy(handle h) : handle(h) { }
+    kwargs_proxy operator*() const { return kwargs_proxy(*this); }
+};
+
+/// Python argument categories (using PEP 448 terms)
+template <typename T> using is_keyword = std::is_base_of<arg, T>;
+template <typename T> using is_s_unpacking = std::is_same<args_proxy, T>; // * unpacking
+template <typename T> using is_ds_unpacking = std::is_same<kwargs_proxy, T>; // ** unpacking
+template <typename T> using is_positional = satisfies_none_of<T,
+    is_keyword, is_s_unpacking, is_ds_unpacking
+>;
+template <typename T> using is_keyword_or_ds = satisfies_any_of<T, is_keyword, is_ds_unpacking>;
+
+// Call argument collector forward declarations
+template <return_value_policy policy = return_value_policy::automatic_reference>
+class simple_collector;
+template <return_value_policy policy = return_value_policy::automatic_reference>
+class unpacking_collector;
+
+NAMESPACE_END(detail)
+
+// TODO: After the deprecated constructors are removed, this macro can be simplified by
+//       inheriting ctors: `using Parent::Parent`. It's not an option right now because
+//       the `using` statement triggers the parent deprecation warning even if the ctor
+//       isn't even used.
+#define PYBIND11_OBJECT_COMMON(Name, Parent, CheckFun) \
+    public: \
+        PYBIND11_DEPRECATED("Use reinterpret_borrow<"#Name">() or reinterpret_steal<"#Name">()") \
+        Name(handle h, bool is_borrowed) : Parent(is_borrowed ? Parent(h, borrowed_t{}) : Parent(h, stolen_t{})) { } \
+        Name(handle h, borrowed_t) : Parent(h, borrowed_t{}) { } \
+        Name(handle h, stolen_t) : Parent(h, stolen_t{}) { } \
+        PYBIND11_DEPRECATED("Use py::isinstance<py::python_type>(obj) instead") \
+        bool check() const { return m_ptr != nullptr && (bool) CheckFun(m_ptr); } \
+        static bool check_(handle h) { return h.ptr() != nullptr && CheckFun(h.ptr()); }
+
+#define PYBIND11_OBJECT_CVT(Name, Parent, CheckFun, ConvertFun) \
+    PYBIND11_OBJECT_COMMON(Name, Parent, CheckFun) \
+    /* This is deliberately not 'explicit' to allow implicit conversion from object: */ \
+    Name(const object &o) : Parent(ConvertFun(o.ptr()), stolen_t{}) { if (!m_ptr) throw error_already_set(); }
+
+#define PYBIND11_OBJECT(Name, Parent, CheckFun) \
+    PYBIND11_OBJECT_COMMON(Name, Parent, CheckFun) \
+    /* This is deliberately not 'explicit' to allow implicit conversion from object: */ \
+    Name(const object &o) : Parent(o) { } \
+    Name(object &&o) : Parent(std::move(o)) { }
+
+#define PYBIND11_OBJECT_DEFAULT(Name, Parent, CheckFun) \
+    PYBIND11_OBJECT(Name, Parent, CheckFun) \
+    Name() : Parent() { }
+
+/// \addtogroup pytypes
+/// @{
+
+/** \rst
+    Wraps a Python iterator so that it can also be used as a C++ input iterator
+
+    Caveat: copying an iterator does not (and cannot) clone the internal
+    state of the Python iterable. This also applies to the post-increment
+    operator. This iterator should only be used to retrieve the current
+    value using ``operator*()``.
+\endrst */
+class iterator : public object {
+public:
+    using iterator_category = std::input_iterator_tag;
+    using difference_type = ssize_t;
+    using value_type = handle;
+    using reference = const handle;
+    using pointer = const handle *;
+
+    PYBIND11_OBJECT_DEFAULT(iterator, object, PyIter_Check)
+
+    iterator& operator++() {
+        advance();
+        return *this;
+    }
+
+    iterator operator++(int) {
+        auto rv = *this;
+        advance();
+        return rv;
+    }
+
+    reference operator*() const {
+        if (m_ptr && !value.ptr()) {
+            auto& self = const_cast<iterator &>(*this);
+            self.advance();
+        }
+        return value;
+    }
+
+    pointer operator->() const { operator*(); return &value; }
+
+    /** \rst
+         The value which marks the end of the iteration. ``it == iterator::sentinel()``
+         is equivalent to catching ``StopIteration`` in Python.
+
+         .. code-block:: cpp
+
+             void foo(py::iterator it) {
+                 while (it != py::iterator::sentinel()) {
+                    // use `*it`
+                    ++it;
+                 }
+             }
+    \endrst */
+    static iterator sentinel() { return {}; }
+
+    friend bool operator==(const iterator &a, const iterator &b) { return a->ptr() == b->ptr(); }
+    friend bool operator!=(const iterator &a, const iterator &b) { return a->ptr() != b->ptr(); }
+
+private:
+    void advance() {
+        value = reinterpret_steal<object>(PyIter_Next(m_ptr));
+        if (PyErr_Occurred()) { throw error_already_set(); }
+    }
+
+private:
+    object value = {};
+};
+
+class iterable : public object {
+public:
+    PYBIND11_OBJECT_DEFAULT(iterable, object, detail::PyIterable_Check)
+};
+
+class bytes;
+
+class str : public object {
+public:
+    PYBIND11_OBJECT_CVT(str, object, detail::PyUnicode_Check_Permissive, raw_str)
