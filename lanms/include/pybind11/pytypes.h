@@ -455,3 +455,179 @@ public:
     operator object() const { return get_cache(); }
     PyObject *ptr() const { return get_cache().ptr(); }
     template <typename T> T cast() const { return get_cache().template cast<T>(); }
+
+private:
+    object &get_cache() const {
+        if (!cache) { cache = Policy::get(obj, key); }
+        return cache;
+    }
+
+private:
+    handle obj;
+    key_type key;
+    mutable object cache;
+};
+
+NAMESPACE_BEGIN(accessor_policies)
+struct obj_attr {
+    using key_type = object;
+    static object get(handle obj, handle key) { return getattr(obj, key); }
+    static void set(handle obj, handle key, handle val) { setattr(obj, key, val); }
+};
+
+struct str_attr {
+    using key_type = const char *;
+    static object get(handle obj, const char *key) { return getattr(obj, key); }
+    static void set(handle obj, const char *key, handle val) { setattr(obj, key, val); }
+};
+
+struct generic_item {
+    using key_type = object;
+
+    static object get(handle obj, handle key) {
+        PyObject *result = PyObject_GetItem(obj.ptr(), key.ptr());
+        if (!result) { throw error_already_set(); }
+        return reinterpret_steal<object>(result);
+    }
+
+    static void set(handle obj, handle key, handle val) {
+        if (PyObject_SetItem(obj.ptr(), key.ptr(), val.ptr()) != 0) { throw error_already_set(); }
+    }
+};
+
+struct sequence_item {
+    using key_type = size_t;
+
+    static object get(handle obj, size_t index) {
+        PyObject *result = PySequence_GetItem(obj.ptr(), static_cast<ssize_t>(index));
+        if (!result) { throw error_already_set(); }
+        return reinterpret_steal<object>(result);
+    }
+
+    static void set(handle obj, size_t index, handle val) {
+        // PySequence_SetItem does not steal a reference to 'val'
+        if (PySequence_SetItem(obj.ptr(), static_cast<ssize_t>(index), val.ptr()) != 0) {
+            throw error_already_set();
+        }
+    }
+};
+
+struct list_item {
+    using key_type = size_t;
+
+    static object get(handle obj, size_t index) {
+        PyObject *result = PyList_GetItem(obj.ptr(), static_cast<ssize_t>(index));
+        if (!result) { throw error_already_set(); }
+        return reinterpret_borrow<object>(result);
+    }
+
+    static void set(handle obj, size_t index, handle val) {
+        // PyList_SetItem steals a reference to 'val'
+        if (PyList_SetItem(obj.ptr(), static_cast<ssize_t>(index), val.inc_ref().ptr()) != 0) {
+            throw error_already_set();
+        }
+    }
+};
+
+struct tuple_item {
+    using key_type = size_t;
+
+    static object get(handle obj, size_t index) {
+        PyObject *result = PyTuple_GetItem(obj.ptr(), static_cast<ssize_t>(index));
+        if (!result) { throw error_already_set(); }
+        return reinterpret_borrow<object>(result);
+    }
+
+    static void set(handle obj, size_t index, handle val) {
+        // PyTuple_SetItem steals a reference to 'val'
+        if (PyTuple_SetItem(obj.ptr(), static_cast<ssize_t>(index), val.inc_ref().ptr()) != 0) {
+            throw error_already_set();
+        }
+    }
+};
+NAMESPACE_END(accessor_policies)
+
+/// STL iterator template used for tuple, list, sequence and dict
+template <typename Policy>
+class generic_iterator : public Policy {
+    using It = generic_iterator;
+
+public:
+    using difference_type = ssize_t;
+    using iterator_category = typename Policy::iterator_category;
+    using value_type = typename Policy::value_type;
+    using reference = typename Policy::reference;
+    using pointer = typename Policy::pointer;
+
+    generic_iterator() = default;
+    generic_iterator(handle seq, ssize_t index) : Policy(seq, index) { }
+
+    reference operator*() const { return Policy::dereference(); }
+    reference operator[](difference_type n) const { return *(*this + n); }
+    pointer operator->() const { return **this; }
+
+    It &operator++() { Policy::increment(); return *this; }
+    It operator++(int) { auto copy = *this; Policy::increment(); return copy; }
+    It &operator--() { Policy::decrement(); return *this; }
+    It operator--(int) { auto copy = *this; Policy::decrement(); return copy; }
+    It &operator+=(difference_type n) { Policy::advance(n); return *this; }
+    It &operator-=(difference_type n) { Policy::advance(-n); return *this; }
+
+    friend It operator+(const It &a, difference_type n) { auto copy = a; return copy += n; }
+    friend It operator+(difference_type n, const It &b) { return b + n; }
+    friend It operator-(const It &a, difference_type n) { auto copy = a; return copy -= n; }
+    friend difference_type operator-(const It &a, const It &b) { return a.distance_to(b); }
+
+    friend bool operator==(const It &a, const It &b) { return a.equal(b); }
+    friend bool operator!=(const It &a, const It &b) { return !(a == b); }
+    friend bool operator< (const It &a, const It &b) { return b - a > 0; }
+    friend bool operator> (const It &a, const It &b) { return b < a; }
+    friend bool operator>=(const It &a, const It &b) { return !(a < b); }
+    friend bool operator<=(const It &a, const It &b) { return !(a > b); }
+};
+
+NAMESPACE_BEGIN(iterator_policies)
+/// Quick proxy class needed to implement ``operator->`` for iterators which can't return pointers
+template <typename T>
+struct arrow_proxy {
+    T value;
+
+    arrow_proxy(T &&value) : value(std::move(value)) { }
+    T *operator->() const { return &value; }
+};
+
+/// Lightweight iterator policy using just a simple pointer: see ``PySequence_Fast_ITEMS``
+class sequence_fast_readonly {
+protected:
+    using iterator_category = std::random_access_iterator_tag;
+    using value_type = handle;
+    using reference = const handle;
+    using pointer = arrow_proxy<const handle>;
+
+    sequence_fast_readonly(handle obj, ssize_t n) : ptr(PySequence_Fast_ITEMS(obj.ptr()) + n) { }
+
+    reference dereference() const { return *ptr; }
+    void increment() { ++ptr; }
+    void decrement() { --ptr; }
+    void advance(ssize_t n) { ptr += n; }
+    bool equal(const sequence_fast_readonly &b) const { return ptr == b.ptr; }
+    ssize_t distance_to(const sequence_fast_readonly &b) const { return ptr - b.ptr; }
+
+private:
+    PyObject **ptr;
+};
+
+/// Full read and write access using the sequence protocol: see ``detail::sequence_accessor``
+class sequence_slow_readwrite {
+protected:
+    using iterator_category = std::random_access_iterator_tag;
+    using value_type = object;
+    using reference = sequence_accessor;
+    using pointer = arrow_proxy<const sequence_accessor>;
+
+    sequence_slow_readwrite(handle obj, ssize_t index) : obj(obj), index(index) { }
+
+    reference dereference() const { return {obj, static_cast<size_t>(index)}; }
+    void increment() { ++index; }
+    void decrement() { --index; }
+    void advance(ssize_t n) { index += n; }
