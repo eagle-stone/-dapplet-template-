@@ -824,3 +824,151 @@ class bytes;
 class str : public object {
 public:
     PYBIND11_OBJECT_CVT(str, object, detail::PyUnicode_Check_Permissive, raw_str)
+
+    str(const char *c, size_t n)
+        : object(PyUnicode_FromStringAndSize(c, (ssize_t) n), stolen_t{}) {
+        if (!m_ptr) pybind11_fail("Could not allocate string object!");
+    }
+
+    // 'explicit' is explicitly omitted from the following constructors to allow implicit conversion to py::str from C++ string-like objects
+    str(const char *c = "")
+        : object(PyUnicode_FromString(c), stolen_t{}) {
+        if (!m_ptr) pybind11_fail("Could not allocate string object!");
+    }
+
+    str(const std::string &s) : str(s.data(), s.size()) { }
+
+    explicit str(const bytes &b);
+
+    /** \rst
+        Return a string representation of the object. This is analogous to
+        the ``str()`` function in Python.
+    \endrst */
+    explicit str(handle h) : object(raw_str(h.ptr()), stolen_t{}) { }
+
+    operator std::string() const {
+        object temp = *this;
+        if (PyUnicode_Check(m_ptr)) {
+            temp = reinterpret_steal<object>(PyUnicode_AsUTF8String(m_ptr));
+            if (!temp)
+                pybind11_fail("Unable to extract string contents! (encoding issue)");
+        }
+        char *buffer;
+        ssize_t length;
+        if (PYBIND11_BYTES_AS_STRING_AND_SIZE(temp.ptr(), &buffer, &length))
+            pybind11_fail("Unable to extract string contents! (invalid type)");
+        return std::string(buffer, (size_t) length);
+    }
+
+    template <typename... Args>
+    str format(Args &&...args) const {
+        return attr("format")(std::forward<Args>(args)...);
+    }
+
+private:
+    /// Return string representation -- always returns a new reference, even if already a str
+    static PyObject *raw_str(PyObject *op) {
+        PyObject *str_value = PyObject_Str(op);
+#if PY_MAJOR_VERSION < 3
+        if (!str_value) throw error_already_set();
+        PyObject *unicode = PyUnicode_FromEncodedObject(str_value, "utf-8", nullptr);
+        Py_XDECREF(str_value); str_value = unicode;
+#endif
+        return str_value;
+    }
+};
+/// @} pytypes
+
+inline namespace literals {
+/** \rst
+    String literal version of `str`
+ \endrst */
+inline str operator"" _s(const char *s, size_t size) { return {s, size}; }
+}
+
+/// \addtogroup pytypes
+/// @{
+class bytes : public object {
+public:
+    PYBIND11_OBJECT(bytes, object, PYBIND11_BYTES_CHECK)
+
+    // Allow implicit conversion:
+    bytes(const char *c = "")
+        : object(PYBIND11_BYTES_FROM_STRING(c), stolen_t{}) {
+        if (!m_ptr) pybind11_fail("Could not allocate bytes object!");
+    }
+
+    bytes(const char *c, size_t n)
+        : object(PYBIND11_BYTES_FROM_STRING_AND_SIZE(c, (ssize_t) n), stolen_t{}) {
+        if (!m_ptr) pybind11_fail("Could not allocate bytes object!");
+    }
+
+    // Allow implicit conversion:
+    bytes(const std::string &s) : bytes(s.data(), s.size()) { }
+
+    explicit bytes(const pybind11::str &s);
+
+    operator std::string() const {
+        char *buffer;
+        ssize_t length;
+        if (PYBIND11_BYTES_AS_STRING_AND_SIZE(m_ptr, &buffer, &length))
+            pybind11_fail("Unable to extract bytes contents!");
+        return std::string(buffer, (size_t) length);
+    }
+};
+
+inline bytes::bytes(const pybind11::str &s) {
+    object temp = s;
+    if (PyUnicode_Check(s.ptr())) {
+        temp = reinterpret_steal<object>(PyUnicode_AsUTF8String(s.ptr()));
+        if (!temp)
+            pybind11_fail("Unable to extract string contents! (encoding issue)");
+    }
+    char *buffer;
+    ssize_t length;
+    if (PYBIND11_BYTES_AS_STRING_AND_SIZE(temp.ptr(), &buffer, &length))
+        pybind11_fail("Unable to extract string contents! (invalid type)");
+    auto obj = reinterpret_steal<object>(PYBIND11_BYTES_FROM_STRING_AND_SIZE(buffer, length));
+    if (!obj)
+        pybind11_fail("Could not allocate bytes object!");
+    m_ptr = obj.release().ptr();
+}
+
+inline str::str(const bytes& b) {
+    char *buffer;
+    ssize_t length;
+    if (PYBIND11_BYTES_AS_STRING_AND_SIZE(b.ptr(), &buffer, &length))
+        pybind11_fail("Unable to extract bytes contents!");
+    auto obj = reinterpret_steal<object>(PyUnicode_FromStringAndSize(buffer, (ssize_t) length));
+    if (!obj)
+        pybind11_fail("Could not allocate string object!");
+    m_ptr = obj.release().ptr();
+}
+
+class none : public object {
+public:
+    PYBIND11_OBJECT(none, object, detail::PyNone_Check)
+    none() : object(Py_None, borrowed_t{}) { }
+};
+
+class bool_ : public object {
+public:
+    PYBIND11_OBJECT_CVT(bool_, object, PyBool_Check, raw_bool)
+    bool_() : object(Py_False, borrowed_t{}) { }
+    // Allow implicit conversion from and to `bool`:
+    bool_(bool value) : object(value ? Py_True : Py_False, borrowed_t{}) { }
+    operator bool() const { return m_ptr && PyLong_AsLong(m_ptr) != 0; }
+
+private:
+    /// Return the truth value of an object -- always returns a new reference
+    static PyObject *raw_bool(PyObject *op) {
+        const auto value = PyObject_IsTrue(op);
+        if (value == -1) return nullptr;
+        return handle(value ? Py_True : Py_False).inc_ref().ptr();
+    }
+};
+
+NAMESPACE_BEGIN(detail)
+// Converts a value to the given unsigned type.  If an error occurs, you get back (Unsigned) -1;
+// otherwise you get back the unsigned long or unsigned long long value cast to (Unsigned).
+// (The distinction is critically important when casting a returned -1 error value to some other
