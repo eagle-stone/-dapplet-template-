@@ -1161,3 +1161,159 @@ public:
     PYBIND11_OBJECT_DEFAULT(sequence, object, PySequence_Check)
     size_t size() const { return (size_t) PySequence_Size(m_ptr); }
     detail::sequence_accessor operator[](size_t index) const { return {*this, index}; }
+    detail::sequence_iterator begin() const { return {*this, 0}; }
+    detail::sequence_iterator end() const { return {*this, PySequence_Size(m_ptr)}; }
+};
+
+class list : public object {
+public:
+    PYBIND11_OBJECT_CVT(list, object, PyList_Check, PySequence_List)
+    explicit list(size_t size = 0) : object(PyList_New((ssize_t) size), stolen_t{}) {
+        if (!m_ptr) pybind11_fail("Could not allocate list object!");
+    }
+    size_t size() const { return (size_t) PyList_Size(m_ptr); }
+    detail::list_accessor operator[](size_t index) const { return {*this, index}; }
+    detail::list_iterator begin() const { return {*this, 0}; }
+    detail::list_iterator end() const { return {*this, PyList_GET_SIZE(m_ptr)}; }
+    template <typename T> void append(T &&val) const {
+        PyList_Append(m_ptr, detail::object_or_cast(std::forward<T>(val)).ptr());
+    }
+};
+
+class args : public tuple { PYBIND11_OBJECT_DEFAULT(args, tuple, PyTuple_Check) };
+class kwargs : public dict { PYBIND11_OBJECT_DEFAULT(kwargs, dict, PyDict_Check)  };
+
+class set : public object {
+public:
+    PYBIND11_OBJECT_CVT(set, object, PySet_Check, PySet_New)
+    set() : object(PySet_New(nullptr), stolen_t{}) {
+        if (!m_ptr) pybind11_fail("Could not allocate set object!");
+    }
+    size_t size() const { return (size_t) PySet_Size(m_ptr); }
+    template <typename T> bool add(T &&val) const {
+        return PySet_Add(m_ptr, detail::object_or_cast(std::forward<T>(val)).ptr()) == 0;
+    }
+    void clear() const { PySet_Clear(m_ptr); }
+};
+
+class function : public object {
+public:
+    PYBIND11_OBJECT_DEFAULT(function, object, PyCallable_Check)
+    handle cpp_function() const {
+        handle fun = detail::get_function(m_ptr);
+        if (fun && PyCFunction_Check(fun.ptr()))
+            return fun;
+        return handle();
+    }
+    bool is_cpp_function() const { return (bool) cpp_function(); }
+};
+
+class buffer : public object {
+public:
+    PYBIND11_OBJECT_DEFAULT(buffer, object, PyObject_CheckBuffer)
+
+    buffer_info request(bool writable = false) {
+        int flags = PyBUF_STRIDES | PyBUF_FORMAT;
+        if (writable) flags |= PyBUF_WRITABLE;
+        Py_buffer *view = new Py_buffer();
+        if (PyObject_GetBuffer(m_ptr, view, flags) != 0) {
+            delete view;
+            throw error_already_set();
+        }
+        return buffer_info(view);
+    }
+};
+
+class memoryview : public object {
+public:
+    explicit memoryview(const buffer_info& info) {
+        static Py_buffer buf { };
+        // Py_buffer uses signed sizes, strides and shape!..
+        static std::vector<Py_ssize_t> py_strides { };
+        static std::vector<Py_ssize_t> py_shape { };
+        buf.buf = info.ptr;
+        buf.itemsize = info.itemsize;
+        buf.format = const_cast<char *>(info.format.c_str());
+        buf.ndim = (int) info.ndim;
+        buf.len = info.size;
+        py_strides.clear();
+        py_shape.clear();
+        for (size_t i = 0; i < (size_t) info.ndim; ++i) {
+            py_strides.push_back(info.strides[i]);
+            py_shape.push_back(info.shape[i]);
+        }
+        buf.strides = py_strides.data();
+        buf.shape = py_shape.data();
+        buf.suboffsets = nullptr;
+        buf.readonly = false;
+        buf.internal = nullptr;
+
+        m_ptr = PyMemoryView_FromBuffer(&buf);
+        if (!m_ptr)
+            pybind11_fail("Unable to create memoryview from buffer descriptor");
+    }
+
+    PYBIND11_OBJECT_CVT(memoryview, object, PyMemoryView_Check, PyMemoryView_FromObject)
+};
+/// @} pytypes
+
+/// \addtogroup python_builtins
+/// @{
+inline size_t len(handle h) {
+    ssize_t result = PyObject_Length(h.ptr());
+    if (result < 0)
+        pybind11_fail("Unable to compute length of object");
+    return (size_t) result;
+}
+
+inline str repr(handle h) {
+    PyObject *str_value = PyObject_Repr(h.ptr());
+    if (!str_value) throw error_already_set();
+#if PY_MAJOR_VERSION < 3
+    PyObject *unicode = PyUnicode_FromEncodedObject(str_value, "utf-8", nullptr);
+    Py_XDECREF(str_value); str_value = unicode;
+    if (!str_value) throw error_already_set();
+#endif
+    return reinterpret_steal<str>(str_value);
+}
+
+inline iterator iter(handle obj) {
+    PyObject *result = PyObject_GetIter(obj.ptr());
+    if (!result) { throw error_already_set(); }
+    return reinterpret_steal<iterator>(result);
+}
+/// @} python_builtins
+
+NAMESPACE_BEGIN(detail)
+template <typename D> iterator object_api<D>::begin() const { return iter(derived()); }
+template <typename D> iterator object_api<D>::end() const { return iterator::sentinel(); }
+template <typename D> item_accessor object_api<D>::operator[](handle key) const {
+    return {derived(), reinterpret_borrow<object>(key)};
+}
+template <typename D> item_accessor object_api<D>::operator[](const char *key) const {
+    return {derived(), pybind11::str(key)};
+}
+template <typename D> obj_attr_accessor object_api<D>::attr(handle key) const {
+    return {derived(), reinterpret_borrow<object>(key)};
+}
+template <typename D> str_attr_accessor object_api<D>::attr(const char *key) const {
+    return {derived(), key};
+}
+template <typename D> args_proxy object_api<D>::operator*() const {
+    return args_proxy(derived().ptr());
+}
+template <typename D> template <typename T> bool object_api<D>::contains(T &&item) const {
+    return attr("__contains__")(std::forward<T>(item)).template cast<bool>();
+}
+
+template <typename D>
+pybind11::str object_api<D>::str() const { return pybind11::str(derived()); }
+
+template <typename D>
+str_attr_accessor object_api<D>::doc() const { return attr("__doc__"); }
+
+template <typename D>
+handle object_api<D>::get_type() const { return (PyObject *) Py_TYPE(derived().ptr()); }
+
+NAMESPACE_END(detail)
+NAMESPACE_END(pybind11)
