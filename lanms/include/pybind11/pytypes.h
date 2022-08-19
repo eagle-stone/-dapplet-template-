@@ -972,3 +972,192 @@ NAMESPACE_BEGIN(detail)
 // Converts a value to the given unsigned type.  If an error occurs, you get back (Unsigned) -1;
 // otherwise you get back the unsigned long or unsigned long long value cast to (Unsigned).
 // (The distinction is critically important when casting a returned -1 error value to some other
+// unsigned type: (A)-1 != (B)-1 when A and B are unsigned types of different sizes).
+template <typename Unsigned>
+Unsigned as_unsigned(PyObject *o) {
+    if (sizeof(Unsigned) <= sizeof(unsigned long)
+#if PY_VERSION_HEX < 0x03000000
+            || PyInt_Check(o)
+#endif
+    ) {
+        unsigned long v = PyLong_AsUnsignedLong(o);
+        return v == (unsigned long) -1 && PyErr_Occurred() ? (Unsigned) -1 : (Unsigned) v;
+    }
+    else {
+        unsigned long long v = PyLong_AsUnsignedLongLong(o);
+        return v == (unsigned long long) -1 && PyErr_Occurred() ? (Unsigned) -1 : (Unsigned) v;
+    }
+}
+NAMESPACE_END(detail)
+
+class int_ : public object {
+public:
+    PYBIND11_OBJECT_CVT(int_, object, PYBIND11_LONG_CHECK, PyNumber_Long)
+    int_() : object(PyLong_FromLong(0), stolen_t{}) { }
+    // Allow implicit conversion from C++ integral types:
+    template <typename T,
+              detail::enable_if_t<std::is_integral<T>::value, int> = 0>
+    int_(T value) {
+        if (sizeof(T) <= sizeof(long)) {
+            if (std::is_signed<T>::value)
+                m_ptr = PyLong_FromLong((long) value);
+            else
+                m_ptr = PyLong_FromUnsignedLong((unsigned long) value);
+        } else {
+            if (std::is_signed<T>::value)
+                m_ptr = PyLong_FromLongLong((long long) value);
+            else
+                m_ptr = PyLong_FromUnsignedLongLong((unsigned long long) value);
+        }
+        if (!m_ptr) pybind11_fail("Could not allocate int object!");
+    }
+
+    template <typename T,
+              detail::enable_if_t<std::is_integral<T>::value, int> = 0>
+    operator T() const {
+        return std::is_unsigned<T>::value
+            ? detail::as_unsigned<T>(m_ptr)
+            : sizeof(T) <= sizeof(long)
+              ? (T) PyLong_AsLong(m_ptr)
+              : (T) PYBIND11_LONG_AS_LONGLONG(m_ptr);
+    }
+};
+
+class float_ : public object {
+public:
+    PYBIND11_OBJECT_CVT(float_, object, PyFloat_Check, PyNumber_Float)
+    // Allow implicit conversion from float/double:
+    float_(float value) : object(PyFloat_FromDouble((double) value), stolen_t{}) {
+        if (!m_ptr) pybind11_fail("Could not allocate float object!");
+    }
+    float_(double value = .0) : object(PyFloat_FromDouble((double) value), stolen_t{}) {
+        if (!m_ptr) pybind11_fail("Could not allocate float object!");
+    }
+    operator float() const { return (float) PyFloat_AsDouble(m_ptr); }
+    operator double() const { return (double) PyFloat_AsDouble(m_ptr); }
+};
+
+class weakref : public object {
+public:
+    PYBIND11_OBJECT_DEFAULT(weakref, object, PyWeakref_Check)
+    explicit weakref(handle obj, handle callback = {})
+        : object(PyWeakref_NewRef(obj.ptr(), callback.ptr()), stolen_t{}) {
+        if (!m_ptr) pybind11_fail("Could not allocate weak reference!");
+    }
+};
+
+class slice : public object {
+public:
+    PYBIND11_OBJECT_DEFAULT(slice, object, PySlice_Check)
+    slice(ssize_t start_, ssize_t stop_, ssize_t step_) {
+        int_ start(start_), stop(stop_), step(step_);
+        m_ptr = PySlice_New(start.ptr(), stop.ptr(), step.ptr());
+        if (!m_ptr) pybind11_fail("Could not allocate slice object!");
+    }
+    bool compute(size_t length, size_t *start, size_t *stop, size_t *step,
+                 size_t *slicelength) const {
+        return PySlice_GetIndicesEx((PYBIND11_SLICE_OBJECT *) m_ptr,
+                                    (ssize_t) length, (ssize_t *) start,
+                                    (ssize_t *) stop, (ssize_t *) step,
+                                    (ssize_t *) slicelength) == 0;
+    }
+};
+
+class capsule : public object {
+public:
+    PYBIND11_OBJECT_DEFAULT(capsule, object, PyCapsule_CheckExact)
+    PYBIND11_DEPRECATED("Use reinterpret_borrow<capsule>() or reinterpret_steal<capsule>()")
+    capsule(PyObject *ptr, bool is_borrowed) : object(is_borrowed ? object(ptr, borrowed_t{}) : object(ptr, stolen_t{})) { }
+
+    explicit capsule(const void *value, const char *name = nullptr, void (*destructor)(PyObject *) = nullptr)
+        : object(PyCapsule_New(const_cast<void *>(value), name, destructor), stolen_t{}) {
+        if (!m_ptr)
+            pybind11_fail("Could not allocate capsule object!");
+    }
+
+    PYBIND11_DEPRECATED("Please pass a destructor that takes a void pointer as input")
+    capsule(const void *value, void (*destruct)(PyObject *))
+        : object(PyCapsule_New(const_cast<void*>(value), nullptr, destruct), stolen_t{}) {
+        if (!m_ptr)
+            pybind11_fail("Could not allocate capsule object!");
+    }
+
+    capsule(const void *value, void (*destructor)(void *)) {
+        m_ptr = PyCapsule_New(const_cast<void *>(value), nullptr, [](PyObject *o) {
+            auto destructor = reinterpret_cast<void (*)(void *)>(PyCapsule_GetContext(o));
+            void *ptr = PyCapsule_GetPointer(o, nullptr);
+            destructor(ptr);
+        });
+
+        if (!m_ptr)
+            pybind11_fail("Could not allocate capsule object!");
+
+        if (PyCapsule_SetContext(m_ptr, (void *) destructor) != 0)
+            pybind11_fail("Could not set capsule context!");
+    }
+
+    capsule(void (*destructor)()) {
+        m_ptr = PyCapsule_New(reinterpret_cast<void *>(destructor), nullptr, [](PyObject *o) {
+            auto destructor = reinterpret_cast<void (*)()>(PyCapsule_GetPointer(o, nullptr));
+            destructor();
+        });
+
+        if (!m_ptr)
+            pybind11_fail("Could not allocate capsule object!");
+    }
+
+    template <typename T> operator T *() const {
+        auto name = this->name();
+        T * result = static_cast<T *>(PyCapsule_GetPointer(m_ptr, name));
+        if (!result) pybind11_fail("Unable to extract capsule contents!");
+        return result;
+    }
+
+    const char *name() const { return PyCapsule_GetName(m_ptr); }
+};
+
+class tuple : public object {
+public:
+    PYBIND11_OBJECT_CVT(tuple, object, PyTuple_Check, PySequence_Tuple)
+    explicit tuple(size_t size = 0) : object(PyTuple_New((ssize_t) size), stolen_t{}) {
+        if (!m_ptr) pybind11_fail("Could not allocate tuple object!");
+    }
+    size_t size() const { return (size_t) PyTuple_Size(m_ptr); }
+    detail::tuple_accessor operator[](size_t index) const { return {*this, index}; }
+    detail::tuple_iterator begin() const { return {*this, 0}; }
+    detail::tuple_iterator end() const { return {*this, PyTuple_GET_SIZE(m_ptr)}; }
+};
+
+class dict : public object {
+public:
+    PYBIND11_OBJECT_CVT(dict, object, PyDict_Check, raw_dict)
+    dict() : object(PyDict_New(), stolen_t{}) {
+        if (!m_ptr) pybind11_fail("Could not allocate dict object!");
+    }
+    template <typename... Args,
+              typename = detail::enable_if_t<detail::all_of<detail::is_keyword_or_ds<Args>...>::value>,
+              // MSVC workaround: it can't compile an out-of-line definition, so defer the collector
+              typename collector = detail::deferred_t<detail::unpacking_collector<>, Args...>>
+    explicit dict(Args &&...args) : dict(collector(std::forward<Args>(args)...).kwargs()) { }
+
+    size_t size() const { return (size_t) PyDict_Size(m_ptr); }
+    detail::dict_iterator begin() const { return {*this, 0}; }
+    detail::dict_iterator end() const { return {}; }
+    void clear() const { PyDict_Clear(ptr()); }
+    bool contains(handle key) const { return PyDict_Contains(ptr(), key.ptr()) == 1; }
+    bool contains(const char *key) const { return PyDict_Contains(ptr(), pybind11::str(key).ptr()) == 1; }
+
+private:
+    /// Call the `dict` Python type -- always returns a new reference
+    static PyObject *raw_dict(PyObject *op) {
+        if (PyDict_Check(op))
+            return handle(op).inc_ref().ptr();
+        return PyObject_CallFunctionObjArgs((PyObject *) &PyDict_Type, op, nullptr);
+    }
+};
+
+class sequence : public object {
+public:
+    PYBIND11_OBJECT_DEFAULT(sequence, object, PySequence_Check)
+    size_t size() const { return (size_t) PySequence_Size(m_ptr); }
+    detail::sequence_accessor operator[](size_t index) const { return {*this, index}; }
