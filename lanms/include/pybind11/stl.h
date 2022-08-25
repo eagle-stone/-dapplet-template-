@@ -13,4 +13,11 @@
 #include <set>
 #include <unordered_set>
 #include <map>
-#
+#include <unordered_map>
+#include <iostream>
+#include <list>
+#include <valarray>
+
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable: 4127) // warning C4127: Conditional expre
