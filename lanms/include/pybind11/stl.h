@@ -26,4 +26,8 @@
 #ifdef __has_include
 // std::optional (but including it in c++14 mode isn't allowed)
 #  if defined(PYBIND11_CPP17) && __has_include(<optional>)
-#    inclu
+#    include <optional>
+#    define PYBIND11_HAS_OPTIONAL 1
+#  endif
+// std::experimental::optional (but not allowed in c++11 mode)
+#  if defined(PYBIND11_CPP14) && __has_include(<exp
