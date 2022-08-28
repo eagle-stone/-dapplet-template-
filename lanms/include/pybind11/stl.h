@@ -49,4 +49,7 @@
 NAMESPACE_BEGIN(pybind11)
 NAMESPACE_BEGIN(detail)
 
-/// Extracts an const lvalue reference or rvalue reference for 
+/// Extracts an const lvalue reference or rvalue reference for U based on the type of T (e.g. for
+/// forwarding a container element).  Typically used indirect via forwarded_type(), below.
+template <typename T, typename U>
+using fo
