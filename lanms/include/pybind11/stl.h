@@ -35,4 +35,11 @@
 #    define PYBIND11_HAS_EXP_OPTIONAL 1
 #  endif
 // std::variant
-#  if defined(PYBIND11_CPP17) && __has_
+#  if defined(PYBIND11_CPP17) && __has_include(<variant>)
+#    include <variant>
+#    define PYBIND11_HAS_VARIANT 1
+#  endif
+#elif defined(_MSC_VER) && defined(PYBIND11_CPP17)
+#  include <optional>
+#  include <variant>
+#  define PYBIND11_HAS_
