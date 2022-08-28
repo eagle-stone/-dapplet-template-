@@ -42,4 +42,11 @@
 #elif defined(_MSC_VER) && defined(PYBIND11_CPP17)
 #  include <optional>
 #  include <variant>
-#  define PYBIND11_HAS_
+#  define PYBIND11_HAS_OPTIONAL 1
+#  define PYBIND11_HAS_VARIANT 1
+#endif
+
+NAMESPACE_BEGIN(pybind11)
+NAMESPACE_BEGIN(detail)
+
+/// Extracts an const lvalue reference or rvalue reference for 
