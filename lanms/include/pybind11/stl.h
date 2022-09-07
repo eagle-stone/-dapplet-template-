@@ -55,4 +55,8 @@ template <typename T, typename U>
 using forwarded_type = conditional_t<
     std::is_lvalue_reference<T>::value, remove_reference_t<U> &, remove_reference_t<U> &&>;
 
-/// Forwards a value U as rvalue or lvalue acc
+/// Forwards a value U as rvalue or lvalue according to whether T is rvalue or lvalue; typically
+/// used for forwarding a container's elements.
+template <typename T, typename U>
+forwarded_type<T, U> forward_like(U &&u) {
+    retur
