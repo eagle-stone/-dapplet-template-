@@ -52,4 +52,7 @@ NAMESPACE_BEGIN(detail)
 /// Extracts an const lvalue reference or rvalue reference for U based on the type of T (e.g. for
 /// forwarding a container element).  Typically used indirect via forwarded_type(), below.
 template <typename T, typename U>
-using fo
+using forwarded_type = conditional_t<
+    std::is_lvalue_reference<T>::value, remove_reference_t<U> &, remove_reference_t<U> &&>;
+
+/// Forwards a value U as rvalue or lvalue acc
