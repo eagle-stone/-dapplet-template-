@@ -59,4 +59,9 @@ using forwarded_type = conditional_t<
 /// used for forwarding a container's elements.
 template <typename T, typename U>
 forwarded_type<T, U> forward_like(U &&u) {
-    retur
+    return std::forward<detail::forwarded_type<T, U>>(std::forward<U>(u));
+}
+
+template <typename Type, typename Key> struct set_caster {
+    using type = Type;
+    using key_conv = make_cas
