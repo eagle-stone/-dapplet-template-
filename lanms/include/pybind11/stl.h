@@ -64,4 +64,9 @@ forwarded_type<T, U> forward_like(U &&u) {
 
 template <typename Type, typename Key> struct set_caster {
     using type = Type;
-    using key_conv = make_cas
+    using key_conv = make_caster<Key>;
+
+    bool load(handle src, bool convert) {
+        if (!isinstance<pybind11::set>(src))
+            return false;
+        auto s = reinterpret_borrow<pybind11::se
