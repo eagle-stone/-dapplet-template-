@@ -75,3 +75,10 @@ template <typename Type, typename Key> struct set_caster {
             key_conv conv;
             if (!conv.load(entry, convert))
                 return false;
+            value.insert(cast_op<Key &&>(std::move(conv)));
+        }
+        return true;
+    }
+
+    template <typename T>
+    static handle cast(T &&src, return_value_policy po
