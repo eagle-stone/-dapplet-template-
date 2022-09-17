@@ -69,4 +69,9 @@ template <typename Type, typename Key> struct set_caster {
     bool load(handle src, bool convert) {
         if (!isinstance<pybind11::set>(src))
             return false;
-        auto s = reinterpret_borrow<pybind11::se
+        auto s = reinterpret_borrow<pybind11::set>(src);
+        value.clear();
+        for (auto entry : s) {
+            key_conv conv;
+            if (!conv.load(entry, convert))
+                return false;
