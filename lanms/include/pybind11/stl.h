@@ -84,4 +84,11 @@ template <typename Type, typename Key> struct set_caster {
     static handle cast(T &&src, return_value_policy policy, handle parent) {
         pybind11::set s;
         for (auto &value: src) {
-            auto value_ = reinterpret_steal<object>(key_conv::cast(forward_like<T>(v
+            auto value_ = reinterpret_steal<object>(key_conv::cast(forward_like<T>(value), policy, parent));
+            if (!value_ || !s.add(value_))
+                return handle();
+        }
+        return s.release();
+    }
+
+    PYBIND11_TYPE_CASTER(t
