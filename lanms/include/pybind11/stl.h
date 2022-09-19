@@ -91,4 +91,9 @@ template <typename Type, typename Key> struct set_caster {
         return s.release();
     }
 
-    PYBIND11_TYPE_CASTER(t
+    PYBIND11_TYPE_CASTER(type, _("Set[") + key_conv::name() + _("]"));
+};
+
+template <typename Type, typename Key, typename Value> struct map_caster {
+    using key_conv   = make_caster<Key>;
+  
