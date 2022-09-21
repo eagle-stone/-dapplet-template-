@@ -96,4 +96,9 @@ template <typename Type, typename Key> struct set_caster {
 
 template <typename Type, typename Key, typename Value> struct map_caster {
     using key_conv   = make_caster<Key>;
-  
+    using value_conv = make_caster<Value>;
+
+    bool load(handle src, bool convert) {
+        if (!isinstance<dict>(src))
+            return false;
+   
