@@ -101,4 +101,9 @@ template <typename Type, typename Key, typename Value> struct map_caster {
     bool load(handle src, bool convert) {
         if (!isinstance<dict>(src))
             return false;
-   
+        auto d = reinterpret_borrow<dict>(src);
+        value.clear();
+        for (auto it : d) {
+            key_conv kconv;
+            value_conv vconv;
+            if (!kconv.load
