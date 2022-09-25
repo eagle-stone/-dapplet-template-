@@ -109,4 +109,10 @@ template <typename Type, typename Key, typename Value> struct map_caster {
             if (!kconv.load(it.first.ptr(), convert) ||
                 !vconv.load(it.second.ptr(), convert))
                 return false;
-            value.emplace(cast_op<Key &&>(std::move(kco
+            value.emplace(cast_op<Key &&>(std::move(kconv)), cast_op<Value &&>(std::move(vconv)));
+        }
+        return true;
+    }
+
+    template <typename T>
+    static handle cast(T &&src, return_value_policy poli
