@@ -106,4 +106,7 @@ template <typename Type, typename Key, typename Value> struct map_caster {
         for (auto it : d) {
             key_conv kconv;
             value_conv vconv;
-            if (!kconv.load
+            if (!kconv.load(it.first.ptr(), convert) ||
+                !vconv.load(it.second.ptr(), convert))
+                return false;
+            value.emplace(cast_op<Key &&>(std::move(kco
