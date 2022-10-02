@@ -118,4 +118,7 @@ template <typename Type, typename Key, typename Value> struct map_caster {
     static handle cast(T &&src, return_value_policy policy, handle parent) {
         dict d;
         for (auto &kv: src) {
-            auto key = reinterpret_steal<object>(key_conv::cast(forward_like<T>(kv.first), policy, pare
+            auto key = reinterpret_steal<object>(key_conv::cast(forward_like<T>(kv.first), policy, parent));
+            auto value = reinterpret_steal<object>(value_conv::cast(forward_like<T>(kv.second), policy, parent));
+            if (!key || !value)
+                return handle()
