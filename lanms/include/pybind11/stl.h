@@ -128,3 +128,10 @@ template <typename Type, typename Key, typename Value> struct map_caster {
     }
 
     PYBIND11_TYPE_CASTER(Type, _("Dict[") + key_conv::name() + _(", ") + value_conv::name() + _("]"));
+};
+
+template <typename Type, typename Value> struct list_caster {
+    using value_conv = make_caster<Value>;
+
+    bool load(handle src, bool convert) {
+        if (
