@@ -121,4 +121,10 @@ template <typename Type, typename Key, typename Value> struct map_caster {
             auto key = reinterpret_steal<object>(key_conv::cast(forward_like<T>(kv.first), policy, parent));
             auto value = reinterpret_steal<object>(value_conv::cast(forward_like<T>(kv.second), policy, parent));
             if (!key || !value)
-                return handle()
+                return handle();
+            d[key] = value;
+        }
+        return d.release();
+    }
+
+    PYBIND11_TYPE_CASTER(Type, _("Dict[") + key_conv::name() + _(", ") + value_conv::name() + _("]"));
