@@ -143,4 +143,11 @@ template <typename Type, typename Value> struct list_caster {
             value_conv conv;
             if (!conv.load(it, convert))
                 return false;
-            value.push_back(cast_o
+            value.push_back(cast_op<Value &&>(std::move(conv)));
+        }
+        return true;
+    }
+
+private:
+    template <typename T = Type,
+              enable_if_t<std::is_same<decltype(std::declval<T>().reserve(0)), 
