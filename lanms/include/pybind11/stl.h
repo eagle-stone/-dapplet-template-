@@ -139,4 +139,8 @@ template <typename Type, typename Value> struct list_caster {
         auto s = reinterpret_borrow<sequence>(src);
         value.clear();
         reserve_maybe(s, &value);
-      
+        for (auto it : s) {
+            value_conv conv;
+            if (!conv.load(it, convert))
+                return false;
+            value.push_back(cast_o
