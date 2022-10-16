@@ -150,4 +150,10 @@ template <typename Type, typename Value> struct list_caster {
 
 private:
     template <typename T = Type,
-              enable_if_t<std::is_same<decltype(std::declval<T>().reserve(0)), 
+              enable_if_t<std::is_same<decltype(std::declval<T>().reserve(0)), void>::value, int> = 0>
+    void reserve_maybe(sequence s, Type *) { value.reserve(s.size()); }
+    void reserve_maybe(sequence, void *) { }
+
+public:
+    template <typename T>
+    st
