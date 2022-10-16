@@ -156,4 +156,8 @@ private:
 
 public:
     template <typename T>
-    st
+    static handle cast(T &&src, return_value_policy policy, handle parent) {
+        list l(src.size());
+        size_t index = 0;
+        for (auto &value: src) {
+           
