@@ -163,4 +163,9 @@ public:
             auto value_ = reinterpret_steal<object>(value_conv::cast(forward_like<T>(value), policy, parent));
             if (!value_)
                 return handle();
-            PyList_SET_ITEM(l.ptr(), (s
+            PyList_SET_ITEM(l.ptr(), (ssize_t) index++, value_.release().ptr()); // steals a reference
+        }
+        return l.release();
+    }
+
+    PYBIND11_TYPE_CASTER(Type, _("List[") + value_conv::name() + _(
