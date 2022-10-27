@@ -168,4 +168,10 @@ public:
         return l.release();
     }
 
-    PYBIND11_TYPE_CASTER(Type, _("List[") + value_conv::name() + _(
+    PYBIND11_TYPE_CASTER(Type, _("List[") + value_conv::name() + _("]"));
+};
+
+template <typename Type, typename Alloc> struct type_caster<std::vector<Type, Alloc>>
+ : list_caster<std::vector<Type, Alloc>, Type> { };
+
+template <typename Type, 
