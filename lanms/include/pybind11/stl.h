@@ -177,4 +177,9 @@ template <typename Type, typename Alloc> struct type_caster<std::vector<Type, Al
 template <typename Type, typename Alloc> struct type_caster<std::list<Type, Alloc>>
  : list_caster<std::list<Type, Alloc>, Type> { };
 
-template <typename ArrayType, typename Value, bool Res
+template <typename ArrayType, typename Value, bool Resizable, size_t Size = 0> struct array_caster {
+    using value_conv = make_caster<Value>;
+
+private:
+    template <bool R = Resizable>
+    bool require_size(enable_if_t<R, size
