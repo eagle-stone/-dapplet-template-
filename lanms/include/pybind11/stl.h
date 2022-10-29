@@ -194,4 +194,9 @@ private:
 
 public:
     bool load(handle src, bool convert) {
-        if 
+        if (!isinstance<list>(src))
+            return false;
+        auto l = reinterpret_borrow<list>(src);
+        if (!require_size(l.size()))
+            return false;
+        size_t ct
