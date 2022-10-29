@@ -174,4 +174,7 @@ public:
 template <typename Type, typename Alloc> struct type_caster<std::vector<Type, Alloc>>
  : list_caster<std::vector<Type, Alloc>, Type> { };
 
-template <typename Type, 
+template <typename Type, typename Alloc> struct type_caster<std::list<Type, Alloc>>
+ : list_caster<std::list<Type, Alloc>, Type> { };
+
+template <typename ArrayType, typename Value, bool Res
