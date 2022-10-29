@@ -188,4 +188,10 @@ private:
         return true;
     }
     template <bool R = Resizable>
-    bool req
+    bool require_size(enable_if_t<!R, size_t> size) {
+        return size == Size;
+    }
+
+public:
+    bool load(handle src, bool convert) {
+        if 
