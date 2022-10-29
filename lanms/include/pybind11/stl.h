@@ -182,4 +182,10 @@ template <typename ArrayType, typename Value, bool Resizable, size_t Size = 0> s
 
 private:
     template <bool R = Resizable>
-    bool require_size(enable_if_t<R, size
+    bool require_size(enable_if_t<R, size_t> size) {
+        if (value.size() != size)
+            value.resize(size);
+        return true;
+    }
+    template <bool R = Resizable>
+    bool req
