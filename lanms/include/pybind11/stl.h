@@ -199,4 +199,9 @@ public:
         auto l = reinterpret_borrow<list>(src);
         if (!require_size(l.size()))
             return false;
-        size_t ct
+        size_t ctr = 0;
+        for (auto it : l) {
+            value_conv conv;
+            if (!conv.load(it, convert))
+                return false;
+            value[ctr++] = cast_op<Value &&>
