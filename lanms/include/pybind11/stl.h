@@ -204,4 +204,10 @@ public:
             value_conv conv;
             if (!conv.load(it, convert))
                 return false;
-            value[ctr++] = cast_op<Value &&>
+            value[ctr++] = cast_op<Value &&>(std::move(conv));
+        }
+        return true;
+    }
+
+    template <typename T>
+    static handle cast(T &&src, return_value_policy policy, handle pa
