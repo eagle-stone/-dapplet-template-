@@ -210,4 +210,8 @@ public:
     }
 
     template <typename T>
-    static handle cast(T &&src, return_value_policy policy, handle pa
+    static handle cast(T &&src, return_value_policy policy, handle parent) {
+        list l(src.size());
+        size_t index = 0;
+        for (auto &value: src) {
+            auto value_ = reinterpret_steal<object>(value_conv::cast(f
