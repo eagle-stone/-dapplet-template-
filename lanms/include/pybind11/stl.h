@@ -222,4 +222,10 @@ public:
         return l.release();
     }
 
-    PYBIND11_TYPE_CASTER(ArrayType, _("List[") + value_conv::name() + _<Resizable>(_(""), _("[") + _<Siz
+    PYBIND11_TYPE_CASTER(ArrayType, _("List[") + value_conv::name() + _<Resizable>(_(""), _("[") + _<Size>() + _("]")) + _("]"));
+};
+
+template <typename Type, size_t Size> struct type_caster<std::array<Type, Size>>
+ : array_caster<std::array<Type, Size>, Type, false, Size> { };
+
+t
