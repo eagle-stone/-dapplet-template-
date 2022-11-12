@@ -231,4 +231,7 @@ template <typename Type, size_t Size> struct type_caster<std::array<Type, Size>>
 template <typename Type> struct type_caster<std::valarray<Type>>
  : array_caster<std::valarray<Type>, Type, true> { };
 
-template <typename Key, typename Compare, typename Alloc> struct typ
+template <typename Key, typename Compare, typename Alloc> struct type_caster<std::set<Key, Compare, Alloc>>
+  : set_caster<std::set<Key, Compare, Alloc>, Key> { };
+
+template <typename Key, typename Hash, typename Equal, typename Alloc> struct type_caster<std::unordered_se
