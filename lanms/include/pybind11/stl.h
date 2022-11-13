@@ -241,4 +241,8 @@ template <typename Key, typename Value, typename Compare, typename Alloc> struct
   : map_caster<std::map<Key, Value, Compare, Alloc>, Key, Value> { };
 
 template <typename Key, typename Value, typename Hash, typename Equal, typename Alloc> struct type_caster<std::unordered_map<Key, Value, Hash, Equal, Alloc>>
-  : map_caster<std::unordered_map<Key, Value, Hash, Eq
+  : map_caster<std::unordered_map<Key, Value, Hash, Equal, Alloc>, Key, Value> { };
+
+// This type caster is intended to be used for std::optional and std::experimental::optional
+template<typename T> struct optional_caster {
+   
