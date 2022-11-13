@@ -237,4 +237,7 @@ template <typename Key, typename Compare, typename Alloc> struct type_caster<std
 template <typename Key, typename Hash, typename Equal, typename Alloc> struct type_caster<std::unordered_set<Key, Hash, Equal, Alloc>>
   : set_caster<std::unordered_set<Key, Hash, Equal, Alloc>, Key> { };
 
-template <typename Key, typename Value, typename Compare, typename 
+template <typename Key, typename Value, typename Compare, typename Alloc> struct type_caster<std::map<Key, Value, Compare, Alloc>>
+  : map_caster<std::map<Key, Value, Compare, Alloc>, Key, Value> { };
+
+template <typename Key,
