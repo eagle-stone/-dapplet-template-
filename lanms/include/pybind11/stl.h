@@ -245,4 +245,7 @@ template <typename Key, typename Value, typename Hash, typename Equal, typename 
 
 // This type caster is intended to be used for std::optional and std::experimental::optional
 template<typename T> struct optional_caster {
-   
+    using value_conv = make_caster<typename T::value_type>;
+
+    template <typename T_>
+    static handle cast(T_ &&src, return_value_policy policy, handle parent) {
