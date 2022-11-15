@@ -249,3 +249,10 @@ template<typename T> struct optional_caster {
 
     template <typename T_>
     static handle cast(T_ &&src, return_value_policy policy, handle parent) {
+        if (!src)
+            return none().inc_ref();
+        return value_conv::cast(*std::forward<T_>(src), policy, parent);
+    }
+
+    bool load(handle src, bool convert) {
+        if
