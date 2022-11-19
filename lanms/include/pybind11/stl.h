@@ -264,4 +264,12 @@ template<typename T> struct optional_caster {
         if (!inner_caster.load(src, convert))
             return false;
 
-        value.emplace(cast_op<typename T::value_type &&>
+        value.emplace(cast_op<typename T::value_type &&>(std::move(inner_caster)));
+        return true;
+    }
+
+    PYBIND11_TYPE_CASTER(T, _("Optional[") + value_conv::name() + _("]"));
+};
+
+#if PYBIND11_HAS_OPTIONAL
+t
