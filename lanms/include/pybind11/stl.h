@@ -260,4 +260,8 @@ template<typename T> struct optional_caster {
         } else if (src.is_none()) {
             return true;  // default-constructed value is already empty
         }
-     
+        value_conv inner_caster;
+        if (!inner_caster.load(src, convert))
+            return false;
+
+        value.emplace(cast_op<typename T::value_type &&>
