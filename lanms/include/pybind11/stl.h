@@ -281,4 +281,7 @@ template<> struct type_caster<std::nullopt_t>
 
 #if PYBIND11_HAS_EXP_OPTIONAL
 template<typename T> struct type_caster<std::experimental::optional<T>>
-    : public optional_caster<std::exp
+    : public optional_caster<std::experimental::optional<T>> {};
+
+template<> struct type_caster<std::experimental::nullopt_t>
+    : public void_caster<std::experimental::nullopt_t> {};
