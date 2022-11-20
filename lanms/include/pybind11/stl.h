@@ -272,4 +272,8 @@ template<typename T> struct optional_caster {
 };
 
 #if PYBIND11_HAS_OPTIONAL
-t
+template<typename T> struct type_caster<std::optional<T>>
+    : public optional_caster<std::optional<T>> {};
+
+template<> struct type_caster<std::nullopt_t>
+    : public void_caster<
