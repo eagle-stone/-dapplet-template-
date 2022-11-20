@@ -285,3 +285,12 @@ template<typename T> struct type_caster<std::experimental::optional<T>>
 
 template<> struct type_caster<std::experimental::nullopt_t>
     : public void_caster<std::experimental::nullopt_t> {};
+#endif
+
+/// Visit a variant and cast any found type to Python
+struct variant_caster_visitor {
+    return_value_policy policy;
+    handle parent;
+
+    template <typename T>
+    handle operato
