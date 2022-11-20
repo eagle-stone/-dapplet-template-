@@ -293,4 +293,9 @@ struct variant_caster_visitor {
     handle parent;
 
     template <typename T>
-    handle operato
+    handle operator()(T &&src) const {
+        return make_caster<T>::cast(std::forward<T>(src), policy, parent);
+    }
+};
+
+/// Helper class which abstracts away variant's `visit` function. `std
