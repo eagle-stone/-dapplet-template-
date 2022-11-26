@@ -300,4 +300,8 @@ struct variant_caster_visitor {
 
 /// Helper class which abstracts away variant's `visit` function. `std::variant` and similar
 /// `namespace::variant` types which provide a `namespace::visit()` function are handled here
-/// automatically using argument-dependent lookup.
+/// automatically using argument-dependent lookup. Users can provide specializations for other
+/// variant-like classes, e.g. `boost::variant` and `boost::apply_visitor`.
+template <template<typename...> class Variant>
+struct visit_helper {
+    templ
