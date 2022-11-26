@@ -304,4 +304,11 @@ struct variant_caster_visitor {
 /// variant-like classes, e.g. `boost::variant` and `boost::apply_visitor`.
 template <template<typename...> class Variant>
 struct visit_helper {
-    templ
+    template <typename... Args>
+    static auto call(Args &&...args) -> decltype(visit(std::forward<Args>(args)...)) {
+        return visit(std::forward<Args>(args)...);
+    }
+};
+
+/// Generic variant caster
+te
