@@ -298,4 +298,6 @@ struct variant_caster_visitor {
     }
 };
 
-/// Helper class which abstracts away variant's `visit` function. `std
+/// Helper class which abstracts away variant's `visit` function. `std::variant` and similar
+/// `namespace::variant` types which provide a `namespace::visit()` function are handled here
+/// automatically using argument-dependent lookup.
