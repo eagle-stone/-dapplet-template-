@@ -311,4 +311,8 @@ struct visit_helper {
 };
 
 /// Generic variant caster
-te
+template <typename Variant> struct variant_caster;
+
+template <template<typename...> class V, typename... Ts>
+struct variant_caster<V<Ts...>> {
+    static_assert(sizeof...(Ts) > 0, "Variant mus
