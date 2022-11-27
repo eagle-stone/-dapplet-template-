@@ -315,4 +315,7 @@ template <typename Variant> struct variant_caster;
 
 template <template<typename...> class V, typename... Ts>
 struct variant_caster<V<Ts...>> {
-    static_assert(sizeof...(Ts) > 0, "Variant mus
+    static_assert(sizeof...(Ts) > 0, "Variant must consist of at least one alternative.");
+
+    template <typename U, typename... Us>
+    bool load_alternative(handle src, bool convert, type_list<U, Us...>) {
