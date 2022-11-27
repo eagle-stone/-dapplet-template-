@@ -319,3 +319,9 @@ struct variant_caster<V<Ts...>> {
 
     template <typename U, typename... Us>
     bool load_alternative(handle src, bool convert, type_list<U, Us...>) {
+        auto caster = make_caster<U>();
+        if (caster.load(src, convert)) {
+            value = cast_op<U>(caster);
+            return true;
+        }
+        return 
