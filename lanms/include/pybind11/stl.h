@@ -324,4 +324,10 @@ struct variant_caster<V<Ts...>> {
             value = cast_op<U>(caster);
             return true;
         }
-        return 
+        return load_alternative(src, convert, type_list<Us...>{});
+    }
+
+    bool load_alternative(handle, bool, type_list<>) { return false; }
+
+    bool load(handle src, bool convert) {
+   
