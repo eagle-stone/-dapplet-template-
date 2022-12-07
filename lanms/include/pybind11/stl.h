@@ -335,4 +335,9 @@ struct variant_caster<V<Ts...>> {
         // slot of the variant. Without two-pass loading `double` would be filled
         // because it appears first and a conversion is possible.
         if (convert && load_alternative(src, false, type_list<Ts...>{}))
-            r
+            return true;
+        return load_alternative(src, convert, type_list<Ts...>{});
+    }
+
+    template <typename Variant>
+    static handle cast(Variant &&src, return_value
