@@ -355,4 +355,13 @@ struct type_caster<std::variant<Ts...>> : variant_caster<std::variant<Ts...>> { 
 #endif
 NAMESPACE_END(detail)
 
-inline std::ostream &operator<<(std::ostream &os, const handle &obj)
+inline std::ostream &operator<<(std::ostream &os, const handle &obj) {
+    os << (std::string) str(obj);
+    return os;
+}
+
+NAMESPACE_END(pybind11)
+
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif
