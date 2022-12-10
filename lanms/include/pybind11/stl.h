@@ -345,4 +345,10 @@ struct variant_caster<V<Ts...>> {
                                      std::forward<Variant>(src));
     }
 
-   
+    using Type = V<Ts...>;
+    PYBIND11_TYPE_CASTER(Type, _("Union[") + detail::concat(make_caster<Ts>::name()...) + _("]"));
+};
+
+#if PYBIND11_HAS_VARIANT
+template <typename... Ts>
+struct ty
