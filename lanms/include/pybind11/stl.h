@@ -340,4 +340,9 @@ struct variant_caster<V<Ts...>> {
     }
 
     template <typename Variant>
-    static handle cast(Variant &&src, return_value
+    static handle cast(Variant &&src, return_value_policy policy, handle parent) {
+        return visit_helper<V>::call(variant_caster_visitor{policy, parent},
+                                     std::forward<Variant>(src));
+    }
+
+   
