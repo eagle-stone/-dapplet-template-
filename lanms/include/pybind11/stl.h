@@ -351,4 +351,8 @@ struct variant_caster<V<Ts...>> {
 
 #if PYBIND11_HAS_VARIANT
 template <typename... Ts>
-struct ty
+struct type_caster<std::variant<Ts...>> : variant_caster<std::variant<Ts...>> { };
+#endif
+NAMESPACE_END(detail)
+
+inline std::ostream &operator<<(std::ostream &os, const handle &obj)
