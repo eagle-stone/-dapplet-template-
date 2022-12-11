@@ -247,3 +247,174 @@ void vector_modifiers(enable_if_t<is_copy_constructible<typename Vector::value_t
         },
         "Delete list elements using a slice object"
     );
+
+}
+
+// If the type has an operator[] that doesn't return a reference (most notably std::vector<bool>),
+// we have to access by copying; otherwise we return by reference.
+template <typename Vector> using vector_needs_copy = negation<
+    std::is_same<decltype(std::declval<Vector>()[typename Vector::size_type()]), typename Vector::value_type &>>;
+
+// The usual case: access and iterate by reference
+template <typename Vector, typename Class_>
+void vector_accessor(enable_if_t<!vector_needs_copy<Vector>::value, Class_> &cl) {
+    using T = typename Vector::value_type;
+    using SizeType = typename Vector::size_type;
+    using ItType   = typename Vector::iterator;
+
+    cl.def("__getitem__",
+        [](Vector &v, SizeType i) -> T & {
+            if (i >= v.size())
+                throw index_error();
+            return v[i];
+        },
+        return_value_policy::reference_internal // ref + keepalive
+    );
+
+    cl.def("__iter__",
+           [](Vector &v) {
+               return make_iterator<
+                   return_value_policy::reference_internal, ItType, ItType, T&>(
+                   v.begin(), v.end());
+           },
+           keep_alive<0, 1>() /* Essential: keep list alive while iterator exists */
+    );
+}
+
+// The case for special objects, like std::vector<bool>, that have to be returned-by-copy:
+template <typename Vector, typename Class_>
+void vector_accessor(enable_if_t<vector_needs_copy<Vector>::value, Class_> &cl) {
+    using T = typename Vector::value_type;
+    using SizeType = typename Vector::size_type;
+    using ItType   = typename Vector::iterator;
+    cl.def("__getitem__",
+        [](const Vector &v, SizeType i) -> T {
+            if (i >= v.size())
+                throw index_error();
+            return v[i];
+        }
+    );
+
+    cl.def("__iter__",
+           [](Vector &v) {
+               return make_iterator<
+                   return_value_policy::copy, ItType, ItType, T>(
+                   v.begin(), v.end());
+           },
+           keep_alive<0, 1>() /* Essential: keep list alive while iterator exists */
+    );
+}
+
+template <typename Vector, typename Class_> auto vector_if_insertion_operator(Class_ &cl, std::string const &name)
+    -> decltype(std::declval<std::ostream&>() << std::declval<typename Vector::value_type>(), void()) {
+    using size_type = typename Vector::size_type;
+
+    cl.def("__repr__",
+           [name](Vector &v) {
+            std::ostringstream s;
+            s << name << '[';
+            for (size_type i=0; i < v.size(); ++i) {
+                s << v[i];
+                if (i != v.size() - 1)
+                    s << ", ";
+            }
+            s << ']';
+            return s.str();
+        },
+        "Return the canonical string representation of this list."
+    );
+}
+
+// Provide the buffer interface for vectors if we have data() and we have a format for it
+// GCC seems to have "void std::vector<bool>::data()" - doing SFINAE on the existence of data() is insufficient, we need to check it returns an appropriate pointer
+template <typename Vector, typename = void>
+struct vector_has_data_and_format : std::false_type {};
+template <typename Vector>
+struct vector_has_data_and_format<Vector, enable_if_t<std::is_same<decltype(format_descriptor<typename Vector::value_type>::format(), std::declval<Vector>().data()), typename Vector::value_type*>::value>> : std::true_type {};
+
+// Add the buffer interface to a vector
+template <typename Vector, typename Class_, typename... Args>
+enable_if_t<detail::any_of<std::is_same<Args, buffer_protocol>...>::value>
+vector_buffer(Class_& cl) {
+    using T = typename Vector::value_type;
+
+    static_assert(vector_has_data_and_format<Vector>::value, "There is not an appropriate format descriptor for this vector");
+
+    // numpy.h declares this for arbitrary types, but it may raise an exception and crash hard at runtime if PYBIND11_NUMPY_DTYPE hasn't been called, so check here
+    format_descriptor<T>::format();
+
+    cl.def_buffer([](Vector& v) -> buffer_info {
+        return buffer_info(v.data(), static_cast<ssize_t>(sizeof(T)), format_descriptor<T>::format(), 1, {v.size()}, {sizeof(T)});
+    });
+
+    cl.def("__init__", [](Vector& vec, buffer buf) {
+        auto info = buf.request();
+        if (info.ndim != 1 || info.strides[0] % static_cast<ssize_t>(sizeof(T)))
+            throw type_error("Only valid 1D buffers can be copied to a vector");
+        if (!detail::compare_buffer_info<T>::compare(info) || (ssize_t) sizeof(T) != info.itemsize)
+            throw type_error("Format mismatch (Python: " + info.format + " C++: " + format_descriptor<T>::format() + ")");
+        new (&vec) Vector();
+        vec.reserve((size_t) info.shape[0]);
+        T *p = static_cast<T*>(info.ptr);
+        ssize_t step = info.strides[0] / static_cast<ssize_t>(sizeof(T));
+        T *end = p + info.shape[0] * step;
+        for (; p != end; p += step)
+            vec.push_back(*p);
+    });
+
+    return;
+}
+
+template <typename Vector, typename Class_, typename... Args>
+enable_if_t<!detail::any_of<std::is_same<Args, buffer_protocol>...>::value> vector_buffer(Class_&) {}
+
+NAMESPACE_END(detail)
+
+//
+// std::vector
+//
+template <typename Vector, typename holder_type = std::unique_ptr<Vector>, typename... Args>
+class_<Vector, holder_type> bind_vector(module &m, std::string const &name, Args&&... args) {
+    using Class_ = class_<Vector, holder_type>;
+
+    Class_ cl(m, name.c_str(), std::forward<Args>(args)...);
+
+    // Declare the buffer interface if a buffer_protocol() is passed in
+    detail::vector_buffer<Vector, Class_, Args...>(cl);
+
+    cl.def(init<>());
+
+    // Register copy constructor (if possible)
+    detail::vector_if_copy_constructible<Vector, Class_>(cl);
+
+    // Register comparison-related operators and functions (if possible)
+    detail::vector_if_equal_operator<Vector, Class_>(cl);
+
+    // Register stream insertion operator (if possible)
+    detail::vector_if_insertion_operator<Vector, Class_>(cl, name);
+
+    // Modifiers require copyable vector value type
+    detail::vector_modifiers<Vector, Class_>(cl);
+
+    // Accessor and iterator; return by value if copyable, otherwise we return by ref + keep-alive
+    detail::vector_accessor<Vector, Class_>(cl);
+
+    cl.def("__bool__",
+        [](const Vector &v) -> bool {
+            return !v.empty();
+        },
+        "Check whether the list is nonempty"
+    );
+
+    cl.def("__len__", &Vector::size);
+
+
+
+
+#if 0
+    // C++ style functions deprecated, leaving it here as an example
+    cl.def(init<size_type>());
+
+    cl.def("resize",
+         (void (Vector::*) (size_type count)) & Vector::resize,
+         "changes the number of elements stored");
