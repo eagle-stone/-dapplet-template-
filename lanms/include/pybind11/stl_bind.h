@@ -418,3 +418,169 @@ class_<Vector, holder_type> bind_vector(module &m, std::string const &name, Args
     cl.def("resize",
          (void (Vector::*) (size_type count)) & Vector::resize,
          "changes the number of elements stored");
+
+    cl.def("erase",
+        [](Vector &v, SizeType i) {
+        if (i >= v.size())
+            throw index_error();
+        v.erase(v.begin() + i);
+    }, "erases element at index ``i``");
+
+    cl.def("empty",         &Vector::empty,         "checks whether the container is empty");
+    cl.def("size",          &Vector::size,          "returns the number of elements");
+    cl.def("push_back", (void (Vector::*)(const T&)) &Vector::push_back, "adds an element to the end");
+    cl.def("pop_back",                               &Vector::pop_back, "removes the last element");
+
+    cl.def("max_size",      &Vector::max_size,      "returns the maximum possible number of elements");
+    cl.def("reserve",       &Vector::reserve,       "reserves storage");
+    cl.def("capacity",      &Vector::capacity,      "returns the number of elements that can be held in currently allocated storage");
+    cl.def("shrink_to_fit", &Vector::shrink_to_fit, "reduces memory usage by freeing unused memory");
+
+    cl.def("clear", &Vector::clear, "clears the contents");
+    cl.def("swap",   &Vector::swap, "swaps the contents");
+
+    cl.def("front", [](Vector &v) {
+        if (v.size()) return v.front();
+        else throw index_error();
+    }, "access the first element");
+
+    cl.def("back", [](Vector &v) {
+        if (v.size()) return v.back();
+        else throw index_error();
+    }, "access the last element ");
+
+#endif
+
+    return cl;
+}
+
+
+
+//
+// std::map, std::unordered_map
+//
+
+NAMESPACE_BEGIN(detail)
+
+/* Fallback functions */
+template <typename, typename, typename... Args> void map_if_insertion_operator(const Args &...) { }
+template <typename, typename, typename... Args> void map_assignment(const Args &...) { }
+
+// Map assignment when copy-assignable: just copy the value
+template <typename Map, typename Class_>
+void map_assignment(enable_if_t<std::is_copy_assignable<typename Map::mapped_type>::value, Class_> &cl) {
+    using KeyType = typename Map::key_type;
+    using MappedType = typename Map::mapped_type;
+
+    cl.def("__setitem__",
+           [](Map &m, const KeyType &k, const MappedType &v) {
+               auto it = m.find(k);
+               if (it != m.end()) it->second = v;
+               else m.emplace(k, v);
+           }
+    );
+}
+
+// Not copy-assignable, but still copy-constructible: we can update the value by erasing and reinserting
+template<typename Map, typename Class_>
+void map_assignment(enable_if_t<
+        !std::is_copy_assignable<typename Map::mapped_type>::value &&
+        is_copy_constructible<typename Map::mapped_type>::value,
+        Class_> &cl) {
+    using KeyType = typename Map::key_type;
+    using MappedType = typename Map::mapped_type;
+
+    cl.def("__setitem__",
+           [](Map &m, const KeyType &k, const MappedType &v) {
+               // We can't use m[k] = v; because value type might not be default constructable
+               auto r = m.emplace(k, v);
+               if (!r.second) {
+                   // value type is not copy assignable so the only way to insert it is to erase it first...
+                   m.erase(r.first);
+                   m.emplace(k, v);
+               }
+           }
+    );
+}
+
+
+template <typename Map, typename Class_> auto map_if_insertion_operator(Class_ &cl, std::string const &name)
+-> decltype(std::declval<std::ostream&>() << std::declval<typename Map::key_type>() << std::declval<typename Map::mapped_type>(), void()) {
+
+    cl.def("__repr__",
+           [name](Map &m) {
+            std::ostringstream s;
+            s << name << '{';
+            bool f = false;
+            for (auto const &kv : m) {
+                if (f)
+                    s << ", ";
+                s << kv.first << ": " << kv.second;
+                f = true;
+            }
+            s << '}';
+            return s.str();
+        },
+        "Return the canonical string representation of this map."
+    );
+}
+
+
+NAMESPACE_END(detail)
+
+template <typename Map, typename holder_type = std::unique_ptr<Map>, typename... Args>
+class_<Map, holder_type> bind_map(module &m, const std::string &name, Args&&... args) {
+    using KeyType = typename Map::key_type;
+    using MappedType = typename Map::mapped_type;
+    using Class_ = class_<Map, holder_type>;
+
+    Class_ cl(m, name.c_str(), std::forward<Args>(args)...);
+
+    cl.def(init<>());
+
+    // Register stream insertion operator (if possible)
+    detail::map_if_insertion_operator<Map, Class_>(cl, name);
+
+    cl.def("__bool__",
+        [](const Map &m) -> bool { return !m.empty(); },
+        "Check whether the map is nonempty"
+    );
+
+    cl.def("__iter__",
+           [](Map &m) { return make_key_iterator(m.begin(), m.end()); },
+           keep_alive<0, 1>() /* Essential: keep list alive while iterator exists */
+    );
+
+    cl.def("items",
+           [](Map &m) { return make_iterator(m.begin(), m.end()); },
+           keep_alive<0, 1>() /* Essential: keep list alive while iterator exists */
+    );
+
+    cl.def("__getitem__",
+        [](Map &m, const KeyType &k) -> MappedType & {
+            auto it = m.find(k);
+            if (it == m.end())
+              throw key_error();
+           return it->second;
+        },
+        return_value_policy::reference_internal // ref + keepalive
+    );
+
+    // Assignment provided only if the type is copyable
+    detail::map_assignment<Map, Class_>(cl);
+
+    cl.def("__delitem__",
+           [](Map &m, const KeyType &k) {
+               auto it = m.find(k);
+               if (it == m.end())
+                   throw key_error();
+               return m.erase(it);
+           }
+    );
+
+    cl.def("__len__", &Map::size);
+
+    return cl;
+}
+
+NAMESPACE_END(pybind11)
