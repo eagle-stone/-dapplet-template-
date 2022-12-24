@@ -7,4 +7,13 @@ def intersection(g, p):
     p = Polygon(p[:8].reshape((4, 2)))
     if not g.is_valid or not p.is_valid:
         return 0
-    inter = Polygon(g).intersection(
+    inter = Polygon(g).intersection(Polygon(p)).area
+    union = g.area + p.area - inter
+    if union == 0:
+        return 0
+    else:
+        return inter/union
+
+
+def weighted_merge(g, p):
+    g[:8] = (g[8] * g[:8] 
