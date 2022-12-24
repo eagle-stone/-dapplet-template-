@@ -16,4 +16,12 @@ def intersection(g, p):
 
 
 def weighted_merge(g, p):
-    g[:8] = (g[8] * g[:8] 
+    g[:8] = (g[8] * g[:8] + p[8] * p[:8])/(g[8] + p[8])
+    g[8] = (g[8] + p[8])
+    return g
+
+
+def standard_nms(S, thres):
+    order = np.argsort(S[:, 8])[::-1]
+    keep = []
+    while order.size >
