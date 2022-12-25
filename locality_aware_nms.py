@@ -24,4 +24,10 @@ def weighted_merge(g, p):
 def standard_nms(S, thres):
     order = np.argsort(S[:, 8])[::-1]
     keep = []
-    while order.size >
+    while order.size > 0:
+        i = order[0]
+        keep.append(i)
+        ovr = np.array([intersection(S[i], S[t]) for t in order[1:]])
+
+        inds = np.where(ovr <= thres)[0]
+        or
