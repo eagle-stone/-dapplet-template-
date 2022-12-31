@@ -30,4 +30,12 @@ def standard_nms(S, thres):
         ovr = np.array([intersection(S[i], S[t]) for t in order[1:]])
 
         inds = np.where(ovr <= thres)[0]
-        or
+        order = order[inds+1]
+
+    return S[keep]
+
+
+def nms_locality(polys, thres=0.3):
+    '''
+    locality aware nms of EAST
+    :param polys: a N*9 numpy array. first 8 coordina
