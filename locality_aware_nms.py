@@ -38,4 +38,10 @@ def standard_nms(S, thres):
 def nms_locality(polys, thres=0.3):
     '''
     locality aware nms of EAST
-    :param polys: a N*9 numpy array. first 8 coordina
+    :param polys: a N*9 numpy array. first 8 coordinates, then prob
+    :return: boxes after nms
+    '''
+    S = []
+    p = None
+    for g in polys:
+        if p is not None and intersection(g, p) > 
