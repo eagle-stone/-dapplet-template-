@@ -51,3 +51,13 @@ def nms_locality(polys, thres=0.3):
                 S.append(p)
             p = g
     if p is not None:
+        S.append(p)
+
+    if len(S) == 0:
+        return np.array([])
+    return standard_nms(np.array(S), thres)
+
+
+if __name__ == '__main__':
+    # 343,350,448,135,474,143,369,359
+    prin
