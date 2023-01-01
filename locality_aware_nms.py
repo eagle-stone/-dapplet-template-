@@ -44,4 +44,10 @@ def nms_locality(polys, thres=0.3):
     S = []
     p = None
     for g in polys:
-        if p is not None and intersection(g, p) > 
+        if p is not None and intersection(g, p) > thres:
+            p = weighted_merge(g, p)
+        else:
+            if p is not None:
+                S.append(p)
+            p = g
+    if p is not None:
