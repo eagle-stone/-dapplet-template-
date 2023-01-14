@@ -14,4 +14,6 @@ The features are summarized blow:
   see [here](http://rrc.cvc.uab.es/?ch=4&com=evaluation&view=method_samples&task=1&m=29855&gtv=1) for the detailed results.
 + Differences from original paper
 	+ Use ResNet-50 rather than PVANET
-	+ Use dice loss
+	+ Use dice loss (optimize IoU of segmentation) rather than balanced cross entropy
+	+ Use linear learning rate decay rather than staged learning rate decay
++ Speed on 720p (resolut
