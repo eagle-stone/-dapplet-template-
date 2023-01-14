@@ -9,4 +9,6 @@ The features are summarized blow:
 	+ CAVEAT: There's only one cpu core on the demo server. Simultaneous access will degrade response time.
 + Only **RBOX** part is implemented.
 + A fast Locality-Aware NMS in C++ provided by the paper's author.
-+ The pre-trained mode
++ The pre-trained model provided achieves **80.83** F1-score on ICDAR 2015
+	Incidental Scene Text Detection Challenge using only training images from ICDAR 2015 and 2013.
+  see [here](http://rrc.cvc.uab.es/?ch=4&com
