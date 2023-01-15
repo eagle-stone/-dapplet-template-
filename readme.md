@@ -16,4 +16,12 @@ The features are summarized blow:
 	+ Use ResNet-50 rather than PVANET
 	+ Use dice loss (optimize IoU of segmentation) rather than balanced cross entropy
 	+ Use linear learning rate decay rather than staged learning rate decay
-+ Speed on 720p (resolut
++ Speed on 720p (resolution of 1280x720) images:
+	+ Now
+		+ Graphic card: GTX 1080 Ti
+		+ Network fprop: **~50 ms**
+		+ NMS (C++): **~6ms**
+		+ Overall: **~16 fps**
+	+ Then
+		+ Graphic card: K40
+		+ Netw
