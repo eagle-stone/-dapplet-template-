@@ -24,4 +24,9 @@ The features are summarized blow:
 		+ Overall: **~16 fps**
 	+ Then
 		+ Graphic card: K40
-		+ Netw
+		+ Network fprop: ~150 ms
+		+ NMS (python): ~300ms
+		+ Overall: ~2 fps
+
+Thanks for the author's ([@zxytim](https://github.com/zxytim)) help!
+Please cite his [paper](https://arxiv.org/abs/1704.03155v2) if you find this u
