@@ -40,4 +40,7 @@ Please cite his [paper](https://arxiv.org/abs/1704.03155v2) if you find this use
 5. [Examples](#examples)
 
 ### Installation
-1. Any version of 
+1. Any version of tensorflow version > 1.0 should be ok.
+
+### Download
+1. Models trained on ICDAR 2013 (training set) + ICDAR 2015 (training set): [BaiduYun link](http://pan.baidu.com/s/1jH
