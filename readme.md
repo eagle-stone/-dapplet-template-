@@ -56,4 +56,6 @@ python multigpu_train.py --gpu_list=0 --input_size=512 --batch_size_per_gpu=14 -
 --pretrained_model_path=/tmp/resnet_v1_50.ckpt
 ```
 
-If you have more than one gpu, you can pass gpu ids to gpu_list(like 
+If you have more than one gpu, you can pass gpu ids to gpu_list(like --gpu_list=0,1,2,3)
+
+**Note: you should change the gt text file of icdar2015's filename to img_\*.txt instead of gt_img_\*.txt(or you can change the code in icdar.py), and s
