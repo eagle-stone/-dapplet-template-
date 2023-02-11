@@ -58,4 +58,9 @@ python multigpu_train.py --gpu_list=0 --input_size=512 --batch_size_per_gpu=14 -
 
 If you have more than one gpu, you can pass gpu ids to gpu_list(like --gpu_list=0,1,2,3)
 
-**Note: you should change the gt text file of icdar2015's filename to img_\*.txt instead of gt_img_\*.txt(or you can change the code in icdar.py), and s
+**Note: you should change the gt text file of icdar2015's filename to img_\*.txt instead of gt_img_\*.txt(or you can change the code in icdar.py), and some extra characters should be removed from the file.
+See the examples in training_samples/**
+
+### Demo
+If you've downloaded the pre-trained model, you can setup a demo server by
+``
