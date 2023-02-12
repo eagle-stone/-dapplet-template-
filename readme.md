@@ -68,4 +68,8 @@ python3 run_demo_server.py --checkpoint-path /tmp/east_icdar2015_resnet_v1_50_rb
 ```
 Then open http://localhost:8769 for the web demo. Notice that the URL will change after you submitted an image.
 Something like `?r=49647854-7ac2-11e7-8bb7-80000210fe80` appends and that makes the URL persistent.
-As long as you are not deleting data 
+As long as you are not deleting data in `static/results`, you can share your results to your friends using
+the same URL.
+
+URL for example below: http://east.zxytim.com/?r=48e5020a-7b7f-11e7-b776-f23c91e0703e
+![we
