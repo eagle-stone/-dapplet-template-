@@ -72,4 +72,12 @@ As long as you are not deleting data in `static/results`, you can share your res
 the same URL.
 
 URL for example below: http://east.zxytim.com/?r=48e5020a-7b7f-11e7-b776-f23c91e0703e
-![we
+![web-demo](demo_images/web-demo.png)
+
+
+### Test
+run
+```
+python eval.py --test_data_path=/tmp/images/ --gpu_list=0 --checkpoint_path=/tmp/east_icdar2015_resnet_v1_50_rbox/ \
+--output_dir=/tmp/
+```
