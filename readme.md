@@ -81,3 +81,10 @@ run
 python eval.py --test_data_path=/tmp/images/ --gpu_list=0 --checkpoint_path=/tmp/east_icdar2015_resnet_v1_50_rbox/ \
 --output_dir=/tmp/
 ```
+
+a text file will be then written to the output path.
+
+
+### Examples
+Here are some test examples on icdar2015, enjoy the beautiful text boxes!
+![image_1](demo_images
