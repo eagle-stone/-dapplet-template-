@@ -94,4 +94,7 @@ Here are some test examples on icdar2015, enjoy the beautiful text boxes!
 ![image_5](demo_images/img_75.jpg)
 
 ### Troubleshooting
-+ How to compile lanms on Win
++ How to compile lanms on Windows ?
+  + See https://github.com/argman/EAST/issues/120
+
+Please let me know if you encounter any issues(my email boostczc@gmail dot com).
