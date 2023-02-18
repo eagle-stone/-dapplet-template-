@@ -1,0 +1,86 @@
+
+<!doctype! html>
+<html>
+	<head>
+		<title>EAST Text Detection Demo</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" type="text/css">
+		<link rel="stylesheet" href="/static/css/app.css" type="text/css">
+
+		<script src="https://cdn.staticfile.org/jquery/3.2.1/jquery.min.js"></script>
+		<script src="https://cdn.staticfile.org/tether/1.4.0/js/tether.min.js"></script>
+		<script src="https://cdn.staticfile.org/twitter-bootstrap/4.0.0-alpha.6/js/bootstrap.min.js"></script>
+		<script src="https://unpkg.com/vue"></script>
+	</head>
+	<body>
+		<div id="app">
+			<div>
+				<form id="upload-form" method="post" enctype="multipart/form-data">
+					<h5>EAST Text Detection Demo</h5>
+					<div class="form-content-container">
+						<input id="upload_images" type="file" name="image" />
+						<input id="upload_button" type="submit" value="Submit" />
+					</div>
+				</form>
+			</div>
+			<hr>
+			<div id="result">
+<!--                <div class="item">-->
+<!--                    <div>Input image</div>-->
+<!--                    <img :src="input_image_url">-->
+<!--                </div>-->
+				<div class="item">
+					<div>Result</div>
+					<ul>
+						<li>
+							<img id="result-image" :src="result_image_url">
+						</li>
+					</ul>
+				</div>
+				<div class="item">
+					<div>Runtime parameters</div>
+					<div>
+						<ul>
+							<li v-for="(val, key) in rtparams">
+							{% raw %}{{ key }}: {{ val }}{% endraw %}
+							</li>
+						</ul>
+					</div>
+				</div>
+				<div class="item">
+					<div>Timing</div>
+					<div>
+						<ul>
+							<li v-for="(val, key) in timing">
+							{% raw %}{{ key }}: {{ val }}{% endraw %}
+							</li>
+						</ul>
+					</div>
+				</div>
+				<div class="item">
+					<div>Text Lines</div>
+					<div>
+						<ul>
+							<li> {% raw %}{{ text_lines.length }}{% endraw %} text lines </li>
+							<li v-for="tl in text_lines">
+							{% raw %}{{ tl }}{% endraw %}
+							</li>
+						</ul>
+					</div>
+				</div>
+
+				<div class="item">
+					<div>Host Info</div>
+					<div>
+						<ul>
+							<li>
+							<details>
+								<summary>/proc/cpuinfo</summary>
+								<pre>{% raw %}{{ cpuinfo }}{% endraw %}</pre>
+							</details>
+							</li>
+							<li>
+							<details>
+								<summary>/proc/meminfo</summary>
+								<pre>{% raw %}{{ meminfo }}{% endraw %}</pre>
+							</details>
